@@ -20,13 +20,15 @@ import entityClasses.LessonList;
 import entityClasses.User;
 
 /**
- * Displays the Lessons Learned page using a lazily created, reusable view.
+ * <p> Title: ViewLessons Class. </p>
+ * 
+ * <p> Description: Displays the Lessons Learned page using a lazily created, reusable view.
  * Presents lesson fields and a list supporting multiple selections, delegates
  * user actions to {@link ControllerLessons}, and loads saved lessons through
  * {@link ModelLessons}.
  *
- * <p>Call UI methods on the JavaFX Application Thread. Opening the page saves
- * the current scene and title so the controller can restore them on Back.</p>
+ * Call UI methods on the JavaFX Application Thread. Opening the page saves
+ * the current scene and title so the controller can restore them on Back. </p>
  *
  * @author Ahmad El-Merhaby
  */

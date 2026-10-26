@@ -6,13 +6,15 @@ import entityClasses.Lesson;
 import entityClasses.LessonList;
 
 /**
- * Provides lesson validation and database operations for the lesson page.
+ * <p> Title: ModelLessons Class. </p>
+ * 
+ * <p> Description: Provides lesson validation and database operations for the lesson page.
  * Maintains an in-memory lesson list that is replaced when all lessons are read.
  *
- * <p>The controller validates lessons before calling create or update; those
+ * The controller validates lessons before calling create or update; those
  * persistence methods do not perform validation themselves. Database operations
  * require the application's database connection to be open and propagate SQL
- * errors to the caller.</p>
+ * errors to the caller. </p>
  *
  * @author Ahmad El-Merhaby
  */

@@ -5,12 +5,14 @@ import entityClasses.Lesson;
 import entityClasses.LessonList;
 
 /**
- * Handles lesson page actions by coordinating {@link ViewLessons} and
+ * <p> Title: ControllerLessons Class. </p>
+ * 
+ * <p> Description: Handles lesson page actions by coordinating {@link ViewLessons} and
  * {@link ModelLessons}. Validates input before saving and asks the view to
  * display validation, selection, and database errors.
  *
- * <p>Call these actions on the JavaFX Application Thread after the lesson view
- * has been initialized.</p>
+ * Call these actions on the JavaFX Application Thread after the lesson view
+ * has been initialized. </p>
  *
  * @author Ahmad El-Merhaby
  */
