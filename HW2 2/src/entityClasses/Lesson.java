@@ -10,6 +10,7 @@ package entityClasses;
 public class Lesson {
 	
 	private int id;
+	private int ownerId;
 	private String title;
 	private String problem;
 	private String solution;
@@ -17,8 +18,9 @@ public class Lesson {
 	
 	
 	// this trims the text before validation and storage
-	public Lesson(int id, String title, String problem, String solution, String experience) {
+	public Lesson(int id, int ownerId, String title, String problem, String solution, String experience) {
 		this.id = id;
+		this.ownerId = ownerId;
 		this.title = title == null ? "" : title.trim();
 		this.problem = problem == null ? "" : problem.trim();
 		this.solution = solution == null ? "" : solution.trim();
@@ -27,6 +29,8 @@ public class Lesson {
 	
 	public int getId() { return id; }
 	public void setId(int id) { this.id = id; }
+	public int getOwnerId() { return ownerId; }
+	public void setOwnerId(int id) { this.ownerId = id;}
 	public String getTitle() { return title; }
 	public String getProblem() { return problem; }
 	public String getSolution() { return solution; }

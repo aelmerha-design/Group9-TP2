@@ -103,6 +103,7 @@ public class ViewAdminHome {
 	protected static Button button_DeleteUser = new Button("Delete a User");
 	protected static Button button_ListUsers = new Button("List All Users");
 	protected static Button button_AddRemoveRoles = new Button("Add/Remove Roles");
+	protected static Button button_ManageLessons = new Button("Manage Lessons");
 	protected static Alert alertNotImplemented = new Alert(AlertType.INFORMATION);
 
 	// This is a separator and it is used to partition the GUI for various tasks
@@ -210,14 +211,7 @@ public class ViewAdminHome {
 		setupButtonUI(button_UpdateThisUser, "Dialog", 18, 170, Pos.CENTER, 610, 45);
 		button_UpdateThisUser.setOnAction((_) -> 
 				{ViewUserUpdate.displayUserUpdate(theStage, theUser);});
-			Button button_Lessons = new Button("Lessons");
-			setupButtonUI(button_Lessons, "Dialog", 18, 130, Pos.CENTER, 470, 45);
-
-			button_Lessons.setOnAction((event) -> {
-	         guiLessons.ViewLessons.displayLessons(theStage, theUser);
-			});
-
-			theRootPane.getChildren().add(button_Lessons);
+		
 		// GUI Area 2
 		setupLabelUI(label_NumberOfInvitations, "Arial", 20, 200, Pos.BASELINE_LEFT, 20, 105);
 		label_NumberOfInvitations.setText("Number of outstanding invitations: " + 
@@ -268,6 +262,11 @@ public class ViewAdminHome {
 		setupButtonUI(button_AddRemoveRoles, "Dialog", 16, 250, Pos.CENTER, 20, 470);
 		button_AddRemoveRoles.setOnAction((_) -> {ControllerAdminHome.addRemoveRoles(); });
 		
+		// Made more sense to have a lessons button with the rest of these management buttons.
+		// NOTE: We may not need this button if we don't want admins to have access to lessons.
+		setupButtonUI(button_ManageLessons, "Dialog", 16, 250, Pos.CENTER, 320, 270);
+		button_ManageLessons.setOnAction((_) -> {guiLessons.ViewLessons.displayLessons(theStage, theUser); });
+		
 		// GUI Area 5
 		setupButtonUI(button_Logout, "Dialog", 18, 250, Pos.CENTER, 20, 540);
 		button_Logout.setOnAction((_) -> {ControllerAdminHome.performLogout(); });
@@ -290,6 +289,7 @@ public class ViewAdminHome {
     		button_DeleteUser,
     		button_ListUsers,
     		button_AddRemoveRoles,
+    		button_ManageLessons,
     		line_Separator4, 
     		button_Logout,
     		button_Quit

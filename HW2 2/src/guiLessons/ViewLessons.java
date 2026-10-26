@@ -19,32 +19,62 @@ import entityClasses.Lesson;
 import entityClasses.LessonList;
 import entityClasses.User;
 
-/*******
- * <p> Title: ViewLessons Class. </p>
- * <p> Description: this displays the lesson page using the foundations singleton and MVC patterns. </p>
+/**
+ * Displays the Lessons Learned page using a lazily created, reusable view.
+ * Presents lesson fields and a list supporting multiple selections, delegates
+ * user actions to {@link ControllerLessons}, and loads saved lessons through
+ * {@link ModelLessons}.
+ *
+ * <p>Call UI methods on the JavaFX Application Thread. Opening the page saves
+ * the current scene and title so the controller can restore them on Back.</p>
+ *
  * @author Ahmad El-Merhaby
  */
 
 public class ViewLessons {
 
 	
+	/** Page width taken from the application window settings. */
 	private static double width = applicationMain.FoundationsMain.WINDOW_WIDTH;
+	/** Page height taken from the application window settings. */
 	private static double height = applicationMain.FoundationsMain.WINDOW_HEIGHT;
+	/** View instance created on the first call to {@link #displayLessons(Stage, User)}. */
 	private static ViewLessons theView;
+	/** Scene reused each time the lesson page is opened. */
 	private static Scene theLessonsScene;
+	/** Window currently displaying the lesson page. */
 	protected static Stage theStage;
+	/** Scene to restore when Back is selected. */
 	protected static Scene theHomeScene;
+	/** Window title to restore when Back is selected. */
 	protected static String theHomeTitle;
+	/** Currently displayed lessons, either the full loaded list or a selected subset. */
 	protected static LessonList displayedLessons = new LessonList();
+	/** Label identifying the user who opened the page. */
 	protected static Label label_UserDetails = new Label();
+	/** Input for the required lesson title. */
 	protected static TextField text_Title = new TextField();
+	/** Input for the required problem description. */
 	protected static TextArea text_Problem = new TextArea();
+	/** Input for the required solution description. */
 	protected static TextArea text_Solution = new TextArea();
+	/** Input for optional experience details. */
 	protected static TextArea text_Experience = new TextArea();
+	/** Lesson list whose selection is used by controller actions. */
 	protected static ListView<Lesson> list_Lessons = new ListView<Lesson>();
+	/** Reusable dialog for validation, selection, and database errors. */
 	private static Alert alertError = new Alert(AlertType.ERROR);
+	/** The current user accessing the scene. */
+	protected static User currentUser;
 
-	//this opens the lesson page from the current home page
+	/**
+	 * Opens the lesson page, creating its widgets on the first call. Saves the
+	 * stage's current scene and title, displays the user's name, and attempts to
+	 * reload all saved lessons before showing the page.
+	 *
+	 * @param ps the non-null application stage whose current scene is the return page
+	 * @param user the non-null user whose username is displayed
+	 */
 	public static void displayLessons(Stage ps, User user) {
 		theStage = ps;
 		theHomeScene = ps.getScene();
@@ -53,6 +83,7 @@ public class ViewLessons {
 		if (theView == null) theView = new ViewLessons();
 
 		label_UserDetails.setText("User: " + user.getUserName());
+		currentUser = user;
 		refreshList();
 
 		theStage.setTitle("CSE 360: Lessons Learned");
@@ -60,7 +91,7 @@ public class ViewLessons {
 		theStage.show();
 	}
 
-	// this creates the widgets one time to follow the foundations singleton pattern
+	/** Creates the reusable scene, lays out its controls, and connects controller actions. */
 	private ViewLessons() {
 		Pane theRootPane = new Pane();
 		theLessonsScene = new Scene(theRootPane, width, height);
@@ -74,7 +105,7 @@ public class ViewLessons {
 		list_Lessons.setLayoutX(20);
 		list_Lessons.setLayoutY(135);
 		list_Lessons.setPrefSize(300, 325);
-		list_Lessons.setPlaceholder(new Label("No lessons"));
+		list_Lessons.setPlaceholder(new Label("No Lessons"));
 		list_Lessons.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		list_Lessons.getSelectionModel().selectedItemProperty().addListener(
 				(observable, oldLesson, newLesson) -> {
@@ -125,10 +156,14 @@ public class ViewLessons {
 				button_Create, button_Read, button_Update, button_Delete, button_Subset,
 				button_All, button_Remove, button_Back);
 	}
-	// this reloads all of the saved lessons
+	/**
+	 * Replaces the displayed list with all saved lessons and clears the selection
+	 * and form. Displays an error if loading fails, leaving the existing display
+	 * unchanged.
+	 */
 	protected static void refreshList() {
 		try {
-			displayedLessons = ModelLessons.readLessons();
+			displayedLessons = ModelLessons.readLessons(currentUser.getUserId());
 			list_Lessons.getSelectionModel().clearSelection();
 			list_Lessons.getItems().setAll(displayedLessons.getLessons());
 			showLesson(null);
@@ -136,26 +171,51 @@ public class ViewLessons {
 			showError("Could not load lessons. Please try again.");
 		}
 	}
-	// this displays the controller's error message so that the user knows what was wrong and the solution
+	/**
+	 * Displays an error dialog and waits for it to be dismissed.
+	 *
+	 * @param message the error explanation to display
+	 */
 	protected static void showError(String message) {
 		alertError.setTitle("Lesson Error");
 		alertError.setHeaderText(null);
 		alertError.setContentText(message);
 		alertError.showAndWait();
 	}
-	// Displays a lesson, or clears the form when there is no selection
+	/**
+	 * Copies a lesson's values into the form, or clears all fields for {@code null}.
+	 *
+	 * @param lesson the lesson to display, or {@code null} to clear the form
+	 */
 	protected static void showLesson(Lesson lesson) {
 		text_Title.setText(lesson == null ? "" : lesson.getTitle());
 		text_Problem.setText(lesson == null ? "" : lesson.getProblem());
 		text_Solution.setText(lesson == null ? "" : lesson.getSolution());
 		text_Experience.setText(lesson == null ? "" : lesson.getExperience());
 	}
+	/**
+	 * Sets a label's Arial font, minimum width, and position within the pane.
+	 *
+	 * @param label the label to configure
+	 * @param size the font size
+	 * @param w the minimum width in pixels
+	 * @param x the horizontal layout position in pixels
+	 * @param y the vertical layout position in pixels
+	 */
 	private static void setupLabelUI(Label label, double size, double w, double x, double y) {
 		label.setFont(Font.font("Arial", size));
 		label.setMinWidth(w);
 		label.setLayoutX(x);
 		label.setLayoutY(y);
 	}
+	/**
+	 * Sets a button's font, minimum width, centered alignment, and pane position.
+	 *
+	 * @param button the button to configure
+	 * @param w the minimum width in pixels
+	 * @param x the horizontal layout position in pixels
+	 * @param y the vertical layout position in pixels
+	 */
 	private static void setupButtonUI(Button button, double w, double x, double y) {
 		button.setFont(Font.font("Dialog", 16));
 		button.setMinWidth(w);
@@ -163,6 +223,13 @@ public class ViewLessons {
 		button.setLayoutX(x);
 		button.setLayoutY(y);
 	}
+	/**
+	 * Positions a wrapping text area with a preferred size of 430 by 75 pixels.
+	 *
+	 * @param text the text area to configure
+	 * @param x the horizontal layout position in pixels
+	 * @param y the vertical layout position in pixels
+	 */
 	private static void setupTextAreaUI(TextArea text, double x, double y) {
 		text.setLayoutX(x);
 		text.setLayoutY(y);
