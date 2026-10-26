@@ -27,10 +27,43 @@ public class Lesson {
 	
 	public int getId() { return id; }
 	public void setId(int id) { this.id = id; }
+	public void setTitle(String title) {
+		this.title = title == null ? "" : title.trim();
+		
+	}
+	
+	public void setProblem(String problem) {
+		this.problem = problem == null ? "" : problem.trim();
+		
+	}
 	public String getTitle() { return title; }
 	public String getProblem() { return problem; }
 	public String getSolution() { return solution; }
+	public void setSolution(String solution) {
+		this.solution = solution == null ? "" : solution.trim();
+	}
+	public void setExperience(String experience) {
+		this.experience = experience == null ? "" : experience.trim();
+		
+	}
 	public String getExperience() { return experience; }
+	
+	public static boolean isValidTitle(String title) {
+		return title != null && !title.trim().isEmpty() && title.trim().length() <= 100;
+	}
+	
+	public static boolean isValidProblem(String problem) {
+		return problem != null && !problem.trim().isEmpty() && problem.trim().length() <= 2000;
+		
+	}
+	
+	public static boolean isValidSolution(String solution) {
+		return solution != null && !solution.trim().isEmpty() && solution.trim().length() <= 2000;
+	}
+	
+	public static boolean isValidExperience(String experience) {
+		return experience == null || experience.trim().length() <= 2000;
+	}
 	
 	// this displays the identification and title in the list
 	@Override
