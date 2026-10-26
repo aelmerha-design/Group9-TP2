@@ -1255,7 +1255,11 @@ public class Database {
 			query.executeUpdate();
 
 			try (ResultSet result = query.getGeneratedKeys()) {
-				if (result.next()) return result.getInt(1);
+				if (result.next()) {
+					int id = result.getInt(1);
+					lesson.setId(id);
+					return id;
+				}
 			}
 		}
 
