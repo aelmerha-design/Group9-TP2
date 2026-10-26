@@ -26,6 +26,7 @@ public class LessonTestingAutomation {
 	static int numFailed = 0;
 	private static File restartFile;
 	private static String actualError;
+	private static int testOwnerId;
 	private static final String titleError = "Enter a title that is between 1-100 characters";
 	private static final String problemError = "Enter a problem that is between 1-2000 characters";
 	private static final String solutionError = "Enter a solution that is between 1-2000 characters";
@@ -50,7 +51,8 @@ public class LessonTestingAutomation {
 	public void start(Stage stage) {
 		try {
 			FoundationsMain.database.connectToDatabase();
-			User user = new User("HW2 Tests", "", "", "", "", "", "", false, false, false);
+			User user = new User("HW2 Tests", "", "", "", "", "", "", false, false, false, 0);
+			testOwnerId = user.getUserId();
 			ViewLessons.displayLessons(stage, user);
 			// Run after JavaFX starts so error dialogs can be opened and checked.
 			Platform.runLater(() -> {
@@ -75,7 +77,7 @@ public class LessonTestingAutomation {
 	}
 	private static void runTests() throws Exception {
 		// Clear only the separate test database so list counts are repeatable.
-		for (Lesson lesson : ModelLessons.readLessons().getLessons())
+		for (Lesson lesson : ModelLessons.readLessons(testOwnerId).getLessons())
 			ModelLessons.deleteLesson(lesson.getId());
 		ViewLessons.refreshList();
 
@@ -116,10 +118,10 @@ public class LessonTestingAutomation {
 				&& ViewLessons.list_Lessons.getItems().size() == 1);
 
 		LessonList list = new LessonList();
-		list.addLesson(new Lesson(1, title, problem, solution, ""));
-		list.addLesson(new Lesson(2, "Other lesson", problem, solution, ""));
+		list.addLesson(new Lesson(1, testOwnerId, title, problem, solution, ""));
+		list.addLesson(new Lesson(2, testOwnerId, "Other lesson", problem, solution, ""));
 		performTestCase(7, "Add and read a list entry", list.getLesson(1).getTitle().equals(title));
-		performTestCase(7, "Update chosen list entry", list.updateLesson(new Lesson(1, "Changed", problem, solution, ""))
+		performTestCase(7, "Update chosen list entry", list.updateLesson(new Lesson(1, testOwnerId, "Changed", problem, solution, ""))
 				&& list.getLesson(1).getTitle().equals("Changed") && list.getLesson(2).getTitle().equals("Other lesson"));
 		performTestCase(7, "Remove chosen list entry", list.removeLesson(1)
 				&& list.getLesson(1) == null && list.getLesson(2) != null);
@@ -157,7 +159,7 @@ public class LessonTestingAutomation {
 		testError(15, ControllerLessons::readLesson, selectionError);
 		testError(15, ControllerLessons::updateLesson, selectionError);
 		testError(15, ControllerLessons::deleteLesson, selectionError);
-		for (Lesson lesson : ModelLessons.readLessons().getLessons())
+		for (Lesson lesson : ModelLessons.readLessons(testOwnerId).getLessons())
 			ModelLessons.deleteLesson(lesson.getId());
 		ViewLessons.refreshList();
 		performTestCase(8, "Empty list displays No lessons", ViewLessons.list_Lessons.getItems().isEmpty()
@@ -167,7 +169,7 @@ public class LessonTestingAutomation {
 		fields(title, problem, solution, "");
 		ControllerLessons.createLesson();
 		int savedId = ViewLessons.list_Lessons.getItems().get(0).getId();
-		performTestCase(8, "List with one lesson", ModelLessons.readLessons().getLessons().size() == 1);
+		performTestCase(8, "List with one lesson", ModelLessons.readLessons(testOwnerId).getLessons().size() == 1);
 		select(savedId);
 		ControllerLessons.showSelectedLessons();
 		performTestCase(9, "Subset with one lesson", ViewLessons.displayedLessons.getLessons().size() == 1);
@@ -177,9 +179,9 @@ public class LessonTestingAutomation {
 				ViewLessons.list_Lessons.getItems().isEmpty() && ModelLessons.readLesson(savedId) != null);
 		// the generated variations of the sample test a large list without typing 1,000 forms
 		for (int i = 1; i < 1000; i++)
-			ModelLessons.createLesson(new Lesson(0, "CRUD diagram lesson " + i, problem, solution, ""));
+			ModelLessons.createLesson(new Lesson(0, testOwnerId, "CRUD diagram lesson " + i, problem, solution, ""));
 		ViewLessons.refreshList();
-		performTestCase(8, "All 1,000 entries can be read", ModelLessons.readLessons().getLessons().size() == 1000
+		performTestCase(8, "All 1,000 entries can be read", ModelLessons.readLessons(testOwnerId).getLessons().size() == 1000
 				&& ViewLessons.list_Lessons.getItems().size() == 1000);
 		ViewLessons.list_Lessons.getSelectionModel().selectAll();
 		ControllerLessons.showSelectedLessons();
@@ -212,25 +214,25 @@ public class LessonTestingAutomation {
 					&& saved.getProblem().equals(problem) && saved.getSolution().equals(solution)
 					&& saved.getExperience().isEmpty());
 			performTestCase(6, "Deleted lesson stays deleted", ModelLessons.readLesson(deletedId) == null);
-			performTestCase(6, "All remaining lessons survive", ModelLessons.readLessons().getLessons().size() == 999);
+			performTestCase(6, "All remaining lessons survive", ModelLessons.readLessons(testOwnerId).getLessons().size() == 999);
 		}
 		if (!restartFile.delete()) System.out.println("Could not remove the restart test marker.");
 	}
 	private static void testValid(int number, String t, String p, String s, String e) throws Exception {
-		int count = ModelLessons.readLessons().getLessons().size();
+		int count = ModelLessons.readLessons(testOwnerId).getLessons().size();
 		fields(t, p, s, e);
 		ControllerLessons.createLesson();
 		Lesson saved = ViewLessons.list_Lessons.getItems().get(ViewLessons.list_Lessons.getItems().size() - 1);
 		performTestCase(number, "Accept lengths " + t.length() + ", " + p.length() + ", " + s.length() + ", " + e.length(),
-				ModelLessons.readLessons().getLessons().size() == count + 1
+				ModelLessons.readLessons(testOwnerId).getLessons().size() == count + 1
 				&& saved.getTitle().equals(t) && saved.getProblem().equals(p)
 				&& saved.getSolution().equals(s) && saved.getExperience().equals(e));
 	}
 	private static void testCreateError(int number, String t, String p, String s, String e, String message) throws Exception {
-		int count = ModelLessons.readLessons().getLessons().size();
+		int count = ModelLessons.readLessons(testOwnerId).getLessons().size();
 		fields(t, p, s, e);
 		testError(number, ControllerLessons::createLesson, message);
-		performTestCase(number, "Invalid create adds no record", ModelLessons.readLessons().getLessons().size() == count);
+		performTestCase(number, "Invalid create adds no record", ModelLessons.readLessons(testOwnerId).getLessons().size() == count);
 	}
 	private static void testError(int number, Runnable action, String expected) {
 		actualError = "";

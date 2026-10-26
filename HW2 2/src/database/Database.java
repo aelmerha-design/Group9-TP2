@@ -1,10 +1,6 @@
 package database;
 
 import java.sql.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -40,7 +36,7 @@ public class Database {
 
 	// JDBC driver name and database URL 
 	static final String JDBC_DRIVER = "org.h2.Driver";   
-	static final String DB_URL = "jdbc:h2:~/FoundationDatabase";  
+	static final String DB_URL = "jdbc:h2:~/TP2Database";  
 
 	//  Database credentials 
 	static final String USER = "sa"; 
@@ -62,6 +58,7 @@ public class Database {
 	private boolean currentAdminRole;
 	private boolean currentNewRole1;
 	private boolean currentNewRole2;
+	private int currentUserId;
 
 	/*******
 	 * <p> Method: Database </p>
@@ -137,6 +134,7 @@ public class Database {
 	   // create the table only when needed so that the startup preserves the saved lessons
 	    String lessonTable = "CREATE TABLE IF NOT EXISTS lessons ("
 				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "ownerId INT, "
 				+ "title VARCHAR(100) NOT NULL, "
 				+ "problem VARCHAR(2000) NOT NULL, "
 				+ "solution VARCHAR(2000) NOT NULL, "
@@ -203,7 +201,7 @@ public class Database {
 		String insertUser = "INSERT INTO userDB (userName, password, firstName, middleName, "
 				+ "lastName, preferredFirstName, emailAddress, adminRole, newRole1, newRole2) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
+		try (PreparedStatement pstmt = connection.prepareStatement(insertUser, Statement.RETURN_GENERATED_KEYS)) {
 			currentUsername = user.getUserName();
 			pstmt.setString(1, currentUsername);
 			
@@ -235,6 +233,13 @@ public class Database {
 			pstmt.setBoolean(10, currentNewRole2);
 			
 			pstmt.executeUpdate();
+
+			try (ResultSet keys = pstmt.getGeneratedKeys()) {
+				if (!keys.next()) {
+					throw new SQLException("No user ID was generated.");
+				}
+				user.setIdUser(keys.getInt(1));
+			}
 		}
 		
 	}
@@ -321,8 +326,17 @@ public class Database {
 
 		return users;
 	}
-	
-	
+
+/*******
+* <p> Method: String getCurrentUserId() </p>
+*
+* <p> Description: A simple getter for the user's ID.</p>
+*
+* @return the non-null integer ID of the current user.
+*/
+	public int getCurrentUserId() {
+		return currentUserId;
+	}
 	
 	
 	
@@ -983,8 +997,9 @@ public class Database {
 		String query = "SELECT * FROM userDB WHERE username = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setString(1, username);
-	        ResultSet rs = pstmt.executeQuery();			
-			rs.next();
+	        ResultSet rs = pstmt.executeQuery();
+			if (!rs.next()) return false;			
+			currentUserId = rs.getInt("id");
 	    	currentUsername = rs.getString(2);
 	    	currentPassword = rs.getString(3);
 	    	currentFirstName = rs.getString(4);
@@ -1229,13 +1244,14 @@ public class Database {
 	 */
 	// these prepared statements keep the lesson text separate from SQL and the generated keys provide the identification given by the database
 	public int createLesson(Lesson lesson) throws SQLException {
-		String sql = "INSERT INTO lessons (title, problem, solution, experience) VALUES (?, ?, ?, ?)";
+		String sql = "INSERT INTO lessons (ownerId, title, problem, solution, experience) VALUES (?, ?, ?, ?, ?)";
 
 		try (PreparedStatement query = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-			query.setString(1, lesson.getTitle());
-			query.setString(2, lesson.getProblem());
-			query.setString(3, lesson.getSolution());
-			query.setString(4, lesson.getExperience());
+			query.setInt(1, lesson.getOwnerId());
+			query.setString(2, lesson.getTitle());
+			query.setString(3, lesson.getProblem());
+			query.setString(4, lesson.getSolution());
+			query.setString(5, lesson.getExperience());
 			query.executeUpdate();
 
 			try (ResultSet result = query.getGeneratedKeys()) {
@@ -1257,7 +1273,7 @@ public class Database {
 			query.setInt(1, id);
 			try (ResultSet result = query.executeQuery()) {
 				if (result.next()) {
-					return new Lesson(result.getInt("id"), result.getString("title"),
+					return new Lesson(result.getInt("id"), result.getInt("ownerId"), result.getString("title"),
 							result.getString("problem"), result.getString("solution"),
 							result.getString("experience"));
 				}
@@ -1268,15 +1284,18 @@ public class Database {
 	}
 
 	// this reads all lessons without a fixed list size
-	public LessonList readLessons() throws SQLException {
+	public LessonList readLessons(int ownerId) throws SQLException {
 		LessonList lessons = new LessonList();
-		String sql = "SELECT * FROM lessons ORDER BY id";
-		try (PreparedStatement query = connection.prepareStatement(sql);
-				ResultSet result = query.executeQuery()) {
-			while (result.next()) {
-				lessons.addLesson(new Lesson(result.getInt("id"), result.getString("title"),
+		String sql = "SELECT * FROM lessons WHERE ownerId = ? ORDER BY id";
+		try (PreparedStatement query = connection.prepareStatement(sql)) {
+			query.setInt(1, ownerId);
+
+			try (ResultSet result = query.executeQuery()) {
+				while (result.next()) {
+				lessons.addLesson(new Lesson(result.getInt("id"), result.getInt("ownerId"), result.getString("title"),
 						result.getString("problem"), result.getString("solution"),
 						result.getString("experience")));
+				}
 			}
 		}
 

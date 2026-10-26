@@ -28,6 +28,7 @@ public class User {
     private boolean adminRole;
     private boolean role1;
     private boolean role2;
+    private int id;
     
     
     /*****
@@ -59,7 +60,7 @@ public class User {
      */
     // Constructor to initialize a new User object with userName, password, and role.
     public User(String userName, String password, String fn, String mn, String ln, String pfn, 
-    		String ea, boolean r1, boolean r2, boolean r3) {
+    		String ea, boolean r1, boolean r2, boolean r3, int id) {
         this.userName = userName;
         this.password = password;
         this.firstName = fn;
@@ -70,6 +71,7 @@ public class User {
         this.adminRole = r1;
         this.role1 = r2;
         this.role2 = r3;
+        this.id = id;
     }
 
     
@@ -112,6 +114,19 @@ public class User {
     // Sets the role2 user.
     public void setRole2User(boolean role) {
     	this.role2=role;
+    }
+
+    /*****
+     * <p> Method: void setIdUser(int newId) </p>
+     * 
+     * <p> Description: This setter defines the ID attribute. </p>
+     * 
+     * @param newId is an int that specifies the user's new ID.
+     * 
+     */
+    // Sets the ID of the user.
+    public void setIdUser(int newId) {
+    	this.id=newId;
     }
 
     
@@ -259,4 +274,15 @@ public class User {
     	if (role2) numRoles++;
     	return numRoles;
     }
+
+    /*****
+     * <p> Method: int getUserId() </p>
+     * 
+     * <p> Description: This getter returns the Id. </p>
+     * 
+     * @return an Integer of the Id
+     * 
+     */
+    // Gets the current value of the Id.
+    public int getUserId() { return id; }
 }
