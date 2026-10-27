@@ -36,13 +36,13 @@ public class ModelLessons {
 		 *         1-2000 characters, and optional experience contains 0-2000 characters
 		 */
 		protected static String validateLesson(Lesson lesson) {
-			if (lesson.getTitle().length() < 1 || lesson.getTitle().length() > 100)
+			if (!Lesson.isValidTitle(lesson.getTitle()))
 				return "Enter a title that is between 1-100 characters";
-			if (lesson.getProblem().length() < 1 || lesson.getProblem().length() > 2000)
+			if (!Lesson.isValidProblem(lesson.getProblem()))
 				return "Enter a problem that is between 1-2000 characters";
-			if (lesson.getSolution().length() < 1 || lesson.getSolution().length() > 2000)
+			if (!Lesson.isValidSolution(lesson.getSolution()))
 				return "Enter a solution that is between 1-2000 characters";
-			if (lesson.getExperience().length() > 2000)
+			if (!Lesson.isValidExperience(lesson.getExperience()))
 				return "Experience has max 2000 characters";
 
 			return "";
@@ -56,8 +56,8 @@ public class ModelLessons {
 		 * @throws SQLException if saving fails or no generated ID is returned
 		 */
 		protected static int createLesson(Lesson lesson) throws SQLException {
-			int id = theDatabase.createLesson(lesson);
-			lesson.setId(id);
+			int id = lesson.create(theDatabase);
+			if(id == -1) return -1;
 			lessons.addLesson(lesson);
 			return id;
 		}
@@ -69,7 +69,7 @@ public class ModelLessons {
 		 * @throws SQLException if the database read fails
 		 */
 		protected static Lesson readLesson(int id) throws SQLException {
-			return theDatabase.readLesson(id);
+			return Lesson.read(theDatabase,id);
 		}
 		/**
 		 * Reloads all saved lessons, ordered by ID, and replaces the in-memory list.
@@ -79,7 +79,7 @@ public class ModelLessons {
 		 * @throws SQLException if the database read fails
 		 */
 		protected static LessonList readLessons(int ownerId) throws SQLException {
-			lessons = theDatabase.readLessons(ownerId);
+			lessons = LessonList.readLessons(theDatabase, ownerId);
 			return lessons;
 		}
 		/**
@@ -92,7 +92,7 @@ public class ModelLessons {
 		 * @throws SQLException if the database update fails
 		 */
 		protected static boolean updateLesson(Lesson lesson) throws SQLException {
-			if (!theDatabase.updateLesson(lesson)) return false;
+			if (!lesson.update(theDatabase)) return false;
 			lessons.updateLesson(lesson);
 			return true;
 		}
@@ -106,7 +106,8 @@ public class ModelLessons {
 		 * @throws SQLException if the database deletion fails
 		 */
 		protected static boolean deleteLesson(int id) throws SQLException {
-			if (!theDatabase.deleteLesson(id)) return false;
+			Lesson lesson = Lesson.read(theDatabase, id);
+			if (lesson == null || !lesson.delete(theDatabase)) return false;
 			lessons.removeLesson(id);
 			return true;
 		}
