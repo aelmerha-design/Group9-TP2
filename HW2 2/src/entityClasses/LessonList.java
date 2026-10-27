@@ -46,4 +46,16 @@ public class LessonList {
 		public ArrayList<Lesson> getLessons() {
 			return new ArrayList<Lesson>(lessons);
 		}
+		
+		// this returns a new list of the lessons that contain the keyword, so the full list stays unchanged
+		public LessonList searchByKeyword(String keyword) {
+			LessonList subset = new LessonList();
+			String key = keyword == null ? "" : keyword.trim().toLowerCase();
+			for (Lesson lesson : lessons) {
+				String text = (lesson.getTitle() + " " + lesson.getProblem() + " " + lesson.getSolution() + " "
+						+ lesson.getExperience()).toLowerCase();
+				if (text.contains(key)) subset.addLesson(lesson);
+			}
+			return subset;
+		}
 	}

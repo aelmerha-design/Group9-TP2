@@ -1282,8 +1282,25 @@ public class Database {
 
 		return null;
 	}
+	
+	// this reads every lesson in the system so the full list can be searched
+	public LessonList readAllLessons() throws SQLException {
+		LessonList lessons = new LessonList();
+		String sql = "SELECT * FROM lessons ORDER BY id";
+		try (PreparedStatement query = connection.prepareStatement(sql)) {
+			try (ResultSet result = query.executeQuery()) {
+				while (result.next()) {
+				lessons.addLesson(new Lesson(result.getInt("id"), result.getInt("ownerId"), result.getString("title"),
+						result.getString("problem"), result.getString("solution"),
+						result.getString("experience")));
+				}
+			}
+		}
 
-	// this reads all lessons without a fixed list size
+		return lessons;
+	}
+
+	// this reads all of one owner's lessons without a fixed list size
 	public LessonList readLessons(int ownerId) throws SQLException {
 		LessonList lessons = new LessonList();
 		String sql = "SELECT * FROM lessons WHERE ownerId = ? ORDER BY id";
