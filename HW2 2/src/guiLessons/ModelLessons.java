@@ -1,9 +1,11 @@
 package guiLessons;
 
 import java.sql.SQLException;
+import java.util.List;
 import database.Database;
 import entityClasses.Lesson;
 import entityClasses.LessonList;
+import entityClasses.User;
 
 /**
  * <p> Title: ModelLessons Class. </p>
@@ -24,6 +26,10 @@ public class ModelLessons {
 		private static Database theDatabase = applicationMain.FoundationsMain.database;
 		/** In-memory list maintained by successful writes and full-list reads. */
 		private static LessonList lessons = new LessonList();
+		/** Simple enum that stores all the fields of a lesson. */
+		protected enum LessonField {
+			TITLE, PROBLEM, SOLUTION, EXPERIENCE
+		}
 
 		/**
 		 * Checks the lesson's text lengths in title, problem, solution, and
@@ -72,14 +78,25 @@ public class ModelLessons {
 			return theDatabase.readLesson(id);
 		}
 		/**
-		 * Reloads all saved lessons, ordered by ID, and replaces the in-memory list.
+		 * Reloads lessons belonging to the user, ordered by ID, and replaces the in-memory list.
 		 *
+		 * @param actor the user actor whose lessons are loaded
 		 * @return the newly loaded list, which may be empty and is also retained by
 		 *         this model; callers receive the same {@link LessonList} instance
+		 * @throws SecurityException if the user is null
 		 * @throws SQLException if the database read fails
 		 */
-		protected static LessonList readLessons(int ownerId) throws SQLException {
-			lessons = theDatabase.readLessons(ownerId);
+		protected static LessonList readLessons(User actor) throws SQLException {
+			if (actor == null) {
+				throw new SecurityException("You must be signed in.");
+			}
+
+			if (actor.getAdminRole()) {
+				lessons = theDatabase.readAllLessons();
+			} else {
+				lessons = theDatabase.readLessons(actor.getUserId());
+			}
+
 			return lessons;
 		}
 		/**
@@ -87,13 +104,43 @@ public class ModelLessons {
 		 * replaces the matching in-memory entry if present. The ID is unchanged.
 		 *
 		 * @param lesson the non-null, validated lesson containing the ID and new values
+		 * @param actor the user actor requesting the operation
 		 * @return {@code true} if a database record was updated; {@code false} if
 		 *         no matching record exists
 		 * @throws SQLException if the database update fails
+		 * @throws SecurityException if the user actor is unauthorized
 		 */
-		protected static boolean updateLesson(Lesson lesson) throws SQLException {
+		protected static boolean updateLesson(Lesson lesson, User actor) throws SQLException {
+			if (actor == null) {
+				throw new SecurityException("You must be signed in.");
+			}
+
+			Lesson saved = theDatabase.readLesson(lesson.getId());
+			if (saved == null) return false;
+
+			// NOTE: update this for Curator in TP3
+			if (!actor.getAdminRole()) {
+				if (saved.getOwnerId() != actor.getUserId()) {
+					throw new SecurityException("You do not own this lesson.");
+				}
+
+				boolean changedLockedField = 
+				(saved.isTitleEffectivelyLocked() 
+					&& !saved.getTitle().equals(lesson.getTitle()))
+				|| (saved.isProblemEffectivelyLocked()
+					&& !saved.getProblem().equals(lesson.getProblem()))
+				|| (saved.isSolutionEffectivelyLocked()
+					&& !saved.getSolution().equals(lesson.getSolution()))
+				|| (saved.isExperienceEffectivelyLocked()
+					&& !saved.getExperience().equals(lesson.getExperience()));
+
+				if (changedLockedField) {
+					throw new SecurityException("A locked field cannot be changed.");
+				}
+			}
+
 			if (!theDatabase.updateLesson(lesson)) return false;
-			lessons.updateLesson(lesson);
+			lessons.updateLesson(theDatabase.readLesson(lesson.getId()));
 			return true;
 		}
 		/**
@@ -101,14 +148,99 @@ public class ModelLessons {
 		 * if present.
 		 *
 		 * @param id the ID of the lesson to delete
+		 * @param actor the user actor requesting the operation
 		 * @return {@code true} if a database record was deleted; {@code false} if
 		 *         no matching record exists
 		 * @throws SQLException if the database deletion fails
+		 * @throws SecurityException if the user is unauthorized
 		 */
-		protected static boolean deleteLesson(int id) throws SQLException {
+		protected static boolean deleteLesson(int id, User actor) throws SQLException {
+			if (actor == null) {
+				throw new SecurityException("You must be signed in.");
+			}
+
+			Lesson saved = theDatabase.readLesson(id);
+			if (saved == null) return false;
+
+			if (!actor.getAdminRole()) {
+				if (saved.getOwnerId() != actor.getUserId()) {
+					throw new SecurityException("You do not own this lesson.");
+				}
+
+				if (saved.hasAnyLock()) {
+					throw new SecurityException("This lesson cannot be deleted while a lock is active.");
+				}
+			}
+
 			if (!theDatabase.deleteLesson(id)) return false;
 			lessons.removeLesson(id);
 			return true;
 		}
+
+		/**
+		 * Updates a field lock of an existing lesson. Only admins and curators (eventually)
+		 * have the ability to lock/unlock lesson fields. Contributors cannot
+		 * interact with locked fields.
+		 * 
+		 * @param lessonId the ID of the lesson to change
+		 * @param field the non-null field for the lesson being changed
+		 * @param actor the user actor requesting the change
+		 * @return the lesson containing the saved lock state
+		 * @throws SecurityException if the actor is null or unpriviliged
+		 * @throws IllegalStateException if no matching record exists
+		 * @throws SQLException if the database fails to read or save the lock
+		 */
+		protected static Lesson toggleLock(int lessonId, LessonField field, User actor) throws SQLException {
+			// NOTE: update this for Curator in TP3
+			if (actor == null || !actor.getAdminRole()) {
+				throw new SecurityException("Only admins and curators can change locks.");
+			}
+
+			Lesson saved = theDatabase.readLesson(lessonId);
+			if (saved == null) {
+				throw new IllegalStateException("The lesson no longer exists.");
+			}
+
+			switch (field) {
+				case TITLE:
+					saved.setTitleLocked(!saved.isTitleLocked());
+					break;
+				case PROBLEM:
+					saved.setProblemLocked(!saved.isProblemLocked());
+					break;
+				case SOLUTION:
+					saved.setSolutionLocked(!saved.isSolutionLocked());
+					break;
+				case EXPERIENCE:
+					saved.setExperienceLocked(!saved.isExperienceLocked());
+					break;
+			}
+
+			if (!theDatabase.updateLessonLocks(saved)) {
+				throw new IllegalStateException("The lesson no longer exists.");
+			}
+
+			return saved;
+		}
 	
+		/**
+		 * Sets the whole-lesson lock for the selected lessons.
+		 * Individual field locks are unchanged.
+		 * 
+		 * @param ids the non-null list of lesson IDs
+		 * @param locked true to lock; false to unlock
+		 * @param actor the user actor requesting the operation
+		 * @throws SecurityException if the user actor is unauthorized
+		 * @throws SQLException if saving fails
+		 */
+		protected static void setLessonsLocked(List<Integer> ids, boolean locked, User actor) throws SQLException {
+			// NOTE: update this for Curator in TP3
+			if (actor == null || !actor.getAdminRole()) {
+				throw new SecurityException("Only admins can lock or unlock lessons.");
+			}
+
+			if (ids.isEmpty()) return;
+
+			theDatabase.setLessonsLocked(ids, locked);
+		}
 }

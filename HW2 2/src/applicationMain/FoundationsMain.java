@@ -94,6 +94,7 @@ public class FoundationsMain extends Application {
 			databaseInUse.setHeaderText("Database Is Already Being Used");
 			databaseInUse.setContentText("Please stop the other instance and try again!");
 			databaseInUse.showAndWait();
+			e.printStackTrace();
 			System.exit(0);
 		}
 		

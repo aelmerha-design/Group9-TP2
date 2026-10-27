@@ -138,8 +138,12 @@ public class Database {
 				+ "title VARCHAR(100) NOT NULL, "
 				+ "problem VARCHAR(2000) NOT NULL, "
 				+ "solution VARCHAR(2000) NOT NULL, "
-				+ "experience VARCHAR(2000))";
-	    
+				+ "experience VARCHAR(2000), "
+				+ "locked BOOLEAN DEFAULT FALSE NOT NULL, "
+				+ "titleLocked BOOLEAN DEFAULT FALSE NOT NULL, "
+				+ "problemLocked BOOLEAN DEFAULT FALSE NOT NULL, "
+				+ "solutionLocked BOOLEAN DEFAULT FALSE NOT NULL, "
+				+ "experienceLocked BOOLEAN DEFAULT FALSE NOT NULL)";
 	    statement.execute(lessonTable);
 	}
 
@@ -248,7 +252,7 @@ public class Database {
  *  <p> Method: List getUserList() </p>
  *  
  *  <P> Description: Generate an List of Strings, one for each user in the database,
- *  starting with "<Select User>" at the start of the list. </p>
+ *  starting with {@code <Select User>} at the start of the list </p>
  *  
  *  @return a list of userNames found in the database.
  */
@@ -1266,6 +1270,25 @@ public class Database {
 		throw new SQLException("The lesson identification was not generated.");
 	}
 
+	// A helper used by readLesson and readLessons to avoid duplicate mapping.
+	private Lesson lessonFromRow(ResultSet result) throws SQLException {
+		Lesson lesson = new Lesson(
+			result.getInt("id"),
+			result.getInt("ownerId"),
+			result.getString("title"),
+			result.getString("problem"),
+			result.getString("solution"),
+			result.getString("experience"));
+		
+		lesson.setLocked(result.getBoolean("locked"));
+		lesson.setTitleLocked(result.getBoolean("titleLocked"));
+		lesson.setProblemLocked(result.getBoolean("problemLocked"));
+		lesson.setSolutionLocked(result.getBoolean("solutionLocked"));
+		lesson.setExperienceLocked(result.getBoolean("experienceLocked"));
+
+		return lesson;
+	}
+
 	// this reads one lesson, or returns null if it does not exist
 	public Lesson readLesson(int id) throws SQLException {
 		String sql = "SELECT * FROM lessons WHERE id = ?";
@@ -1273,9 +1296,7 @@ public class Database {
 			query.setInt(1, id);
 			try (ResultSet result = query.executeQuery()) {
 				if (result.next()) {
-					return new Lesson(result.getInt("id"), result.getInt("ownerId"), result.getString("title"),
-							result.getString("problem"), result.getString("solution"),
-							result.getString("experience"));
+					return lessonFromRow(result);
 				}
 			}
 		}
@@ -1283,7 +1304,7 @@ public class Database {
 		return null;
 	}
 
-	// this reads all lessons without a fixed list size
+	// this reads all of the current user's lessons without a fixed list size
 	public LessonList readLessons(int ownerId) throws SQLException {
 		LessonList lessons = new LessonList();
 		String sql = "SELECT * FROM lessons WHERE ownerId = ? ORDER BY id";
@@ -1292,11 +1313,24 @@ public class Database {
 
 			try (ResultSet result = query.executeQuery()) {
 				while (result.next()) {
-				lessons.addLesson(new Lesson(result.getInt("id"), result.getInt("ownerId"), result.getString("title"),
-						result.getString("problem"), result.getString("solution"),
-						result.getString("experience")));
+					lessons.addLesson(lessonFromRow(result));
 				}
 			}
+		}
+
+		return lessons;
+	}
+
+	// this reads all lessons regardless of ownership
+	public LessonList readAllLessons() throws SQLException {
+		LessonList lessons = new LessonList();
+		String sql = "SELECT * FROM lessons ORDER BY id";
+
+		try (PreparedStatement query = connection.prepareStatement(sql);
+			ResultSet result = query.executeQuery()) {
+				while (result.next()) {
+					lessons.addLesson(lessonFromRow(result));
+				}
 		}
 
 		return lessons;
@@ -1321,6 +1355,77 @@ public class Database {
 		try (PreparedStatement query = connection.prepareStatement(sql)) {
 			query.setInt(1, id);
 			return query.executeUpdate() == 1;
+		}
+	}
+
+	/**
+	 * Stores all five locks for an existing lesson.
+	 * Leaves ownership and content unchanged, and performs
+	 * no authorization check.
+	 * 
+	 * @param lesson the non-null lesson containing its ID and locks
+	 * @return true if a record was updated; false if its ID does not exist
+	 * @throws SQLException if the database update fails
+	 */
+	public boolean updateLessonLocks(Lesson lesson) throws SQLException {
+		String sql = "UPDATE lessons SET locked = ?, titleLocked = ?, "
+				+ "problemLocked = ?, solutionLocked = ?, experienceLocked = ? "
+				+ "WHERE id = ?";
+		
+				try (PreparedStatement query = connection.prepareStatement(sql)) {
+					query.setBoolean(1, lesson.isLocked());
+					query.setBoolean(2, lesson.isTitleLocked());
+					query.setBoolean(3, lesson.isProblemLocked());
+					query.setBoolean(4, lesson.isSolutionLocked());
+					query.setBoolean(5, lesson.isExperienceLocked());
+					query.setInt(6, lesson.getId());
+
+					return query.executeUpdate() == 1;
+				}
+	}
+
+	/**
+	 * Sets the whole-lesson lock for the selected lessons in
+	 * one transaction. Individual locks remain unchanged.
+	 * No authorization check is performed.
+	 * 
+	 * @param ids the non-null list of non-null lesson IDs
+	 * @param locked the whole-lesson lock value to store
+	 * @throws SQLException if a lesson is missing, saving fails, 
+	 * 		   or another transaction is already active
+	 */
+	public void setLessonsLocked(List<Integer> ids, boolean locked) throws SQLException {
+		if (ids.isEmpty()) return;
+
+		if (!connection.getAutoCommit()) {
+			throw new SQLException("Another transaction is already active.");
+		}
+
+		String sql = "UPDATE lessons SET locked = ? WHERE id = ?";
+		connection.setAutoCommit(false);
+
+		try {
+			try (PreparedStatement query = connection.prepareStatement(sql)) {
+				for (int id : ids) {
+					query.setBoolean(1, locked);
+					query.setInt(2, id);
+
+					if (query.executeUpdate() != 1) {
+						throw new SQLException("A selected lesson no longer exists.");
+					}
+				}
+			}
+
+			connection.commit();
+		} catch (SQLException e) {
+			try {
+				connection.rollback();
+			} catch (SQLException rollbackError) {
+				e.addSuppressed(rollbackError);
+			}
+			throw e;
+		} finally {
+			connection.setAutoCommit(true);
 		}
 	}
 }

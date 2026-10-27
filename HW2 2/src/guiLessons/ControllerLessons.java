@@ -1,6 +1,8 @@
 package guiLessons;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
 import entityClasses.Lesson;
 import entityClasses.LessonList;
 
@@ -24,6 +26,7 @@ public class ControllerLessons {
 	 * modify a lesson already held in the list. The lesson constructor trims text.
 	 *
 	 * @param id the selected lesson's ID, or {@code 0} for a new lesson
+	 * @param ownerId the ID of the lesson owner
 	 * @return a lesson containing the current form values
 	 */
 	private static Lesson lessonFromFields(int id, int ownerId) {
@@ -97,8 +100,10 @@ public class ControllerLessons {
 				return;
 			}
 
-			if (ModelLessons.updateLesson(lesson)) ViewLessons.refreshList();
+			if (ModelLessons.updateLesson(lesson, ViewLessons.currentUser)) ViewLessons.refreshList();
 			else ViewLessons.showError("Select a lesson that exists");
+		} catch (SecurityException e) {
+			ViewLessons.showError(e.getMessage());
 		} catch (SQLException e) {
 			ViewLessons.showError("Could not update the lesson. Please try again.");
 		}
@@ -116,8 +121,10 @@ public class ControllerLessons {
 			return;
 		}
 		try {
-			if (ModelLessons.deleteLesson(selected.getId())) ViewLessons.refreshList();
+			if (ModelLessons.deleteLesson(selected.getId(), ViewLessons.currentUser)) ViewLessons.refreshList();
 			else ViewLessons.showError("Select a lesson that exists");
+		} catch (SecurityException e) {
+			ViewLessons.showError(e.getMessage());
 		} catch (SQLException e) {
 			ViewLessons.showError("Could not delete the lesson. Please try again.");
 		}
@@ -160,5 +167,58 @@ public class ControllerLessons {
 		ViewLessons.theStage.setScene(ViewLessons.theHomeScene);
 		ViewLessons.theStage.setTitle(ViewLessons.theHomeTitle);
 	}
+
+	/**
+	 * Toggles the selected lesson's field lock through the model and reloads
+	 * the saved lesson into the form, replacing unsaved form values.
+	 * Displays an error for missing selection, denied permission,
+	 * a missing record, or a database failure.
+	 *
+	 * @param field the field whose individual lock is toggled
+	 */
+	protected static void toggleLock(ModelLessons.LessonField field) {
+		Lesson selected = ViewLessons.list_Lessons.getSelectionModel().getSelectedItem();
+
+		if (selected == null) {
+			ViewLessons.showError("Select a lesson first.");
+			return;
+		}
+
+		try {
+			Lesson saved = ModelLessons.toggleLock(selected.getId(), field, ViewLessons.currentUser);
+			ViewLessons.showLesson(saved);
+		} catch (SecurityException | IllegalStateException e) {
+			ViewLessons.showError(e.getMessage());
+		} catch (SQLException e) {
+			ViewLessons.showError("Could not save the lock change.");
+		}
+	}
 	
+	/**
+	 * Sets the whole-lesson lock for each selected lesson.
+	 * 
+	 * @param locked true to lock; false to unlock
+	 */
+	protected static void setSelectedLessonsLocked(boolean locked) {
+		List<Lesson> selected = new ArrayList<>(ViewLessons.list_Lessons.getSelectionModel().getSelectedItems());
+
+		if (selected.isEmpty()) {
+			ViewLessons.showError("Select one or more lessons first.");
+			return;
+		}
+
+		List<Integer> ids = new ArrayList<>();
+		for (Lesson lesson : selected) {
+			ids.add(lesson.getId());
+		}
+
+		try {
+			ModelLessons.setLessonsLocked(ids, locked, ViewLessons.currentUser);
+			ViewLessons.refreshList();
+		} catch (SecurityException e) {
+			ViewLessons.showError(e.getMessage());
+		} catch (SQLException e) {
+			ViewLessons.showError("Could not change the lesson locks. Please try again.");
+		}
+	}
 }

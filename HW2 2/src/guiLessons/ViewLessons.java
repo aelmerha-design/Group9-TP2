@@ -68,11 +68,23 @@ public class ViewLessons {
 	private static Alert alertError = new Alert(AlertType.ERROR);
 	/** The current user accessing the scene. */
 	protected static User currentUser;
+	/** Button to lock/unlock the title field. */
+	private static Button button_TitleLock = new Button("🔓");
+	/** Button to lock/unlock the problem field. */
+	private static Button button_ProblemLock = new Button("🔓");
+	/** Button to lock/unlock the solution field. */
+	private static Button button_SolutionLock = new Button("🔓");
+	/** Button to lock/unlock the experience field. */
+	private static Button button_ExperienceLock = new Button("🔓");
+	/** Button to lock selected lessons. */
+	private static Button button_LockSelected = new Button("Lock selected");
+	/** Button to unlock the selected lessons. */
+	private static Button button_UnlockSelected = new Button("Unlock selected");
 
 	/**
 	 * Opens the lesson page, creating its widgets on the first call. Saves the
 	 * stage's current scene and title, displays the user's name, and attempts to
-	 * reload all saved lessons before showing the page.
+	 * reload all lessons belonging to the user before showing the page.
 	 *
 	 * @param ps the non-null application stage whose current scene is the return page
 	 * @param user the non-null user whose username is displayed
@@ -86,11 +98,41 @@ public class ViewLessons {
 
 		label_UserDetails.setText("User: " + user.getUserName());
 		currentUser = user;
+		// NOTE: update this for Curator in TP3
+		boolean admin = currentUser.getAdminRole();
+		for (Button button : new Button[] {
+			button_TitleLock,
+			button_ProblemLock,
+			button_SolutionLock,
+			button_ExperienceLock,
+			button_LockSelected,
+			button_UnlockSelected }) {
+				button.setVisible(admin);
+				button.setManaged(admin);
+			}
 		refreshList();
 
 		theStage.setTitle("CSE 360: Lessons Learned");
 		theStage.setScene(theLessonsScene);
 		theStage.show();
+	}
+
+	/**
+	 * A simple helper function for setting up the lock buttons. Simplifies
+	 * a lot of redundant code that would otherwise be repeated each
+	 * time a new lock button is created.
+	 * 
+	 * @param button the lock button to configure
+	 * @param x the horizontal layout position in pixels
+	 * @param y the vertical layout position in pixels
+	 */
+	private static void setupLockButton(Button button, double x, double y) {
+		button.setLayoutX(x);
+		button.setLayoutY(y);
+		button.setPrefSize(30, 24);
+		button.setStyle("-fx-padding: 2; -fx-font-size: 12;");
+		button.setVisible(false);
+		button.setManaged(false);
 	}
 
 	/** Creates the reusable scene, lays out its controls, and connects controller actions. */
@@ -149,26 +191,44 @@ public class ViewLessons {
 		Button button_Remove = new Button("Remove from subset");
 		setupButtonUI(button_Remove, 300, 20, 515);
 		button_Remove.setOnAction((event) -> { ControllerLessons.removeFromSubset(); });
+		button_Remove.disableProperty().bind(javafx.beans.binding.Bindings.isEmpty(list_Lessons.getSelectionModel().getSelectedItems()));
 		Button button_Back = new Button("Back");
 		setupButtonUI(button_Back, 100, 680, 55);
 		button_Back.setOnAction((event) -> { ControllerLessons.performBack(); });
+		setupLockButton(button_TitleLock, 745, 102);
+		button_TitleLock.setOnAction(event -> { ControllerLessons.toggleLock(ModelLessons.LessonField.TITLE); });
+		setupLockButton(button_ProblemLock, 745, 167);
+		button_ProblemLock.setOnAction(event -> { ControllerLessons.toggleLock(ModelLessons.LessonField.PROBLEM); });
+		setupLockButton(button_SolutionLock, 745, 277);
+		button_SolutionLock.setOnAction(event -> { ControllerLessons.toggleLock(ModelLessons.LessonField.SOLUTION); });
+		setupLockButton(button_ExperienceLock, 745, 387);
+		button_ExperienceLock.setOnAction(event -> { ControllerLessons.toggleLock(ModelLessons.LessonField.EXPERIENCE); });
+		setupButtonUI(button_LockSelected, 145, 20, 560);
+		button_LockSelected.setOnAction(event -> { ControllerLessons.setSelectedLessonsLocked(true); });
+		button_LockSelected.disableProperty().bind(javafx.beans.binding.Bindings.isEmpty(list_Lessons.getSelectionModel().getSelectedItems()));
+		setupButtonUI(button_UnlockSelected, 145, 175, 560);
+		button_UnlockSelected.setOnAction(event -> { ControllerLessons.setSelectedLessonsLocked(false); });
+		button_UnlockSelected.disableProperty().bind(javafx.beans.binding.Bindings.isEmpty(list_Lessons.getSelectionModel().getSelectedItems()));
 		theRootPane.getChildren().addAll(label_PageTitle, label_UserDetails, line_Separator,
 				label_List, list_Lessons, label_Title, text_Title, label_Problem, text_Problem,
 				label_Solution, text_Solution, label_Experience, text_Experience,
 				button_Create, button_Read, button_Update, button_Delete, button_Subset,
-				button_All, button_Remove, button_Back);
+				button_All, button_Remove, button_Back, button_TitleLock, button_ProblemLock,
+				button_SolutionLock, button_ExperienceLock, button_LockSelected, button_UnlockSelected);
 	}
 	/**
-	 * Replaces the displayed list with all saved lessons and clears the selection
-	 * and form. Displays an error if loading fails, leaving the existing display
-	 * unchanged.
+	 * Replaces the displayed list with lessons belonging to the current user 
+	 * and clears the selection and form. Displays an error if loading fails, 
+	 * leaving the existing display unchanged.
 	 */
 	protected static void refreshList() {
 		try {
-			displayedLessons = ModelLessons.readLessons(currentUser.getUserId());
+			displayedLessons = ModelLessons.readLessons(currentUser);
 			list_Lessons.getSelectionModel().clearSelection();
 			list_Lessons.getItems().setAll(displayedLessons.getLessons());
 			showLesson(null);
+		} catch (SecurityException e) {
+			showError(e.getMessage());
 		} catch (SQLException e) {
 			showError("Could not load lessons. Please try again.");
 		}
@@ -186,6 +246,8 @@ public class ViewLessons {
 	}
 	/**
 	 * Copies a lesson's values into the form, or clears all fields for {@code null}.
+	 * Also displays whether a field is locked or not, disabling fields
+	 * that are locked.
 	 *
 	 * @param lesson the lesson to display, or {@code null} to clear the form
 	 */
@@ -194,6 +256,24 @@ public class ViewLessons {
 		text_Problem.setText(lesson == null ? "" : lesson.getProblem());
 		text_Solution.setText(lesson == null ? "" : lesson.getSolution());
 		text_Experience.setText(lesson == null ? "" : lesson.getExperience());
+
+		boolean admin = currentUser != null && currentUser.getAdminRole();
+
+		text_Title.setEditable(lesson == null || admin || !lesson.isTitleEffectivelyLocked());
+		button_TitleLock.setText(lesson != null && lesson.isTitleEffectivelyLocked() ? "🔒" : "🔓");
+		button_TitleLock.setDisable(lesson == null);
+
+		text_Problem.setEditable(lesson == null || admin || !lesson.isProblemEffectivelyLocked());
+		button_ProblemLock.setText(lesson != null && lesson.isProblemEffectivelyLocked() ? "🔒" : "🔓");
+		button_ProblemLock.setDisable(lesson == null);
+
+		text_Solution.setEditable(lesson == null || admin || !lesson.isSolutionEffectivelyLocked());
+		button_SolutionLock.setText(lesson != null && lesson.isSolutionEffectivelyLocked() ? "🔒" : "🔓");
+		button_SolutionLock.setDisable(lesson == null);
+
+		text_Experience.setEditable(lesson == null || admin || !lesson.isExperienceEffectivelyLocked());
+		button_ExperienceLock.setText(lesson != null && lesson.isExperienceEffectivelyLocked() ? "🔒" : "🔓");
+		button_ExperienceLock.setDisable(lesson == null);
 	}
 	/**
 	 * Sets a label's Arial font, minimum width, and position within the pane.
