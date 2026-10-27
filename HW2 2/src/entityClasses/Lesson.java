@@ -1,4 +1,7 @@
 package entityClasses;
+import java.sql.SQLException;
+import database.Database;
+
 
 /*******
  * <p> Title: Lesson Class. </p>
@@ -68,6 +71,42 @@ public class Lesson {
 	public static boolean isValidExperience(String experience) {
 		return experience == null || experience.trim().length() <= 2000;
 	}
+	
+	
+	
+	
+	
+	
+	// this checks every field with the validators above so invalid data never reaches the database
+	public boolean isValid() {
+		return isValidTitle(title) && isValidProblem(problem) && isValidSolution(solution) && isValidExperience(experience);
+	}
+
+	// create saves this lesson and the database sets its generated identification, or returns -1 if the lesson is invalid
+	public int create(Database db) throws SQLException {
+		if (!isValid()) return -1;
+		return db.createLesson(this);
+	}
+
+	// read returns the saved lesson with this identification, or null if it does not exist
+	public static Lesson read(Database db, int id) throws SQLException {
+		return db.readLesson(id);
+	}
+
+	// update saves the changed fields without changing the identification, and returns false if invalid or not found
+	public boolean update(Database db) throws SQLException {
+		if (!isValid()) return false;
+		return db.updateLesson(this);
+	}
+
+	// delete removes only this lesson, and returns false if it was not found
+	public boolean delete(Database db) throws SQLException {
+		return db.deleteLesson(id);
+	}
+	
+	
+	
+	
 	
 	// this displays the identification and title in the list
 	@Override
