@@ -6,6 +6,8 @@ import database.Database;
 /*******
  * <p> Title: Lesson Class. </p>
  * 
+ * <p> This is the LessonsLearned class required by TP2. </p>
+ * 
  * <p> Description: This class represents one persistent Lessons Learned entry.
  * A lesson stores the identification of the lesson, its contributor, along with 
  * the title, problem, solution, and experience information which is optional.</p>
@@ -30,19 +32,38 @@ import database.Database;
 
 public class Lesson {
 	
+	/** The id of the lesson. Needed so each lesson can be found, updated, and deleted. */
 	private int id;
+
+	/** The id of the contributor who wrote the lesson. Needed so only the author can change it. */
 	private int ownerId;
+
+	/** The title of the lesson. Needed by the contributor user stories to name the lesson. */
 	private String title;
+
+	/** The problem that happened. Needed by the contributor user stories. */
 	private String problem;
+
+	/** What was done to solve the problem. Needed by the contributor user stories. */
 	private String solution;
+
+	/** Extra experience the contributor learned. It is optional. Needed by the contributor user stories. */
 	private String experience;
 
+	/** True if the whole lesson is locked. Needed for the epic that locks lessons. */
 	private boolean locked;
+
+	/** True if the title is locked. Needed for the epic that locks lesson fields. */
 	private boolean titleLocked;
+
+	/** True if the problem is locked. Needed for the epic that locks lesson fields. */
 	private boolean problemLocked;
+
+	/** True if the solution is locked. Needed for the epic that locks lesson fields. */
 	private boolean solutionLocked;
+
+	/** True if the experience is locked. Needed for the epic that locks lesson fields. */
 	private boolean experienceLocked;
-	
 
 	/** Search terms the curator approves so users can find this lesson. Needed for the AI search terms epic. */
 	private String searchTerms = "";

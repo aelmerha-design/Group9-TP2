@@ -6,6 +6,7 @@ import database.Database;
 
 /*******
  * <p> Title: LessonList Class. </p>
+ * <p> This is the LessonsLearnedList class required by TP2. </p>
  * <p> Description: Stores a collection of Lesson objects without a fixed size limit.
  * The collection may represent all lessons, the lessons belonging to
  * one contributor, or a selected set.</p>
@@ -26,9 +27,8 @@ import database.Database;
 
 
 public class LessonList {
-		// ArrayList grows as it should because the lists and the subsets have no limits
+		/** The lessons in this list. An ArrayList is used because the list and its subsets have no size limit. */
 		private ArrayList<Lesson> lessons = new ArrayList<Lesson>();
-
 		
 		
 		/** 
