@@ -13,14 +13,12 @@ import database.Database;
  * <p> The attributes support the User Stories. The id identifies the lesson, ownerId
  * identifies the contributor who created it, title identifies the lesson to users, 
  * problem describes the situation being addressed, solution records what was done, and 
- * experience stores additional information learned.</p>
+ * experience stores additional information learned. </p>
  * 
  * <p> This class provides input validation and persistent Create, Read, Update,
  * and Delete operations. This design can be extended with additional attributes needed 
  * in later project phases, including refinement, searching, locking, visibility, and
- * effort statistics.
- *  
- * experience information.</p>
+ * effort statistics. </p>
  * 
  * @author Ahmad El-Merhaby
  */
@@ -34,6 +32,12 @@ public class Lesson {
 	private String problem;
 	private String solution;
 	private String experience;
+
+	private boolean locked;
+	private boolean titleLocked;
+	private boolean problemLocked;
+	private boolean solutionLocked;
+	private boolean experienceLocked;
 	
 	
     /**
@@ -57,47 +61,22 @@ public class Lesson {
 		this.solution = solution == null ? "" : solution.trim();
 		this.experience = experience == null ? "" : experience.trim();
 	}
+	
 	/** @return the lesson identification */
 	public int getId() { return id; }
-	/**@param id the lesson identification*/
+  /**@param id the lesson identification*/
 	public void setId(int id) { this.id = id; }
-	/** @return the contributor identification */
+  /** @return the contributor identification */
 	public int getOwnerId() { return ownerId; }
-	/**@param id the contributor identification*/
+  /**@param id the contributor identification*/
 	public void setOwnerId(int id) { this.ownerId = id;}
-	/**@param title the new lesson title */
-	public void setTitle(String title) {
-		this.title = title == null ? "" : title.trim();
-		
-	}
-	/**@param problem the new problem information*/
-	public void setProblem(String problem) {
-		this.problem = problem == null ? "" : problem.trim();
-		
-	}
 	/** @return the lesson title */
 	public String getTitle() { return title; }
-
-	/** @return the lesson problem */
-	public String getProblem() { return problem; }
-	
-	/** @return the lesson solution */
-	public String getSolution() { return solution; }
-	
-	/**@param solution the solution information*/
-	public void setSolution(String solution) {
-		this.solution = solution == null ? "" : solution.trim();
+  /**@param title the new lesson title */
+	public void setTitle(String title) {
+		this.title = title == null ? "" : title.trim();
 	}
-	
-	/**@param experience the experience information*/
-	public void setExperience(String experience) {
-		this.experience = experience == null ? "" : experience.trim();
-		
-	}
-	/** @return the lesson experience information */
-	public String getExperience() { return experience; }
-	
-	/**
+  /**
 	 * Validates that the title contains non blank text and does not exceed
 	 * the 100 character limit
 	 * 
@@ -107,7 +86,22 @@ public class Lesson {
 	public static boolean isValidTitle(String title) {
 		return title != null && !title.trim().isEmpty() && title.trim().length() <= 100;
 	}
-	/** 
+  /** @return the stored title-specific lock */
+	public boolean isTitleLocked() { return titleLocked; }
+  /** @return true if locked or whole-locked; false if unlocked */
+	public boolean isTitleEffectivelyLocked() { return locked || titleLocked; }
+  /** @param titleLocked the bool determining whether to lock or not */
+	public void setTitleLocked(boolean titleLocked) {
+		this.titleLocked = titleLocked;
+	}
+
+	/** @return the lesson problem */
+	public String getProblem() { return problem; }
+  /**@param problem the new problem information*/
+	public void setProblem(String problem) {
+		this.problem = problem == null ? "" : problem.trim();
+	}
+  /** 
 	 * Validates that the problem contains non blank text and does not exceed the
 	 * 2000 character limit
 	 * 
@@ -116,9 +110,23 @@ public class Lesson {
 	 */
 	public static boolean isValidProblem(String problem) {
 		return problem != null && !problem.trim().isEmpty() && problem.trim().length() <= 2000;
-		
 	}
-	/**
+  /** @return the stored problem-specific lock */
+	public boolean isProblemLocked() { return problemLocked; }
+  /** @return true if locked or whole-locked; false if unlocked */
+	public boolean isProblemEffectivelyLocked() { return locked || problemLocked; }
+  /** @param problemLocked the bool determining whether to lock or not */
+	public void setProblemLocked(boolean problemLocked) {
+		this.problemLocked = problemLocked;
+	}
+
+	/** @return the lesson solution */
+	public String getSolution() { return solution; }
+  /**@param solution the solution information*/
+	public void setSolution(String solution) {
+		this.solution = solution == null ? "" : solution.trim();
+	}
+  /**
 	 * Validates that the solution contains non blank text and does not exceed the 2000
 	 * character limit
 	 * 
@@ -128,10 +136,24 @@ public class Lesson {
 	public static boolean isValidSolution(String solution) {
 		return solution != null && !solution.trim().isEmpty() && solution.trim().length() <= 2000;
 	}
-	
-	/**
+  /** @return the stored solution-specific lock */
+	public boolean isSolutionLocked() { return solutionLocked; }
+  /** @return true if locked or whole-locked; false if unlocked */
+	public boolean isSolutionEffectivelyLocked() { return locked || solutionLocked; }
+  /** @param solutionLocked the bool determining whether to lock or not */
+	public void setSolutionLocked(boolean solutionLocked) {
+		this.solutionLocked = solutionLocked;
+	}
+
+	/** @return the lesson experience information */
+	public String getExperience() { return experience; }
+	/**@param experience the experience information*/
+	public void setExperience(String experience) {
+		this.experience = experience == null ? "" : experience.trim();
+	}
+  /**
 	 * Validates the optional experience information. Experience may be empty
-	 * but it cannot exceet the 2000 character limit
+	 * but it cannot exceed the 2000 character limit
 	 * 
 	 * @param experience the experience information to validate
 	 * @return true if the experience information is valid, otherwise false
@@ -139,12 +161,28 @@ public class Lesson {
 	public static boolean isValidExperience(String experience) {
 		return experience == null || experience.trim().length() <= 2000;
 	}
-	
-	
-	
-	
-	
-	
+  /** @return the stored experience-specific lock */
+	public boolean isExperienceLocked() { return experienceLocked; }
+  /** @return true if locked or whole-locked; false if unlocked */
+	public boolean isExperienceEffectivelyLocked() { return locked || experienceLocked; }
+  /** @param experienceLocked the bool determining whether to lock or not */
+	public void setExperienceLocked(boolean experienceLocked) {
+		this.experienceLocked = experienceLocked;
+	}
+
+	/** @return true if the whole lesson is locked */
+	public boolean isLocked() { return locked; }
+
+  /** @param locked true to lock the whole lesson; false to unlock */
+	public void setLocked(boolean locked) {
+		this.locked = locked;
+	}
+
+	/** @return true if the whole lesson or any individual field is locked */
+	public boolean hasAnyLock() {
+		return locked || titleLocked || problemLocked || solutionLocked || experienceLocked;
+	}
+  
 	/**
 	 * Checks all lesson fields using the validation methods above so invalid 
 	 * lesson data is not written to the persistent database
@@ -204,11 +242,7 @@ public class Lesson {
 	public boolean delete(Database db) throws SQLException {
 		return db.deleteLesson(id);
 	}
-	
-	
-	
-	
-	
+  
 	/**
 	 * 
 	 * returns the lesson identification and title
