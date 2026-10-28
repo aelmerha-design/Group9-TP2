@@ -1304,7 +1304,7 @@ public class Database {
 		return null;
 	}
 
-	// this reads all of the current user's lessons without a fixed list size
+	// this reads all of one owner's lessons without a fixed list size
 	public LessonList readLessons(int ownerId) throws SQLException {
 		LessonList lessons = new LessonList();
 		String sql = "SELECT * FROM lessons WHERE ownerId = ? ORDER BY id";
