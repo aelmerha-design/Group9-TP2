@@ -145,6 +145,13 @@ public class Database {
 				+ "solutionLocked BOOLEAN DEFAULT FALSE NOT NULL, "
 				+ "experienceLocked BOOLEAN DEFAULT FALSE NOT NULL)";
 	    statement.execute(lessonTable);
+
+	    // each experience is saved as its own row so new ones do not replace old ones
+	    String experienceTable = "CREATE TABLE IF NOT EXISTS experiences ("
+				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "lessonId INT NOT NULL, "
+				+ "text VARCHAR(2000) NOT NULL)";
+	    statement.execute(experienceTable);
 	}
 
 
@@ -1427,5 +1434,30 @@ public class Database {
 		} finally {
 			connection.setAutoCommit(true);
 		}
+	}
+
+	// this saves a new experience for a lesson
+	public boolean addExperience(int lessonId, String text) throws SQLException {
+		String sql = "INSERT INTO experiences (lessonId, text) VALUES (?, ?)";
+		try (PreparedStatement query = connection.prepareStatement(sql)) {
+			query.setInt(1, lessonId);
+			query.setString(2, text);
+			return query.executeUpdate() == 1;
+		}
+	}
+
+	// this reads all the experiences for a lesson in the order they were added
+	public ArrayList<String> readExperiences(int lessonId) throws SQLException {
+		ArrayList<String> experiences = new ArrayList<String>();
+		String sql = "SELECT text FROM experiences WHERE lessonId = ? ORDER BY id";
+		try (PreparedStatement query = connection.prepareStatement(sql)) {
+			query.setInt(1, lessonId);
+			try (ResultSet result = query.executeQuery()) {
+				while (result.next()) {
+					experiences.add(result.getString("text"));
+				}
+			}
+		}
+		return experiences;
 	}
 }

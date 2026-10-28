@@ -1,7 +1,7 @@
 package entityClasses;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import database.Database;
-
 
 /*******
  * <p> Title: Lesson Class. </p>
@@ -16,9 +16,13 @@ import database.Database;
  * experience stores additional information learned. </p>
  * 
  * <p> This class provides input validation and persistent Create, Read, Update,
- * and Delete operations. This design can be extended with additional attributes needed 
- * in later project phases, including refinement, searching, locking, visibility, and
- * effort statistics. </p>
+ * and Delete operations. </p>
+ * 
+ * <p> The class also stores attributes for the Phase 3 epics. The lock attributes are for
+ * the epic that locks a lesson or its fields. searchTerms is for the AI search terms epic.
+ * timeHours and effortHours are for the epic that merges time and effort data. statsVisible
+ * is for the epic that shows or hides the statistics. The AI writing epic and the AI
+ * refinement epic use the existing text fields so they do not need new attributes. </p>
  * 
  * @author Ahmad El-Merhaby
  */
@@ -38,6 +42,20 @@ public class Lesson {
 	private boolean problemLocked;
 	private boolean solutionLocked;
 	private boolean experienceLocked;
+	
+
+	/** Search terms the curator approves so users can find this lesson. Needed for the AI search terms epic. */
+	private String searchTerms = "";
+
+	/** Time spent on this lesson in hours. Needed for the epic that merges time and effort data. */
+	private double timeHours = 0;
+
+	/** Effort spent on this lesson in person hours. Needed for the epic that merges time and effort data. */
+	private double effortHours = 0;
+
+	/** Whether the contributor can see the statistics. Needed for the epic that shows or hides statistics. */
+	private boolean statsVisible = false;
+	
 	
 	
     /**
@@ -182,6 +200,51 @@ public class Lesson {
 	public boolean hasAnyLock() {
 		return locked || titleLocked || problemLocked || solutionLocked || experienceLocked;
 	}
+	
+	
+	
+
+	/** @return the search terms */
+	public String getSearchTerms() {
+		return searchTerms;
+	}
+
+	/** @param searchTerms the new search terms */
+	public void setSearchTerms(String searchTerms) {
+		this.searchTerms = searchTerms == null ? "" : searchTerms.trim();
+	}
+
+	/** @return the time in hours */
+	public double getTimeHours() {
+		return timeHours;
+	}
+
+	/** @param timeHours the new time in hours */
+	public void setTimeHours(double timeHours) {
+		this.timeHours = timeHours;
+	}
+
+	/** @return the effort in person hours */
+	public double getEffortHours() {
+		return effortHours;
+	}
+
+	/** @param effortHours the new effort in person hours */
+	public void setEffortHours(double effortHours) {
+		this.effortHours = effortHours;
+	}
+
+	/** @return true if the contributor can see the statistics */
+	public boolean isStatsVisible() {
+		return statsVisible;
+	}
+
+	/** @param statsVisible true to show the statistics */
+	public void setStatsVisible(boolean statsVisible) {
+		this.statsVisible = statsVisible;
+	}
+	
+	
   
 	/**
 	 * Checks all lesson fields using the validation methods above so invalid 
@@ -242,6 +305,34 @@ public class Lesson {
 	public boolean delete(Database db) throws SQLException {
 		return db.deleteLesson(id);
 	}
+	
+	
+	
+	/**
+	 * Adds a new experience to this lesson and keeps the old ones.
+	 *
+	 * @param db the database
+	 * @param newExperience the experience to add
+	 * @return true if the experience was saved
+	 * @throws SQLException if the database has a problem
+	 */
+	public boolean addExperience(Database db, String newExperience) throws SQLException {
+		if (newExperience == null || newExperience.trim().isEmpty() || !isValidExperience(newExperience)) return false;
+		return db.addExperience(id, newExperience.trim());
+	}
+
+	/**
+	 * Gets all the experiences for this lesson in the order they were added.
+	 *
+	 * @param db the database
+	 * @return the list of experiences
+	 * @throws SQLException if the database has a problem
+	 */
+	public ArrayList<String> getExperiences(Database db) throws SQLException {
+		return db.readExperiences(id);
+	}
+	
+	
   
 	/**
 	 * 
