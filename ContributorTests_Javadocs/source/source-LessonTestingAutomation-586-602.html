@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 586-602</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestingAutomation.java - source lines 586-602</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">586</span><code>        int displayedCount = ViewLessons.list_Lessons.getItems().size();</code></div>
+<div class="line"><span class="number">587</span><code>        FoundationsMain.database.closeConnection();</code></div>
+<div class="line"><span class="number">588</span><code>        try {</code></div>
+<div class="line"><span class="number">589</span><code>            testError(20, ControllerLessons::createLesson, &quot;Could not save the lesson. Please try again.&quot;);</code></div>
+<div class="line"><span class="number">590</span><code>            testError(20, ControllerLessons::readLesson, &quot;Could not read the lesson. Please try again.&quot;);</code></div>
+<div class="line"><span class="number">591</span><code>            testError(20, ControllerLessons::updateLesson, &quot;Could not update the lesson. Please try again.&quot;);</code></div>
+<div class="line"><span class="number">592</span><code>            testError(20, ControllerLessons::deleteLesson, &quot;Could not delete the lesson. Please try again.&quot;);</code></div>
+<div class="line"><span class="number">593</span><code>            testError(20, ViewLessons::refreshList, &quot;Could not load lessons. Please try again.&quot;);</code></div>
+<div class="line"><span class="number">594</span><code>            performTestCase(20, &quot;Failed list read preserves visible rows&quot;, ViewLessons.list_Lessons.getItems().size() == displayedCount);</code></div>
+<div class="line"><span class="number">595</span><code>        } finally {</code></div>
+<div class="line"><span class="number">596</span><code>            FoundationsMain.database.connectToDatabase();</code></div>
+<div class="line"><span class="number">597</span><code>            ViewLessons.refreshList();</code></div>
+<div class="line"><span class="number">598</span><code>        }</code></div>
+<div class="line"><span class="number">599</span><code>        performTestCase(20, &quot;Reconnection restores unchanged stored fields&quot;, sameLesson(selected, ModelLessons.readLesson(selected.getId()))</code></div>
+<div class="line"><span class="number">600</span><code>                &amp;&amp; ViewLessons.list_Lessons.getItems().size() == displayedCount);</code></div>
+<div class="line"><span class="number">601</span><code>    }</code></div>
+<div class="line"><span class="number">602</span><code>}</code></div></div></html>

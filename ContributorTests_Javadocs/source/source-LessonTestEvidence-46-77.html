@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestEvidence - lines 46-77</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestEvidence.java - source lines 46-77</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: C4D41EC4289F0B3FDEE9BBD7721038AA94E88045B44633749AC1A7AB33C63517</p><div class="source"><div class="line"><span class="number">46</span><code>        try (DataOutputStream output = new DataOutputStream(Files.newOutputStream(destination))) {</code></div>
+<div class="line"><span class="number">47</span><code>            output.writeLong(0x89504e470d0a1a0aL);</code></div>
+<div class="line"><span class="number">48</span><code>            ByteArrayOutputStream header = new ByteArrayOutputStream();</code></div>
+<div class="line"><span class="number">49</span><code>            try (DataOutputStream dimensions = new DataOutputStream(header)) {</code></div>
+<div class="line"><span class="number">50</span><code>                dimensions.writeInt(width);</code></div>
+<div class="line"><span class="number">51</span><code>                dimensions.writeInt(height);</code></div>
+<div class="line"><span class="number">52</span><code>                dimensions.write(new byte[] {8, 2, 0, 0, 0});</code></div>
+<div class="line"><span class="number">53</span><code>            }</code></div>
+<div class="line"><span class="number">54</span><code>            chunk(output, &quot;IHDR&quot;, header.toByteArray());</code></div>
+<div class="line"><span class="number">55</span><code>            chunk(output, &quot;IDAT&quot;, compressed.toByteArray());</code></div>
+<div class="line"><span class="number">56</span><code>            chunk(output, &quot;IEND&quot;, new byte[0]);</code></div>
+<div class="line"><span class="number">57</span><code>        }</code></div>
+<div class="line"><span class="number">58</span><code>    }</code></div>
+<div class="line"><span class="number">59</span><code></code></div>
+<div class="line"><span class="number">60</span><code>    /**</code></div>
+<div class="line"><span class="number">61</span><code>     * Writes one PNG chunk with its required CRC.</code></div>
+<div class="line"><span class="number">62</span><code>     * @param output image stream</code></div>
+<div class="line"><span class="number">63</span><code>     * @param type four-letter PNG chunk type</code></div>
+<div class="line"><span class="number">64</span><code>     * @param data chunk payload</code></div>
+<div class="line"><span class="number">65</span><code>     * @throws IOException if writing fails</code></div>
+<div class="line"><span class="number">66</span><code>     */</code></div>
+<div class="line"><span class="number">67</span><code>    private static void chunk(DataOutputStream output, String type, byte[] data) throws IOException {</code></div>
+<div class="line"><span class="number">68</span><code>        byte[] typeBytes = type.getBytes(java.nio.charset.StandardCharsets.US_ASCII);</code></div>
+<div class="line"><span class="number">69</span><code>        CRC32 checksum = new CRC32();</code></div>
+<div class="line"><span class="number">70</span><code>        checksum.update(typeBytes);</code></div>
+<div class="line"><span class="number">71</span><code>        checksum.update(data);</code></div>
+<div class="line"><span class="number">72</span><code>        output.writeInt(data.length);</code></div>
+<div class="line"><span class="number">73</span><code>        output.write(typeBytes);</code></div>
+<div class="line"><span class="number">74</span><code>        output.write(data);</code></div>
+<div class="line"><span class="number">75</span><code>        output.writeInt((int) checksum.getValue());</code></div>
+<div class="line"><span class="number">76</span><code>    }</code></div>
+<div class="line"><span class="number">77</span><code>}</code></div></div></html>

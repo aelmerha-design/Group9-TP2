@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 46-90</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestingAutomation.java - source lines 46-90</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">46</span><code>    /** Contributor identity used to isolate the fixture&#39;s owner-filtered list. */</code></div>
+<div class="line"><span class="number">47</span><code>    private static int testOwnerId;</code></div>
+<div class="line"><span class="number">48</span><code>    /** Optional output directory for visible application evidence. */</code></div>
+<div class="line"><span class="number">49</span><code>    private static Path evidenceDirectory;</code></div>
+<div class="line"><span class="number">50</span><code>    /** Prevents later dialogs from overwriting this execution&#39;s first error screenshot. */</code></div>
+<div class="line"><span class="number">51</span><code>    private static boolean errorCaptured;</code></div>
+<div class="line"><span class="number">52</span><code></code></div>
+<div class="line"><span class="number">53</span><code>    /** Creates a runner; initialization happens in {@link #start(Stage)}. */</code></div>
+<div class="line"><span class="number">54</span><code>    public LessonTestingAutomation() { }</code></div>
+<div class="line"><span class="number">55</span><code>    private static final String titleError = &quot;Enter a title that is between 1-100 characters&quot;;</code></div>
+<div class="line"><span class="number">56</span><code>    private static final String problemError = &quot;Enter a problem that is between 1-2000 characters&quot;;</code></div>
+<div class="line"><span class="number">57</span><code>    private static final String solutionError = &quot;Enter a solution that is between 1-2000 characters&quot;;</code></div>
+<div class="line"><span class="number">58</span><code>    private static final String experienceError = &quot;Experience has max 2000 characters&quot;;</code></div>
+<div class="line"><span class="number">59</span><code>    private static final String selectionError = &quot;Select a lesson that exists&quot;;</code></div>
+<div class="line"><span class="number">60</span><code>    private static final String title = &quot;Making 4 CRUD Diagrams&quot;;</code></div>
+<div class="line"><span class="number">61</span><code>    private static final String problem = &quot;The homework asks for four diagrams with two main data classes.&quot;;</code></div>
+<div class="line"><span class="number">62</span><code>    private static final String solution = &quot;Make a separate diagram for Create, Read, Update, and Delete.&quot;;</code></div>
+<div class="line"><span class="number">63</span><code>    private static final String experience = &quot;A team member organized the classes in Astah in 20 minutes.&quot;;</code></div>
+<div class="line"><span class="number">64</span><code></code></div>
+<div class="line"><span class="number">65</span><code>    /**</code></div>
+<div class="line"><span class="number">66</span><code>     * Starts JavaFX after isolating H2 storage from normal application data.</code></div>
+<div class="line"><span class="number">67</span><code>     * @param args unused command-line arguments; configuration uses system properties</code></div>
+<div class="line"><span class="number">68</span><code>     */</code></div>
+<div class="line"><span class="number">69</span><code>    public static void main(String[] args) {</code></div>
+<div class="line"><span class="number">70</span><code>        // For H2 it uses user.home. which is a separate folder keeps tests away from real accounts/lessons</code></div>
+<div class="line"><span class="number">71</span><code>        File testFolder = new File(System.getProperty(&quot;contributor.test.home&quot;,</code></div>
+<div class="line"><span class="number">72</span><code>                new File(System.getProperty(&quot;user.home&quot;), &quot;HW2-Test-Database&quot;).getPath()));</code></div>
+<div class="line"><span class="number">73</span><code>        if (!testFolder.isDirectory() &amp;&amp; !testFolder.mkdirs()) {</code></div>
+<div class="line"><span class="number">74</span><code>            System.out.println(&quot;Could not create the test database folder.&quot;);</code></div>
+<div class="line"><span class="number">75</span><code>            System.exit(1);</code></div>
+<div class="line"><span class="number">76</span><code>        }</code></div>
+<div class="line"><span class="number">77</span><code>        System.setProperty(&quot;user.home&quot;, testFolder.getAbsolutePath());</code></div>
+<div class="line"><span class="number">78</span><code>        String evidence = System.getProperty(&quot;contributor.test.evidence&quot;);</code></div>
+<div class="line"><span class="number">79</span><code>        if (evidence != null) evidenceDirectory = Path.of(evidence);</code></div>
+<div class="line"><span class="number">80</span><code>        restartFile = new File(testFolder, &quot;restart-test.txt&quot;);</code></div>
+<div class="line"><span class="number">81</span><code>        Platform.startup(() -&gt; new LessonTestingAutomation().start(new Stage()));</code></div>
+<div class="line"><span class="number">82</span><code>    }</code></div>
+<div class="line"><span class="number">83</span><code>    /**</code></div>
+<div class="line"><span class="number">84</span><code>     * Opens the real lesson view and schedules the appropriate test phase.</code></div>
+<div class="line"><span class="number">85</span><code>     * @param stage the JavaFX stage used by the tests</code></div>
+<div class="line"><span class="number">86</span><code>     */</code></div>
+<div class="line"><span class="number">87</span><code>    public void start(Stage stage) {</code></div>
+<div class="line"><span class="number">88</span><code>        try {</code></div>
+<div class="line"><span class="number">89</span><code>            FoundationsMain.database.connectToDatabase();</code></div>
+<div class="line"><span class="number">90</span><code>            User user = new User(&quot;HW2 Tests&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, false, false, false, 0);</code></div></div></html>

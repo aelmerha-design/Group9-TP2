@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 226-270</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestingAutomation.java - source lines 226-270</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">226</span><code>        for (Lesson lesson : ModelLessons.readLessons(testOwnerId).getLessons())</code></div>
+<div class="line"><span class="number">227</span><code>            ModelLessons.deleteLesson(lesson.getId());</code></div>
+<div class="line"><span class="number">228</span><code>        ViewLessons.refreshList();</code></div>
+<div class="line"><span class="number">229</span><code>        // CASE 08: Empty, singleton, and generated large lists must have exact counts.</code></div>
+<div class="line"><span class="number">230</span><code>        performTestCase(8, &quot;Empty list displays No lessons&quot;, ViewLessons.list_Lessons.getItems().isEmpty()</code></div>
+<div class="line"><span class="number">231</span><code>                &amp;&amp; ((Label) ViewLessons.list_Lessons.getPlaceholder()).getText().equals(&quot;No Lessons&quot;));</code></div>
+<div class="line"><span class="number">232</span><code>        capture(&quot;03-empty-list&quot;);</code></div>
+<div class="line"><span class="number">233</span><code>        // CASE 09: A subset changes the display without deleting persistent lessons.</code></div>
+<div class="line"><span class="number">234</span><code>        ControllerLessons.showSelectedLessons();</code></div>
+<div class="line"><span class="number">235</span><code>        performTestCase(9, &quot;Empty subset&quot;, ViewLessons.displayedLessons.getLessons().isEmpty());</code></div>
+<div class="line"><span class="number">236</span><code>        fields(title, problem, solution, &quot;&quot;);</code></div>
+<div class="line"><span class="number">237</span><code>        ControllerLessons.createLesson();</code></div>
+<div class="line"><span class="number">238</span><code>        int savedId = ViewLessons.list_Lessons.getItems().get(0).getId();</code></div>
+<div class="line"><span class="number">239</span><code>        performTestCase(8, &quot;List with one lesson&quot;, ModelLessons.readLessons(testOwnerId).getLessons().size() == 1);</code></div>
+<div class="line"><span class="number">240</span><code>        select(savedId);</code></div>
+<div class="line"><span class="number">241</span><code>        ControllerLessons.showSelectedLessons();</code></div>
+<div class="line"><span class="number">242</span><code>        performTestCase(9, &quot;Subset with one lesson&quot;, ViewLessons.displayedLessons.getLessons().size() == 1);</code></div>
+<div class="line"><span class="number">243</span><code>        select(savedId);</code></div>
+<div class="line"><span class="number">244</span><code>        ControllerLessons.removeFromSubset();</code></div>
+<div class="line"><span class="number">245</span><code>        performTestCase(9, &quot;Subset removal preserves database record&quot;,</code></div>
+<div class="line"><span class="number">246</span><code>                ViewLessons.list_Lessons.getItems().isEmpty() &amp;&amp; ModelLessons.readLesson(savedId) != null);</code></div>
+<div class="line"><span class="number">247</span><code>        // the generated variations of the sample test a large list without typing 1,000 forms</code></div>
+<div class="line"><span class="number">248</span><code>        for (int i = 1; i &lt; 1000; i++)</code></div>
+<div class="line"><span class="number">249</span><code>            ModelLessons.createLesson(new Lesson(0, testOwnerId, &quot;CRUD diagram lesson &quot; + i, problem, solution, &quot;&quot;));</code></div>
+<div class="line"><span class="number">250</span><code>        ViewLessons.refreshList();</code></div>
+<div class="line"><span class="number">251</span><code>        performTestCase(8, &quot;All 1,000 entries can be read&quot;, ModelLessons.readLessons(testOwnerId).getLessons().size() == 1000</code></div>
+<div class="line"><span class="number">252</span><code>                &amp;&amp; ViewLessons.list_Lessons.getItems().size() == 1000);</code></div>
+<div class="line"><span class="number">253</span><code>        ViewLessons.list_Lessons.getSelectionModel().selectAll();</code></div>
+<div class="line"><span class="number">254</span><code>        ControllerLessons.showSelectedLessons();</code></div>
+<div class="line"><span class="number">255</span><code>        performTestCase(9, &quot;Subset with 1,000 lessons&quot;, ViewLessons.displayedLessons.getLessons().size() == 1000);</code></div>
+<div class="line"><span class="number">256</span><code>        select(savedId);</code></div>
+<div class="line"><span class="number">257</span><code>        ControllerLessons.removeFromSubset();</code></div>
+<div class="line"><span class="number">258</span><code>        performTestCase(9, &quot;Large subset removal preserves database record&quot;,</code></div>
+<div class="line"><span class="number">259</span><code>                ViewLessons.list_Lessons.getItems().size() == 999 &amp;&amp; ModelLessons.readLesson(savedId) != null);</code></div>
+<div class="line"><span class="number">260</span><code>        capture(&quot;04-large-subset&quot;);</code></div>
+<div class="line"><span class="number">261</span><code>        testContributorLists();</code></div>
+<div class="line"><span class="number">262</span><code>        testListSearch();</code></div>
+<div class="line"><span class="number">263</span><code>        testEntityPersistence();</code></div>
+<div class="line"><span class="number">264</span><code>        testDatabaseErrors();</code></div>
+<div class="line"><span class="number">265</span><code>        ViewLessons.refreshList();</code></div>
+<div class="line"><span class="number">266</span><code>        select(savedId);</code></div>
+<div class="line"><span class="number">267</span><code>        ViewLessons.text_Title.setText(&quot;Saved after restart&quot;);</code></div>
+<div class="line"><span class="number">268</span><code>        ControllerLessons.updateLesson();</code></div>
+<div class="line"><span class="number">269</span><code>        int deletedId = ViewLessons.list_Lessons.getItems().get(999).getId();</code></div>
+<div class="line"><span class="number">270</span><code>        select(deletedId);</code></div></div></html>

@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 316-360</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestingAutomation.java - source lines 316-360</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">316</span><code>                &amp;&amp; saved.getSolution().equals(s) &amp;&amp; saved.getExperience().equals(e));</code></div>
+<div class="line"><span class="number">317</span><code>    }</code></div>
+<div class="line"><span class="number">318</span><code>    /**</code></div>
+<div class="line"><span class="number">319</span><code>     * Checks the actual validation dialog and verifies no record was added.</code></div>
+<div class="line"><span class="number">320</span><code>     * @param number requirement case number</code></div>
+<div class="line"><span class="number">321</span><code>     * @param t title input</code></div>
+<div class="line"><span class="number">322</span><code>     * @param p problem input</code></div>
+<div class="line"><span class="number">323</span><code>     * @param s solution input</code></div>
+<div class="line"><span class="number">324</span><code>     * @param e experience input</code></div>
+<div class="line"><span class="number">325</span><code>     * @param message expected dialog text</code></div>
+<div class="line"><span class="number">326</span><code>     * @throws Exception if database access fails</code></div>
+<div class="line"><span class="number">327</span><code>     */</code></div>
+<div class="line"><span class="number">328</span><code>    private static void testCreateError(int number, String t, String p, String s, String e, String message) throws Exception {</code></div>
+<div class="line"><span class="number">329</span><code>        int count = ModelLessons.readLessons(testOwnerId).getLessons().size();</code></div>
+<div class="line"><span class="number">330</span><code>        fields(t, p, s, e);</code></div>
+<div class="line"><span class="number">331</span><code>        testError(number, ControllerLessons::createLesson, message);</code></div>
+<div class="line"><span class="number">332</span><code>        performTestCase(number, &quot;Invalid create adds no record&quot;, ModelLessons.readLessons(testOwnerId).getLessons().size() == count);</code></div>
+<div class="line"><span class="number">333</span><code>    }</code></div>
+<div class="line"><span class="number">334</span><code>    /**</code></div>
+<div class="line"><span class="number">335</span><code>     * Reads and dismisses a real modal error dialog in its nested JavaFX event loop.</code></div>
+<div class="line"><span class="number">336</span><code>     * @param number requirement case number</code></div>
+<div class="line"><span class="number">337</span><code>     * @param action controller action expected to show an error</code></div>
+<div class="line"><span class="number">338</span><code>     * @param expected exact expected error content</code></div>
+<div class="line"><span class="number">339</span><code>     */</code></div>
+<div class="line"><span class="number">340</span><code>    private static void testError(int number, Runnable action, String expected) {</code></div>
+<div class="line"><span class="number">341</span><code>        actualError = &quot;&quot;;</code></div>
+<div class="line"><span class="number">342</span><code>        // showAndWait processes this queued action and it reads the real dialog before it dismisses it</code></div>
+<div class="line"><span class="number">343</span><code>        Platform.runLater(() -&gt; {</code></div>
+<div class="line"><span class="number">344</span><code>            for (Window window : Window.getWindows().toArray(new Window[0])) {</code></div>
+<div class="line"><span class="number">345</span><code>                if (window.getScene() != null &amp;&amp; window.getScene().getRoot() instanceof DialogPane) {</code></div>
+<div class="line"><span class="number">346</span><code>                    DialogPane pane = (DialogPane) window.getScene().getRoot();</code></div>
+<div class="line"><span class="number">347</span><code>                    actualError = pane.getContentText();</code></div>
+<div class="line"><span class="number">348</span><code>                    if (evidenceDirectory != null &amp;&amp; !errorCaptured) {</code></div>
+<div class="line"><span class="number">349</span><code>                        try {</code></div>
+<div class="line"><span class="number">350</span><code>                            LessonTestEvidence.capture(pane, evidenceDirectory.resolve(&quot;02-validation-error.png&quot;));</code></div>
+<div class="line"><span class="number">351</span><code>                            errorCaptured = true;</code></div>
+<div class="line"><span class="number">352</span><code>                        } catch (Exception failure) {</code></div>
+<div class="line"><span class="number">353</span><code>                            numFailed++;</code></div>
+<div class="line"><span class="number">354</span><code>                            failure.printStackTrace();</code></div>
+<div class="line"><span class="number">355</span><code>                        }</code></div>
+<div class="line"><span class="number">356</span><code>                    }</code></div>
+<div class="line"><span class="number">357</span><code>                    pane.lookupButton(ButtonType.OK).fireEvent(new javafx.event.ActionEvent());</code></div>
+<div class="line"><span class="number">358</span><code>                }</code></div>
+<div class="line"><span class="number">359</span><code>            }</code></div>
+<div class="line"><span class="number">360</span><code>        });</code></div></div></html>

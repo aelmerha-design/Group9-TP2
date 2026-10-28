@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 136-180</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestingAutomation.java - source lines 136-180</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">136</span><code>        </code></div>
+<div class="line"><span class="number">137</span><code>        performTestCase(1, &quot;Create two lessons with different IDs&quot;,</code></div>
+<div class="line"><span class="number">138</span><code>                firstId != secondId &amp;&amp; ViewLessons.list_Lessons.getItems().size() == 2);</code></div>
+<div class="line"><span class="number">139</span><code>        select(firstId);</code></div>
+<div class="line"><span class="number">140</span><code>        ControllerLessons.readLesson();</code></div>
+<div class="line"><span class="number">141</span><code>        </code></div>
+<div class="line"><span class="number">142</span><code>        // CASE 02: Reading must restore all four stored fields, not just the list title.</code></div>
+<div class="line"><span class="number">143</span><code>        performTestCase(2, &quot;Read all stored fields&quot;, formMatches(title, problem, solution, experience));</code></div>
+<div class="line"><span class="number">144</span><code>        capture(&quot;01-created-and-read&quot;);</code></div>
+<div class="line"><span class="number">145</span><code>        // CASE 03: Editing one lesson must retain its identity and preserve its neighbor.</code></div>
+<div class="line"><span class="number">146</span><code>        fields(&quot;Updated diagrams&quot;, &quot;Need four CRUD diagrams.&quot;, &quot;Use one diagram per operation.&quot;, experience);</code></div>
+<div class="line"><span class="number">147</span><code>        ControllerLessons.updateLesson();</code></div>
+<div class="line"><span class="number">148</span><code>        Lesson updated = ModelLessons.readLesson(firstId);</code></div>
+<div class="line"><span class="number">149</span><code>        </code></div>
+<div class="line"><span class="number">150</span><code>        performTestCase(3, &quot;Update fields, keep ID and other lesson&quot;,</code></div>
+<div class="line"><span class="number">151</span><code>                updated.getId() == firstId &amp;&amp; updated.getTitle().equals(&quot;Updated diagrams&quot;)</code></div>
+<div class="line"><span class="number">152</span><code>                &amp;&amp; updated.getProblem().equals(&quot;Need four CRUD diagrams.&quot;)</code></div>
+<div class="line"><span class="number">153</span><code>                &amp;&amp; updated.getSolution().equals(&quot;Use one diagram per operation.&quot;)</code></div>
+<div class="line"><span class="number">154</span><code>                &amp;&amp; ModelLessons.readLesson(secondId).getTitle().equals(&quot;Organizing diagrams&quot;));</code></div>
+<div class="line"><span class="number">155</span><code>        // CASE 04: Optional experience can be added, replaced, and cleared independently.</code></div>
+<div class="line"><span class="number">156</span><code>        for (String text : new String[] {experience, &quot;The diagrams took 30 minutes.&quot;, &quot;&quot;}) {</code></div>
+<div class="line"><span class="number">157</span><code>            select(firstId);</code></div>
+<div class="line"><span class="number">158</span><code>            ViewLessons.text_Experience.setText(text);</code></div>
+<div class="line"><span class="number">159</span><code>            ControllerLessons.updateLesson();</code></div>
+<div class="line"><span class="number">160</span><code>            performTestCase(4, &quot;Save experience: &quot; + (text.isEmpty() ? &quot;blank&quot; : text),</code></div>
+<div class="line"><span class="number">161</span><code>                    ModelLessons.readLesson(firstId).getExperience().equals(text));</code></div>
+<div class="line"><span class="number">162</span><code>        }</code></div>
+<div class="line"><span class="number">163</span><code>        // CASE 05: Persistent deletion must affect only the chosen ID.</code></div>
+<div class="line"><span class="number">164</span><code>        select(secondId);</code></div>
+<div class="line"><span class="number">165</span><code>        ControllerLessons.deleteLesson();</code></div>
+<div class="line"><span class="number">166</span><code>        </code></div>
+<div class="line"><span class="number">167</span><code>        performTestCase(5, &quot;Delete selected lesson only&quot;,</code></div>
+<div class="line"><span class="number">168</span><code>                ModelLessons.readLesson(secondId) == null &amp;&amp; ModelLessons.readLesson(firstId) != null</code></div>
+<div class="line"><span class="number">169</span><code>                &amp;&amp; ViewLessons.list_Lessons.getItems().size() == 1);</code></div>
+<div class="line"><span class="number">170</span><code></code></div>
+<div class="line"><span class="number">171</span><code>        // CASE 07: Collection CRUD must preserve the entries that were not targeted.</code></div>
+<div class="line"><span class="number">172</span><code>        LessonList list = new LessonList();</code></div>
+<div class="line"><span class="number">173</span><code>        list.addLesson(new Lesson(1, testOwnerId, title, problem, solution, &quot;&quot;));</code></div>
+<div class="line"><span class="number">174</span><code>        list.addLesson(new Lesson(2, testOwnerId, &quot;Other lesson&quot;, problem, solution, &quot;&quot;));</code></div>
+<div class="line"><span class="number">175</span><code>        performTestCase(7, &quot;Add and read a list entry&quot;, list.getLesson(1).getTitle().equals(title));</code></div>
+<div class="line"><span class="number">176</span><code>        performTestCase(7, &quot;Update chosen list entry&quot;, list.updateLesson(new Lesson(1, testOwnerId, &quot;Changed&quot;, problem, solution, &quot;&quot;))</code></div>
+<div class="line"><span class="number">177</span><code>                &amp;&amp; list.getLesson(1).getTitle().equals(&quot;Changed&quot;) &amp;&amp; list.getLesson(2).getTitle().equals(&quot;Other lesson&quot;));</code></div>
+<div class="line"><span class="number">178</span><code>        performTestCase(7, &quot;Remove chosen list entry&quot;, list.removeLesson(1)</code></div>
+<div class="line"><span class="number">179</span><code>                &amp;&amp; list.getLesson(1) == null &amp;&amp; list.getLesson(2) != null);</code></div>
+<div class="line"><span class="number">180</span><code></code></div></div></html>

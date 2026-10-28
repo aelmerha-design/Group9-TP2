@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestEvidence - lines 1-45</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestEvidence.java - source lines 1-45</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: C4D41EC4289F0B3FDEE9BBD7721038AA94E88045B44633749AC1A7AB33C63517</p><div class="source"><div class="line"><span class="number">1</span><code>package guiLessons;</code></div>
+<div class="line"><span class="number">2</span><code></code></div>
+<div class="line"><span class="number">3</span><code>import java.io.ByteArrayOutputStream;</code></div>
+<div class="line"><span class="number">4</span><code>import java.io.DataOutputStream;</code></div>
+<div class="line"><span class="number">5</span><code>import java.io.IOException;</code></div>
+<div class="line"><span class="number">6</span><code>import java.nio.file.Files;</code></div>
+<div class="line"><span class="number">7</span><code>import java.nio.file.Path;</code></div>
+<div class="line"><span class="number">8</span><code>import java.util.zip.CRC32;</code></div>
+<div class="line"><span class="number">9</span><code>import java.util.zip.DeflaterOutputStream;</code></div>
+<div class="line"><span class="number">10</span><code>import javafx.scene.Node;</code></div>
+<div class="line"><span class="number">11</span><code>import javafx.scene.image.PixelReader;</code></div>
+<div class="line"><span class="number">12</span><code>import javafx.scene.image.WritableImage;</code></div>
+<div class="line"><span class="number">13</span><code></code></div>
+<div class="line"><span class="number">14</span><code>/** Writes actual JavaFX node snapshots as PNG evidence without extra GUI dependencies. */</code></div>
+<div class="line"><span class="number">15</span><code>final class LessonTestEvidence {</code></div>
+<div class="line"><span class="number">16</span><code></code></div>
+<div class="line"><span class="number">17</span><code>    /** Prevents instantiation of this utility class. */</code></div>
+<div class="line"><span class="number">18</span><code>    private LessonTestEvidence() { }</code></div>
+<div class="line"><span class="number">19</span><code></code></div>
+<div class="line"><span class="number">20</span><code>    /**</code></div>
+<div class="line"><span class="number">21</span><code>     * Captures a laid-out node on the JavaFX Application Thread as an opaque RGB PNG.</code></div>
+<div class="line"><span class="number">22</span><code>     * @param node rendered scene root or dialog pane</code></div>
+<div class="line"><span class="number">23</span><code>     * @param destination output PNG path</code></div>
+<div class="line"><span class="number">24</span><code>     * @throws IOException if creating the output directory or writing the image fails</code></div>
+<div class="line"><span class="number">25</span><code>     */</code></div>
+<div class="line"><span class="number">26</span><code>    static void capture(Node node, Path destination) throws IOException {</code></div>
+<div class="line"><span class="number">27</span><code>        node.applyCss();</code></div>
+<div class="line"><span class="number">28</span><code>        if (node instanceof javafx.scene.Parent parent) parent.layout();</code></div>
+<div class="line"><span class="number">29</span><code>        WritableImage image = node.snapshot(null, null);</code></div>
+<div class="line"><span class="number">30</span><code>        int width = (int) image.getWidth();</code></div>
+<div class="line"><span class="number">31</span><code>        int height = (int) image.getHeight();</code></div>
+<div class="line"><span class="number">32</span><code>        PixelReader pixels = image.getPixelReader();</code></div>
+<div class="line"><span class="number">33</span><code>        ByteArrayOutputStream compressed = new ByteArrayOutputStream();</code></div>
+<div class="line"><span class="number">34</span><code>        try (DeflaterOutputStream deflater = new DeflaterOutputStream(compressed)) {</code></div>
+<div class="line"><span class="number">35</span><code>            for (int row = 0; row &lt; height; row++) {</code></div>
+<div class="line"><span class="number">36</span><code>                deflater.write(0);</code></div>
+<div class="line"><span class="number">37</span><code>                for (int column = 0; column &lt; width; column++) {</code></div>
+<div class="line"><span class="number">38</span><code>                    int color = pixels.getArgb(column, row);</code></div>
+<div class="line"><span class="number">39</span><code>                    deflater.write((color &gt;&gt; 16) &amp; 255);</code></div>
+<div class="line"><span class="number">40</span><code>                    deflater.write((color &gt;&gt; 8) &amp; 255);</code></div>
+<div class="line"><span class="number">41</span><code>                    deflater.write(color &amp; 255);</code></div>
+<div class="line"><span class="number">42</span><code>                }</code></div>
+<div class="line"><span class="number">43</span><code>            }</code></div>
+<div class="line"><span class="number">44</span><code>        }</code></div>
+<div class="line"><span class="number">45</span><code>        Files.createDirectories(destination.toAbsolutePath().getParent());</code></div></div></html>

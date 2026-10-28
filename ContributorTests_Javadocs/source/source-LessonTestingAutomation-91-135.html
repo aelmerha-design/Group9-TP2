@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 91-135</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestingAutomation.java - source lines 91-135</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">91</span><code>            testOwnerId = user.getUserId();</code></div>
+<div class="line"><span class="number">92</span><code>            stage.setScene(new javafx.scene.Scene(new javafx.scene.layout.Pane(), 800, 600));</code></div>
+<div class="line"><span class="number">93</span><code>            stage.setTitle(&quot;Contributor test home&quot;);</code></div>
+<div class="line"><span class="number">94</span><code>            ViewLessons.displayLessons(stage, user);</code></div>
+<div class="line"><span class="number">95</span><code>            // Run after JavaFX starts so error dialogs can be opened and checked.</code></div>
+<div class="line"><span class="number">96</span><code>            Platform.runLater(() -&gt; {</code></div>
+<div class="line"><span class="number">97</span><code>                try {</code></div>
+<div class="line"><span class="number">98</span><code>                    System.out.println(&quot;\nHW2 Lesson Testing Automation&quot;);</code></div>
+<div class="line"><span class="number">99</span><code>                    if (restartFile.exists()) testRestart();</code></div>
+<div class="line"><span class="number">100</span><code>                    else runTests();</code></div>
+<div class="line"><span class="number">101</span><code>                } catch (Exception e) {</code></div>
+<div class="line"><span class="number">102</span><code>                    numFailed++;</code></div>
+<div class="line"><span class="number">103</span><code>                    e.printStackTrace();</code></div>
+<div class="line"><span class="number">104</span><code>                } finally {</code></div>
+<div class="line"><span class="number">105</span><code>                    System.out.println(&quot;\nNumber of tests passed: &quot; + numPassed);</code></div>
+<div class="line"><span class="number">106</span><code>                    System.out.println(&quot;Number of tests failed: &quot; + numFailed);</code></div>
+<div class="line"><span class="number">107</span><code>                    FoundationsMain.database.closeConnection();</code></div>
+<div class="line"><span class="number">108</span><code>                    Platform.exit();</code></div>
+<div class="line"><span class="number">109</span><code>                    System.exit(numFailed == 0 ? 0 : 1);</code></div>
+<div class="line"><span class="number">110</span><code>                }</code></div>
+<div class="line"><span class="number">111</span><code>            });</code></div>
+<div class="line"><span class="number">112</span><code>        } catch (Exception e) {</code></div>
+<div class="line"><span class="number">113</span><code>            e.printStackTrace();</code></div>
+<div class="line"><span class="number">114</span><code>            Platform.exit();</code></div>
+<div class="line"><span class="number">115</span><code>            System.exit(1);</code></div>
+<div class="line"><span class="number">116</span><code>        }</code></div>
+<div class="line"><span class="number">117</span><code>    }</code></div>
+<div class="line"><span class="number">118</span><code>    /**</code></div>
+<div class="line"><span class="number">119</span><code>     * Exercises cases 1-5 and 7-20, then saves case 6&#39;s restart fixture.</code></div>
+<div class="line"><span class="number">120</span><code>     * @throws Exception if a database, evidence, or marker operation fails</code></div>
+<div class="line"><span class="number">121</span><code>     */</code></div>
+<div class="line"><span class="number">122</span><code>    private static void runTests() throws Exception {</code></div>
+<div class="line"><span class="number">123</span><code>        // Clear only the separate test database so list counts are repeatable.</code></div>
+<div class="line"><span class="number">124</span><code>        for (Lesson lesson : ModelLessons.readLessons(testOwnerId).getLessons())</code></div>
+<div class="line"><span class="number">125</span><code>            ModelLessons.deleteLesson(lesson.getId());</code></div>
+<div class="line"><span class="number">126</span><code>        ViewLessons.refreshList();</code></div>
+<div class="line"><span class="number">127</span><code></code></div>
+<div class="line"><span class="number">128</span><code>        testButtons();</code></div>
+<div class="line"><span class="number">129</span><code>        // CASE 01: A contributor can create multiple lessons with distinct persistent IDs.</code></div>
+<div class="line"><span class="number">130</span><code>        fields(title, problem, solution, experience);</code></div>
+<div class="line"><span class="number">131</span><code>        ControllerLessons.createLesson();</code></div>
+<div class="line"><span class="number">132</span><code>        int firstId = ViewLessons.list_Lessons.getItems().get(0).getId();</code></div>
+<div class="line"><span class="number">133</span><code>        fields(&quot;Organizing diagrams&quot;, problem, solution, &quot;&quot;);</code></div>
+<div class="line"><span class="number">134</span><code>        ControllerLessons.createLesson();</code></div>
+<div class="line"><span class="number">135</span><code>        int secondId = ViewLessons.list_Lessons.getItems().get(1).getId();</code></div></div></html>

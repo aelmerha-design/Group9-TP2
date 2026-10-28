@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 271-315</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestingAutomation.java - source lines 271-315</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">271</span><code>        ControllerLessons.deleteLesson();</code></div>
+<div class="line"><span class="number">272</span><code>        try (PrintWriter output = new PrintWriter(restartFile)) {</code></div>
+<div class="line"><span class="number">273</span><code>            output.println(savedId);</code></div>
+<div class="line"><span class="number">274</span><code>            output.println(deletedId);</code></div>
+<div class="line"><span class="number">275</span><code>        }</code></div>
+<div class="line"><span class="number">276</span><code>        System.out.println(&quot;\nTest 6: Run this class again to check a separate execution.&quot;);</code></div>
+<div class="line"><span class="number">277</span><code>    }</code></div>
+<div class="line"><span class="number">278</span><code>    /**</code></div>
+<div class="line"><span class="number">279</span><code>     * Verifies case 6 in a fresh process using IDs recorded by the first execution.</code></div>
+<div class="line"><span class="number">280</span><code>     * @throws Exception if database access or reading the marker fails</code></div>
+<div class="line"><span class="number">281</span><code>     */</code></div>
+<div class="line"><span class="number">282</span><code>    private static void testRestart() throws Exception {</code></div>
+<div class="line"><span class="number">283</span><code>        // CASE 06: A new JVM must read saved data, not a previous process&#39;s cached list.</code></div>
+<div class="line"><span class="number">284</span><code>        try (Scanner input = new Scanner(restartFile)) {</code></div>
+<div class="line"><span class="number">285</span><code>            int savedId = input.nextInt();</code></div>
+<div class="line"><span class="number">286</span><code>            int deletedId = input.nextInt();</code></div>
+<div class="line"><span class="number">287</span><code>            Lesson saved = ModelLessons.readLesson(savedId);</code></div>
+<div class="line"><span class="number">288</span><code>            performTestCase(6, &quot;Created and edited lesson survives a separate execution&quot;, saved != null</code></div>
+<div class="line"><span class="number">289</span><code>                    &amp;&amp; saved.getId() == savedId &amp;&amp; saved.getTitle().equals(&quot;Saved after restart&quot;)</code></div>
+<div class="line"><span class="number">290</span><code>                    &amp;&amp; saved.getProblem().equals(problem) &amp;&amp; saved.getSolution().equals(solution)</code></div>
+<div class="line"><span class="number">291</span><code>                    &amp;&amp; saved.getExperience().isEmpty());</code></div>
+<div class="line"><span class="number">292</span><code>            performTestCase(6, &quot;Deleted lesson stays deleted&quot;, ModelLessons.readLesson(deletedId) == null);</code></div>
+<div class="line"><span class="number">293</span><code>            performTestCase(6, &quot;All remaining lessons survive&quot;, ModelLessons.readLessons(testOwnerId).getLessons().size() == 999);</code></div>
+<div class="line"><span class="number">294</span><code>            select(savedId);</code></div>
+<div class="line"><span class="number">295</span><code>            capture(&quot;05-after-restart&quot;);</code></div>
+<div class="line"><span class="number">296</span><code>        }</code></div>
+<div class="line"><span class="number">297</span><code>        if (!restartFile.delete()) System.out.println(&quot;Could not remove the restart test marker.&quot;);</code></div>
+<div class="line"><span class="number">298</span><code>    }</code></div>
+<div class="line"><span class="number">299</span><code>    /**</code></div>
+<div class="line"><span class="number">300</span><code>     * Checks that a valid create stores every supplied field and adds one record.</code></div>
+<div class="line"><span class="number">301</span><code>     * @param number requirement case number</code></div>
+<div class="line"><span class="number">302</span><code>     * @param t title input</code></div>
+<div class="line"><span class="number">303</span><code>     * @param p problem input</code></div>
+<div class="line"><span class="number">304</span><code>     * @param s solution input</code></div>
+<div class="line"><span class="number">305</span><code>     * @param e experience input</code></div>
+<div class="line"><span class="number">306</span><code>     * @throws Exception if database access fails</code></div>
+<div class="line"><span class="number">307</span><code>     */</code></div>
+<div class="line"><span class="number">308</span><code>    private static void testValid(int number, String t, String p, String s, String e) throws Exception {</code></div>
+<div class="line"><span class="number">309</span><code>        int count = ModelLessons.readLessons(testOwnerId).getLessons().size();</code></div>
+<div class="line"><span class="number">310</span><code>        fields(t, p, s, e);</code></div>
+<div class="line"><span class="number">311</span><code>        ControllerLessons.createLesson();</code></div>
+<div class="line"><span class="number">312</span><code>        Lesson saved = ViewLessons.list_Lessons.getItems().get(ViewLessons.list_Lessons.getItems().size() - 1);</code></div>
+<div class="line"><span class="number">313</span><code>        performTestCase(number, &quot;Accept lengths &quot; + t.length() + &quot;, &quot; + p.length() + &quot;, &quot; + s.length() + &quot;, &quot; + e.length(),</code></div>
+<div class="line"><span class="number">314</span><code>                ModelLessons.readLessons(testOwnerId).getLessons().size() == count + 1</code></div>
+<div class="line"><span class="number">315</span><code>                &amp;&amp; saved.getTitle().equals(t) &amp;&amp; saved.getProblem().equals(p)</code></div></div></html>

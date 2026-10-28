@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 1-45</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestingAutomation.java - source lines 1-45</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">1</span><code>package guiLessons;</code></div>
+<div class="line"><span class="number">2</span><code></code></div>
+<div class="line"><span class="number">3</span><code>import java.io.File;</code></div>
+<div class="line"><span class="number">4</span><code>import java.io.PrintWriter;</code></div>
+<div class="line"><span class="number">5</span><code>import java.util.Scanner;</code></div>
+<div class="line"><span class="number">6</span><code>import java.nio.file.Path;</code></div>
+<div class="line"><span class="number">7</span><code>import applicationMain.FoundationsMain;</code></div>
+<div class="line"><span class="number">8</span><code>import entityClasses.Lesson;</code></div>
+<div class="line"><span class="number">9</span><code>import entityClasses.LessonList;</code></div>
+<div class="line"><span class="number">10</span><code>import entityClasses.User;</code></div>
+<div class="line"><span class="number">11</span><code>import javafx.application.Platform;</code></div>
+<div class="line"><span class="number">12</span><code>import javafx.scene.control.ButtonType;</code></div>
+<div class="line"><span class="number">13</span><code>import javafx.scene.control.DialogPane;</code></div>
+<div class="line"><span class="number">14</span><code>import javafx.scene.control.Label;</code></div>
+<div class="line"><span class="number">15</span><code>import javafx.stage.Stage;</code></div>
+<div class="line"><span class="number">16</span><code>import javafx.stage.Window;</code></div>
+<div class="line"><span class="number">17</span><code></code></div>
+<div class="line"><span class="number">18</span><code>/*******</code></div>
+<div class="line"><span class="number">19</span><code> * &lt;p&gt; Title: LessonTestingAutomation Class. &lt;/p&gt;</code></div>
+<div class="line"><span class="number">20</span><code> * &lt;p&gt;Runs contributor CRUD, validation, list, subset, and restart tests through</code></div>
+<div class="line"><span class="number">21</span><code> * the real JavaFX controller and H2 database. Case numbers correspond to the</code></div>
+<div class="line"><span class="number">22</span><code> * requirements matrix in ContributorTests_Javadocs/RequirementsToTests.md.&lt;/p&gt;</code></div>
+<div class="line"><span class="number">23</span><code> * &lt;p&gt;Run twice in separate JVMs: the first execution writes a restart marker;</code></div>
+<div class="line"><span class="number">24</span><code> * the second verifies persistence and removes that marker. Set</code></div>
+<div class="line"><span class="number">25</span><code> * {@code contributor.test.home} to an isolated directory and optionally set</code></div>
+<div class="line"><span class="number">26</span><code> * {@code contributor.test.evidence} to save PNG snapshots. Exit status is zero</code></div>
+<div class="line"><span class="number">27</span><code> * only when every assertion in that execution passes. UI actions run on the</code></div>
+<div class="line"><span class="number">28</span><code> * JavaFX Application Thread; this is not a headless test.&lt;/p&gt;</code></div>
+<div class="line"><span class="number">29</span><code> * &lt;p&gt;Task 3 is checked through entity validation, persistent lesson CRUD, and</code></div>
+<div class="line"><span class="number">30</span><code> * collection operations. Task 4 is checked through the real MVC form, dialogs,</code></div>
+<div class="line"><span class="number">31</span><code> * buttons, and subset display. As in PasswordEvaluationTestingAutomation,</code></div>
+<div class="line"><span class="number">32</span><code> * each assertion reports its expected behavior and a pass/fail counter.&lt;/p&gt;</code></div>
+<div class="line"><span class="number">33</span><code> * @author Ahmad El-Merhaby</code></div>
+<div class="line"><span class="number">34</span><code> */</code></div>
+<div class="line"><span class="number">35</span><code></code></div>
+<div class="line"><span class="number">36</span><code>public class LessonTestingAutomation {</code></div>
+<div class="line"><span class="number">37</span><code></code></div>
+<div class="line"><span class="number">38</span><code>    /** Number of successful assertions in this JVM, following the Foundations testbed. */</code></div>
+<div class="line"><span class="number">39</span><code>    static int numPassed = 0;</code></div>
+<div class="line"><span class="number">40</span><code>    /** Number of failed assertions or unexpected test errors in this JVM. */</code></div>
+<div class="line"><span class="number">41</span><code>    static int numFailed = 0;</code></div>
+<div class="line"><span class="number">42</span><code>    /** IDs shared between separate executions to establish real disk persistence. */</code></div>
+<div class="line"><span class="number">43</span><code>    private static File restartFile;</code></div>
+<div class="line"><span class="number">44</span><code>    /** Text read from the real dialog rather than inferred from a validation method. */</code></div>
+<div class="line"><span class="number">45</span><code>    private static String actualError;</code></div></div></html>

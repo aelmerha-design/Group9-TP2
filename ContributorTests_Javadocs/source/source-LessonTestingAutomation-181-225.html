@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 181-225</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestingAutomation.java - source lines 181-225</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">181</span><code>        // CASE 10: Both empty and whitespace-only required fields must be rejected.</code></div>
+<div class="line"><span class="number">182</span><code>        for (String blank : new String[] {&quot;&quot;, &quot;   &quot;}) {</code></div>
+<div class="line"><span class="number">183</span><code>            testCreateError(10, blank, problem, solution, &quot;&quot;, titleError);</code></div>
+<div class="line"><span class="number">184</span><code>            testCreateError(10, title, blank, solution, &quot;&quot;, problemError);</code></div>
+<div class="line"><span class="number">185</span><code>            testCreateError(10, title, problem, blank, &quot;&quot;, solutionError);</code></div>
+<div class="line"><span class="number">186</span><code>        }</code></div>
+<div class="line"><span class="number">187</span><code>        // CASE 11: Exact lower and upper required-field boundaries are inclusive.</code></div>
+<div class="line"><span class="number">188</span><code>        testValid(11, &quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;&quot;);</code></div>
+<div class="line"><span class="number">189</span><code>        testValid(11, &quot;T&quot;.repeat(100), &quot;P&quot;.repeat(2000), &quot;S&quot;.repeat(2000), &quot;&quot;);</code></div>
+<div class="line"><span class="number">190</span><code>        // CASE 12: One character above each maximum must fail without inserting a row.</code></div>
+<div class="line"><span class="number">191</span><code>        testCreateError(12, &quot;T&quot;.repeat(101), problem, solution, &quot;&quot;, titleError);</code></div>
+<div class="line"><span class="number">192</span><code>        testCreateError(12, title, &quot;P&quot;.repeat(2001), solution, &quot;&quot;, problemError);</code></div>
+<div class="line"><span class="number">193</span><code>        testCreateError(12, title, problem, &quot;S&quot;.repeat(2001), &quot;&quot;, solutionError);</code></div>
+<div class="line"><span class="number">194</span><code>        // CASE 13: Experience is optional, but its nonblank content has a length limit.</code></div>
+<div class="line"><span class="number">195</span><code>        testValid(13, title, problem, solution, &quot;&quot;);</code></div>
+<div class="line"><span class="number">196</span><code>        testValid(13, title, problem, solution, &quot;E&quot;.repeat(2000));</code></div>
+<div class="line"><span class="number">197</span><code>        testCreateError(13, title, problem, solution, &quot;E&quot;.repeat(2001), experienceError);</code></div>
+<div class="line"><span class="number">198</span><code></code></div>
+<div class="line"><span class="number">199</span><code>        // CASE 14: Compare full database snapshots to detect partial writes after rejection.</code></div>
+<div class="line"><span class="number">200</span><code>        for (String[] invalid : new String[][] {</code></div>
+<div class="line"><span class="number">201</span><code>                {&quot;&quot;, problem, solution, &quot;&quot;, titleError},</code></div>
+<div class="line"><span class="number">202</span><code>                {&quot;T&quot;.repeat(101), problem, solution, &quot;&quot;, titleError},</code></div>
+<div class="line"><span class="number">203</span><code>                {title, &quot;&quot;, solution, &quot;&quot;, problemError},</code></div>
+<div class="line"><span class="number">204</span><code>                {title, &quot;P&quot;.repeat(2001), solution, &quot;&quot;, problemError},</code></div>
+<div class="line"><span class="number">205</span><code>                {title, problem, &quot;&quot;, &quot;&quot;, solutionError},</code></div>
+<div class="line"><span class="number">206</span><code>                {title, problem, &quot;S&quot;.repeat(2001), &quot;&quot;, solutionError},</code></div>
+<div class="line"><span class="number">207</span><code>                {title, problem, solution, &quot;E&quot;.repeat(2001), experienceError}}) {</code></div>
+<div class="line"><span class="number">208</span><code>            select(firstId);</code></div>
+<div class="line"><span class="number">209</span><code>            Lesson before = ModelLessons.readLesson(firstId);</code></div>
+<div class="line"><span class="number">210</span><code>            fields(invalid[0], invalid[1], invalid[2], invalid[3]);</code></div>
+<div class="line"><span class="number">211</span><code>            testError(14, ControllerLessons::updateLesson, invalid[4]);</code></div>
+<div class="line"><span class="number">212</span><code>            Lesson after = ModelLessons.readLesson(firstId);</code></div>
+<div class="line"><span class="number">213</span><code>            performTestCase(14, &quot;Invalid edit preserves all saved fields&quot;, sameLesson(before, after));</code></div>
+<div class="line"><span class="number">214</span><code>        }</code></div>
+<div class="line"><span class="number">215</span><code>        // CASE 15: No selection and a stale selected ID must both yield a helpful error.</code></div>
+<div class="line"><span class="number">216</span><code>        ViewLessons.list_Lessons.getSelectionModel().clearSelection();</code></div>
+<div class="line"><span class="number">217</span><code>        testError(15, ControllerLessons::readLesson, selectionError);</code></div>
+<div class="line"><span class="number">218</span><code>        testError(15, ControllerLessons::updateLesson, selectionError);</code></div>
+<div class="line"><span class="number">219</span><code>        testError(15, ControllerLessons::deleteLesson, selectionError);</code></div>
+<div class="line"><span class="number">220</span><code>        // this keeps an entry displayed while deleting its record to reproduce a stale selection</code></div>
+<div class="line"><span class="number">221</span><code>        select(firstId);</code></div>
+<div class="line"><span class="number">222</span><code>        ModelLessons.deleteLesson(firstId);</code></div>
+<div class="line"><span class="number">223</span><code>        testError(15, ControllerLessons::readLesson, selectionError);</code></div>
+<div class="line"><span class="number">224</span><code>        testError(15, ControllerLessons::updateLesson, selectionError);</code></div>
+<div class="line"><span class="number">225</span><code>        testError(15, ControllerLessons::deleteLesson, selectionError);</code></div></div></html>

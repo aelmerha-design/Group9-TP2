@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 496-540</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestingAutomation.java - source lines 496-540</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">496</span><code>        performTestCase(18, &quot;Show selected button clears the form&quot;, ViewLessons.list_Lessons.getItems().size() == 1</code></div>
+<div class="line"><span class="number">497</span><code>                &amp;&amp; formMatches(&quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;));</code></div>
+<div class="line"><span class="number">498</span><code>        select(lessonId);</code></div>
+<div class="line"><span class="number">499</span><code>        fireButton(&quot;Remove from subset&quot;);</code></div>
+<div class="line"><span class="number">500</span><code>        performTestCase(18, &quot;Remove button hides without deleting&quot;, ViewLessons.list_Lessons.getItems().isEmpty()</code></div>
+<div class="line"><span class="number">501</span><code>                &amp;&amp; ModelLessons.readLesson(lessonId) != null);</code></div>
+<div class="line"><span class="number">502</span><code>        fireButton(&quot;Show all&quot;);</code></div>
+<div class="line"><span class="number">503</span><code>        performTestCase(18, &quot;Show all button restores the lesson&quot;, ViewLessons.list_Lessons.getItems().size() == 1);</code></div>
+<div class="line"><span class="number">504</span><code>        select(lessonId);</code></div>
+<div class="line"><span class="number">505</span><code>        fireButton(&quot;Delete&quot;);</code></div>
+<div class="line"><span class="number">506</span><code>        performTestCase(18, &quot;Delete button removes the saved record&quot;, ModelLessons.readLesson(lessonId) == null</code></div>
+<div class="line"><span class="number">507</span><code>                &amp;&amp; ViewLessons.list_Lessons.getItems().isEmpty());</code></div>
+<div class="line"><span class="number">508</span><code>        javafx.scene.Scene lessonScene = ViewLessons.theStage.getScene();</code></div>
+<div class="line"><span class="number">509</span><code>        fireButton(&quot;Back&quot;);</code></div>
+<div class="line"><span class="number">510</span><code>        performTestCase(18, &quot;Back button restores scene and title&quot;, ViewLessons.theStage.getScene() == ViewLessons.theHomeScene</code></div>
+<div class="line"><span class="number">511</span><code>                &amp;&amp; ViewLessons.theStage.getTitle().equals(&quot;Contributor test home&quot;));</code></div>
+<div class="line"><span class="number">512</span><code>        ViewLessons.theStage.setScene(lessonScene);</code></div>
+<div class="line"><span class="number">513</span><code>        ViewLessons.theStage.setTitle(&quot;CSE 360: Lessons Learned&quot;);</code></div>
+<div class="line"><span class="number">514</span><code>    }</code></div>
+<div class="line"><span class="number">515</span><code></code></div>
+<div class="line"><span class="number">516</span><code>    /**</code></div>
+<div class="line"><span class="number">517</span><code>     * Fires a visible button through its installed action handler.</code></div>
+<div class="line"><span class="number">518</span><code>     * @param caption exact button text to find</code></div>
+<div class="line"><span class="number">519</span><code>     * @throws IllegalStateException if the expected control is absent</code></div>
+<div class="line"><span class="number">520</span><code>     */</code></div>
+<div class="line"><span class="number">521</span><code>    private static void fireButton(String caption) {</code></div>
+<div class="line"><span class="number">522</span><code>        ViewLessons.theStage.getScene().getRoot().applyCss();</code></div>
+<div class="line"><span class="number">523</span><code>        for (javafx.scene.Node node : ViewLessons.theStage.getScene().getRoot().lookupAll(&quot;.button&quot;)) {</code></div>
+<div class="line"><span class="number">524</span><code>            if (node instanceof javafx.scene.control.Button button &amp;&amp; button.getText().equals(caption)) {</code></div>
+<div class="line"><span class="number">525</span><code>                button.fire();</code></div>
+<div class="line"><span class="number">526</span><code>                return;</code></div>
+<div class="line"><span class="number">527</span><code>            }</code></div>
+<div class="line"><span class="number">528</span><code>        }</code></div>
+<div class="line"><span class="number">529</span><code>        throw new IllegalStateException(&quot;Missing button: &quot; + caption);</code></div>
+<div class="line"><span class="number">530</span><code>    }</code></div>
+<div class="line"><span class="number">531</span><code></code></div>
+<div class="line"><span class="number">532</span><code>    /**</code></div>
+<div class="line"><span class="number">533</span><code>     * Checks Task 3&#39;s entity validation and persistence without going through the MVC controller.</code></div>
+<div class="line"><span class="number">534</span><code>     * @throws Exception if the entity/database fixture fails</code></div>
+<div class="line"><span class="number">535</span><code>     */</code></div>
+<div class="line"><span class="number">536</span><code>    private static void testEntityPersistence() throws Exception {</code></div>
+<div class="line"><span class="number">537</span><code>        // CASE 19: The entity itself must guard invalid writes, even without GUI validation.</code></div>
+<div class="line"><span class="number">538</span><code>        int originalCount = ModelLessons.readLessons(testOwnerId).getLessons().size();</code></div>
+<div class="line"><span class="number">539</span><code>        for (Lesson invalid : new Lesson[] {</code></div>
+<div class="line"><span class="number">540</span><code>                new Lesson(0, testOwnerId, null, problem, solution, null),</code></div></div></html>

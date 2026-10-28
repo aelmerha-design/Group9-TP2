@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 406-450</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonTestingAutomation.java - source lines 406-450</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">406</span><code>    private static boolean sameLesson(Lesson a, Lesson b) {</code></div>
+<div class="line"><span class="number">407</span><code>        return a != null &amp;&amp; b != null &amp;&amp; a.getOwnerId() == b.getOwnerId()</code></div>
+<div class="line"><span class="number">408</span><code>                &amp;&amp; a.getId() == b.getId() &amp;&amp; a.getTitle().equals(b.getTitle()) &amp;&amp; a.getProblem().equals(b.getProblem())</code></div>
+<div class="line"><span class="number">409</span><code>                &amp;&amp; a.getSolution().equals(b.getSolution()) &amp;&amp; a.getExperience().equals(b.getExperience());</code></div>
+<div class="line"><span class="number">410</span><code>    }</code></div>
+<div class="line"><span class="number">411</span><code>    /**</code></div>
+<div class="line"><span class="number">412</span><code>     * Reports one assertion; multiple assertions may belong to the same case.</code></div>
+<div class="line"><span class="number">413</span><code>     * @param number requirement case number</code></div>
+<div class="line"><span class="number">414</span><code>     * @param description assertion description</code></div>
+<div class="line"><span class="number">415</span><code>     * @param passed whether the observed result met the expectation</code></div>
+<div class="line"><span class="number">416</span><code>     */</code></div>
+<div class="line"><span class="number">417</span><code>    private static void performTestCase(int number, String description, boolean passed) {</code></div>
+<div class="line"><span class="number">418</span><code>        System.out.println(&quot;\nTest case &quot; + number + &quot;: &quot; + description);</code></div>
+<div class="line"><span class="number">419</span><code>        if (passed) {</code></div>
+<div class="line"><span class="number">420</span><code>            System.out.println(&quot;Success&quot;);</code></div>
+<div class="line"><span class="number">421</span><code>            numPassed++;</code></div>
+<div class="line"><span class="number">422</span><code>        } else {</code></div>
+<div class="line"><span class="number">423</span><code>            System.out.println(&quot;Failure&quot;);</code></div>
+<div class="line"><span class="number">424</span><code>            numFailed++;</code></div>
+<div class="line"><span class="number">425</span><code>        }</code></div>
+<div class="line"><span class="number">426</span><code>    }</code></div>
+<div class="line"><span class="number">427</span><code></code></div>
+<div class="line"><span class="number">428</span><code>    /**</code></div>
+<div class="line"><span class="number">429</span><code>     * Saves a rendered lesson scene when evidence output is enabled.</code></div>
+<div class="line"><span class="number">430</span><code>     * @param name screenshot filename without its PNG extension</code></div>
+<div class="line"><span class="number">431</span><code>     * @throws Exception if the screenshot cannot be written</code></div>
+<div class="line"><span class="number">432</span><code>     */</code></div>
+<div class="line"><span class="number">433</span><code>    private static void capture(String name) throws Exception {</code></div>
+<div class="line"><span class="number">434</span><code>        if (evidenceDirectory != null)</code></div>
+<div class="line"><span class="number">435</span><code>            LessonTestEvidence.capture(ViewLessons.theStage.getScene().getRoot(), evidenceDirectory.resolve(name + &quot;.png&quot;));</code></div>
+<div class="line"><span class="number">436</span><code>    }</code></div>
+<div class="line"><span class="number">437</span><code></code></div>
+<div class="line"><span class="number">438</span><code>    /**</code></div>
+<div class="line"><span class="number">439</span><code>     * Checks owner-filtered lists with an independently owned fixture (case 16).</code></div>
+<div class="line"><span class="number">440</span><code>     * @throws Exception if database access fails</code></div>
+<div class="line"><span class="number">441</span><code>     */</code></div>
+<div class="line"><span class="number">442</span><code>    private static void testContributorLists() throws Exception {</code></div>
+<div class="line"><span class="number">443</span><code>        // CASE 16: An independent owner fixture detects accidental unfiltered list reads.</code></div>
+<div class="line"><span class="number">444</span><code>        int otherOwnerId = 42;</code></div>
+<div class="line"><span class="number">445</span><code>        int otherId = ModelLessons.createLesson(new Lesson(0, otherOwnerId, &quot;Other contributor&quot;, problem, solution, &quot;&quot;));</code></div>
+<div class="line"><span class="number">446</span><code>        ViewLessons.refreshList();</code></div>
+<div class="line"><span class="number">447</span><code>        performTestCase(16, &quot;Contributor list excludes another owner&#39;s lesson&quot;,</code></div>
+<div class="line"><span class="number">448</span><code>                ViewLessons.list_Lessons.getItems().size() == 1000</code></div>
+<div class="line"><span class="number">449</span><code>                &amp;&amp; ViewLessons.list_Lessons.getItems().stream().noneMatch(lesson -&gt; lesson.getId() == otherId)</code></div>
+<div class="line"><span class="number">450</span><code>                &amp;&amp; ModelLessons.readLessons(otherOwnerId).getLessons().size() == 1);</code></div></div></html>
