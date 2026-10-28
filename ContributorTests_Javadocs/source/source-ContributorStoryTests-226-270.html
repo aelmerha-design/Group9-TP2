@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ContributorStoryTests - lines 226-270</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>ContributorStoryTests.java - source lines 226-270</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: A2CCA1D5C51ACAE6A656F3C86A4CA5C1BED7D04C50F7A9D03FE1BF575BC1E86D</p><div class="source"><div class="line"><span class="number">226</span><code></code></div>
+<div class="line"><span class="number">227</span><code>    /** C05 negative: each field lock, then a whole lock, prevents contributor deletion.</code></div>
+<div class="line"><span class="number">228</span><code>     * Success means each denial preserves its record; unlocking permits deletion.</code></div>
+<div class="line"><span class="number">229</span><code>     * @throws Exception if persistence fails */</code></div>
+<div class="line"><span class="number">230</span><code>    public static void testLockedDeletionDenied() throws Exception {</code></div>
+<div class="line"><span class="number">231</span><code>        for (ModelLessons.LessonField field : ModelLessons.LessonField.values()) {</code></div>
+<div class="line"><span class="number">232</span><code>            Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">233</span><code>            ModelLessons.toggleLock(lesson.getId(), field, admin);</code></div>
+<div class="line"><span class="number">234</span><code>            check(&quot;C05-N delete locked &quot; + field, denied(() -&gt; ModelLessons.deleteLesson(lesson.getId(), owner))</code></div>
+<div class="line"><span class="number">235</span><code>                    &amp;&amp; ModelLessons.readLesson(lesson.getId(), owner) != null);</code></div>
+<div class="line"><span class="number">236</span><code>            ModelLessons.toggleLock(lesson.getId(), field, admin);</code></div>
+<div class="line"><span class="number">237</span><code>            check(&quot;C05-P delete after unlock &quot; + field, ModelLessons.deleteLesson(lesson.getId(), owner));</code></div>
+<div class="line"><span class="number">238</span><code>        }</code></div>
+<div class="line"><span class="number">239</span><code>        Lesson whole = fixture();</code></div>
+<div class="line"><span class="number">240</span><code>        ModelLessons.setLessonsLocked(List.of(whole.getId()), true, admin);</code></div>
+<div class="line"><span class="number">241</span><code>        check(&quot;C05-N delete whole locked&quot;, denied(() -&gt; ModelLessons.deleteLesson(whole.getId(), owner))</code></div>
+<div class="line"><span class="number">242</span><code>                &amp;&amp; ModelLessons.readLesson(whole.getId(), owner) != null);</code></div>
+<div class="line"><span class="number">243</span><code>    }</code></div>
+<div class="line"><span class="number">244</span><code></code></div>
+<div class="line"><span class="number">245</span><code>    /** C06 positive/privacy: store other-role metadata, then request contributor content.</code></div>
+<div class="line"><span class="number">246</span><code>     * Success means admin sees persisted metadata and contributor receives no additions.</code></div>
+<div class="line"><span class="number">247</span><code>     * @throws Exception if persistence fails */</code></div>
+<div class="line"><span class="number">248</span><code>    public static void testMetadataHidden() throws Exception {</code></div>
+<div class="line"><span class="number">249</span><code>        Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">250</span><code>        lesson.setSearchTerms(&quot;PRIVATE CURATOR TERMS&quot;); lesson.setTimeHours(4); lesson.setEffortHours(7); lesson.setStatsVisible(true);</code></div>
+<div class="line"><span class="number">251</span><code>        FoundationsMain.database.updateLessonMetadata(lesson);</code></div>
+<div class="line"><span class="number">252</span><code>        Lesson restricted = ModelLessons.readLesson(lesson.getId(), owner);</code></div>
+<div class="line"><span class="number">253</span><code>        check(&quot;C06-P testMetadataHidden&quot;, ModelLessons.readLesson(lesson.getId(), admin).getSearchTerms().equals(&quot;PRIVATE CURATOR TERMS&quot;)</code></div>
+<div class="line"><span class="number">254</span><code>                &amp;&amp; restricted.getSearchTerms().isEmpty() &amp;&amp; restricted.getTimeHours() == 0</code></div>
+<div class="line"><span class="number">255</span><code>                &amp;&amp; restricted.getEffortHours() == 0 &amp;&amp; !restricted.isStatsVisible()</code></div>
+<div class="line"><span class="number">256</span><code>                &amp;&amp; ModelLessons.readLessons(owner).getLesson(lesson.getId()).getSearchTerms().isEmpty());</code></div>
+<div class="line"><span class="number">257</span><code>    }</code></div>
+<div class="line"><span class="number">258</span><code></code></div>
+<div class="line"><span class="number">259</span><code>    /** C06 negative: contributor tries to replace other-role metadata along with a core edit.</code></div>
+<div class="line"><span class="number">260</span><code>     * Success means the core edit succeeds but stored private additions remain unchanged.</code></div>
+<div class="line"><span class="number">261</span><code>     * @throws Exception if persistence fails */</code></div>
+<div class="line"><span class="number">262</span><code>    public static void testMetadataPreserved() throws Exception {</code></div>
+<div class="line"><span class="number">263</span><code>        Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">264</span><code>        lesson.setSearchTerms(&quot;PRIVATE PRESERVE&quot;); lesson.setTimeHours(2);</code></div>
+<div class="line"><span class="number">265</span><code>        FoundationsMain.database.updateLessonMetadata(lesson);</code></div>
+<div class="line"><span class="number">266</span><code>        Lesson edited = ModelLessons.readLesson(lesson.getId(), owner);</code></div>
+<div class="line"><span class="number">267</span><code>        edited.setSearchTerms(&quot;FORGED&quot;); edited.setTimeHours(99); edited.setTitle(&quot;Allowed core edit&quot;);</code></div>
+<div class="line"><span class="number">268</span><code>        check(&quot;C06-N testMetadataPreserved&quot;, ModelLessons.updateLesson(edited, owner)</code></div>
+<div class="line"><span class="number">269</span><code>                &amp;&amp; ModelLessons.readLesson(lesson.getId(), admin).getSearchTerms().equals(&quot;PRIVATE PRESERVE&quot;)</code></div>
+<div class="line"><span class="number">270</span><code>                &amp;&amp; ModelLessons.readLesson(lesson.getId(), admin).getTimeHours() == 2);</code></div></div></html>

@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 226-270</title>
 <style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
 <h1>LessonTestingAutomation.java - source lines 226-270</h1><p>Contributor test implementation / original Java source and internal documentation</p>
-<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">226</span><code>        for (Lesson lesson : ModelLessons.readLessons(testOwnerId).getLessons())</code></div>
+<p class="hash">SHA-256: 8A0C70980AD78A9E46E20EB4E53FCE0EFF9639F006F25F9EA7583C02312D4BBD</p><div class="source"><div class="line"><span class="number">226</span><code>        for (Lesson lesson : ModelLessons.readLessons(testOwnerId).getLessons())</code></div>
 <div class="line"><span class="number">227</span><code>            ModelLessons.deleteLesson(lesson.getId());</code></div>
 <div class="line"><span class="number">228</span><code>        ViewLessons.refreshList();</code></div>
 <div class="line"><span class="number">229</span><code>        // CASE 08: Empty, singleton, and generated large lists must have exact counts.</code></div>
@@ -40,9 +40,9 @@
 <div class="line"><span class="number">262</span><code>        testListSearch();</code></div>
 <div class="line"><span class="number">263</span><code>        testEntityPersistence();</code></div>
 <div class="line"><span class="number">264</span><code>        testDatabaseErrors();</code></div>
-<div class="line"><span class="number">265</span><code>        ViewLessons.refreshList();</code></div>
-<div class="line"><span class="number">266</span><code>        select(savedId);</code></div>
-<div class="line"><span class="number">267</span><code>        ViewLessons.text_Title.setText(&quot;Saved after restart&quot;);</code></div>
-<div class="line"><span class="number">268</span><code>        ControllerLessons.updateLesson();</code></div>
-<div class="line"><span class="number">269</span><code>        int deletedId = ViewLessons.list_Lessons.getItems().get(999).getId();</code></div>
-<div class="line"><span class="number">270</span><code>        select(deletedId);</code></div></div></html>
+<div class="line"><span class="number">265</span><code>        ContributorStoryTests.run();</code></div>
+<div class="line"><span class="number">266</span><code>        ViewLessons.refreshList();</code></div>
+<div class="line"><span class="number">267</span><code>        select(savedId);</code></div>
+<div class="line"><span class="number">268</span><code>        ViewLessons.text_Title.setText(&quot;Saved after restart&quot;);</code></div>
+<div class="line"><span class="number">269</span><code>        ControllerLessons.updateLesson();</code></div>
+<div class="line"><span class="number">270</span><code>        int deletedId = ViewLessons.list_Lessons.getItems().get(999).getId();</code></div></div></html>

@@ -1,8 +1,46 @@
 # Requirements-to-tests list
 
-Baseline: `Lesson`, `LessonList`, `ModelLessons`, `ControllerLessons`, and `ViewLessons` in `HW2 2/src`, plus the supplied Task 3/4 and testing instructions. Cases 1–15 retain the original runner's numbering. Cases 16–20 add contributor list, collection edge, button wiring, direct entity, and database failure coverage. Each case may contain multiple assertions; totals count assertions rather than matrix rows. All automated cases use the actual application classes. The separate Contributor User Stories and team-specific TP3/Ed Discussion insights still need team review against this matrix; they were not supplied with the assignment excerpts.
+Source: the supplied **Contributor (Phase Two)** story and **Contributor (Phase Three)** AI-writing epic, together with Tasks 3, 4, 6, and 7. Core information is interpreted here as title/problem/solution, matching the supplied Task 3/4 code; confirm any stakeholder-specific changes before team sign-off. Experience records capture what/how/time/individual team effort as narrative text. Admin is the other-role test fixture; a curator-specific role and actual Phase Three AI are not implemented.
 
-Every commented case has a source-screenshot location in [SourceScreenshots.md](SourceScreenshots.md). Shared helpers and complete source are included there as well as in the generated Javadoc's source links.
+## Primary story acceptance matrix (Task 7.1-7.3)
+
+Every row names at least two executable scenarios. Both links name the exact documenting file, **ContributorStoryTests.html**, and its individual test-method anchor. Each method's Javadoc identifies the requirement, the implementation strategy, and the conditions for Success. Negative tests pass when rejection occurs and saved data is preserved. C03 uses edit and deletion as its two distinct scenarios; not every requirement requires invalid input.
+
+| Requirement | Acceptance criterion | Named positive / first test | Named negative / second test | Manual procedure |
+| --- | --- | --- | --- | --- |
+| C01 | Add valid core information under the contributor's ownership | [testCreateValid](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testCreateValid()) | [testCreateInvalid](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testCreateInvalid()) | MT-01, MT-05 |
+| C02 | List and examine only the contributor's lessons; deny foreign IDs | [testOwnListAndRead](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testOwnListAndRead()) | [testForeignAccessDenied](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testForeignAccessDenied()) | MT-09 |
+| C03 | Reflect permitted other-role edits and deletions of contributed content | [testOtherRoleEditVisible](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testOtherRoleEditVisible()) | [testOtherRoleDeletionVisible](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testOtherRoleDeletionVisible()) | MT-13 |
+| C04 | Show field/whole locks and prohibit locked-field edits or contributor lock changes | [testUnlockedEdit](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testUnlockedEdit()) | [testLockedEditsAndIndicators](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testLockedEditsAndIndicators()) | MT-10 |
+| C05 | Permit unlocked deletion; prohibit deletion with any active lock | [testUnlockedDelete](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testUnlockedDelete()) | [testLockedDeletionDenied](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testLockedDeletionDenied()) | MT-10 |
+| C06 | Hide and preserve other-role additions while allowing core edits | [testMetadataHidden](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testMetadataHidden()) | [testMetadataPreserved](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testMetadataPreserved()) | MT-11 |
+| C07 | Append what/how/time/team-effort experiences after repeated attempts; preserve history | [testExperienceAppend](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testExperienceAppend()) | [testExperienceRejected](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testExperienceRejected()) | MT-12 |
+| C08 | Persist core content, locks, privacy, and experience history across executions | [testRestartRestoresState](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testRestartRestoresState()) | [testRestartKeepsRestrictions](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testRestartKeepsRestrictions()) | MT-06, MT-10 |
+| C09 | Support lesson collection operations and non-destructive keyword subsets | [testListOperations](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testListOperations()) | [testListEdges](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testListEdges()) | MT-04, MT-07 |
+| C10 | Privileged bulk lock changes preserve individual locks and roll back failures | [testBatchLocks](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testBatchLocks()) | [testBatchRollback](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testBatchRollback()) | MT-10 |
+| C11 | Validate required core fields and optional experience at defined boundaries | [testBoundaryAccepted](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testBoundaryAccepted()) | [testBoundaryRejected](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testBoundaryRejected()) | MT-05 |
+| C12 | Accommodate Phase Three search/time/effort/visibility attributes without exposing restricted additions | [testRestartRestoresState](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testRestartRestoresState()) | [testRestartKeepsRestrictions](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testRestartKeepsRestrictions()) | Design review; C06 privacy checks |
+
+Additional C07 scenarios are [testExperienceHistoryButton](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testExperienceHistoryButton()) and [testExperienceForeignOrLocked](javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html#testExperienceForeignOrLocked()). They check actual GUI button bindings and denied history access/append.
+
+## HTML and screenshot filenames
+
+[StoryEvidence.md](StoryEvidence.md) lists the exact HTML filename and all source PNG filenames for each requirement's two named tests. This is the direct Task 7.1/9.3 evidence list.
+
+- All primary tests: `javadoc/FoundationsF26/guiLessons/ContributorStoryTests.html`.
+- All regression cases below: `javadoc/FoundationsF26/guiLessons/LessonTestingAutomation.html`.
+- Manual fixture and MT procedures: `javadoc/FoundationsF26/guiLessons/LessonManualTesting.html`.
+- Screenshot implementation: `javadoc/FoundationsF26/guiLessons/LessonTestEvidence.html`.
+- **[SourceScreenshots.md](SourceScreenshots.md)** explicitly lists the PNG and source-HTML filenames for each named method and each legacy case. Continue across adjacent pages for methods crossing a boundary.
+- C04 visible lock state: `screenshots/09-contributor-locked-fields.png`; C07 history: `screenshots/10-experience-history.png`.
+- Other application-state evidence: `01-created-and-read.png` through `05-after-restart.png` in screenshots.
+- Javadoc evidence: `06-test-javadoc.png`, `07-helper-javadoc.png`, `08-manual-javadoc.png`, and `11-story-tests-javadoc.png`.
+
+## Phase scope and all-TP2 inventory
+
+C01-C08 are the Phase Two story acceptance requirements. C09-C11 also exercise the assignment's collection, validation, and failure-handling responsibilities. C12 tests persistence and contributor restrictions for future attributes; it does not claim AI tools, curator search, or effort aggregation are implemented. [SubmissionChecks.md](SubmissionChecks.md) lists the other TP2 deliverable requirements separately, with two manual inspections per item; these are not Java application acceptance tests.
+
+## Supporting regression cases
 
 | Case | Requirement / acceptance criterion | Setup and test input | Expected result / oracle | Execution and manual reference |
 | --- | --- | --- | --- | --- |

@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ContributorStoryTests - lines 316-360</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>ContributorStoryTests.java - source lines 316-360</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: A2CCA1D5C51ACAE6A656F3C86A4CA5C1BED7D04C50F7A9D03FE1BF575BC1E86D</p><div class="source"><div class="line"><span class="number">316</span><code>                }</code></div>
+<div class="line"><span class="number">317</span><code>            }</code></div>
+<div class="line"><span class="number">318</span><code>        });</code></div>
+<div class="line"><span class="number">319</span><code>        for (javafx.scene.Node node : ViewLessons.theStage.getScene().getRoot().lookupAll(&quot;.button&quot;)) {</code></div>
+<div class="line"><span class="number">320</span><code>            if (node instanceof javafx.scene.control.Button button &amp;&amp; button.getText().equals(&quot;Experience history&quot;)) button.fire();</code></div>
+<div class="line"><span class="number">321</span><code>        }</code></div>
+<div class="line"><span class="number">322</span><code>    }</code></div>
+<div class="line"><span class="number">323</span><code></code></div>
+<div class="line"><span class="number">324</span><code>    /** C07 negative/privacy: another contributor cannot append or read history; locks block append.</code></div>
+<div class="line"><span class="number">325</span><code>     * Success means all denied operations leave an empty history.</code></div>
+<div class="line"><span class="number">326</span><code>     * @throws Exception if persistence fails */</code></div>
+<div class="line"><span class="number">327</span><code>    public static void testExperienceForeignOrLocked() throws Exception {</code></div>
+<div class="line"><span class="number">328</span><code>        Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">329</span><code>        ModelLessons.toggleLock(lesson.getId(), ModelLessons.LessonField.EXPERIENCE, admin);</code></div>
+<div class="line"><span class="number">330</span><code>        check(&quot;C07-N testExperienceForeignOrLocked&quot;, denied(() -&gt; ModelLessons.addExperience(lesson.getId(), &quot;Other attempt&quot;, other))</code></div>
+<div class="line"><span class="number">331</span><code>                &amp;&amp; denied(() -&gt; ModelLessons.readExperiences(lesson.getId(), other))</code></div>
+<div class="line"><span class="number">332</span><code>                &amp;&amp; denied(() -&gt; ModelLessons.addExperience(lesson.getId(), &quot;Locked attempt&quot;, owner))</code></div>
+<div class="line"><span class="number">333</span><code>                &amp;&amp; ModelLessons.readExperiences(lesson.getId(), owner).isEmpty());</code></div>
+<div class="line"><span class="number">334</span><code>    }</code></div>
+<div class="line"><span class="number">335</span><code></code></div>
+<div class="line"><span class="number">336</span><code>    /** C09 positive: list add/read/update/remove and a selected keyword subset.</code></div>
+<div class="line"><span class="number">337</span><code>     * Success means intended entries change and the source list survives subset removal. */</code></div>
+<div class="line"><span class="number">338</span><code>    public static void testListOperations() {</code></div>
+<div class="line"><span class="number">339</span><code>        LessonList list = new LessonList();</code></div>
+<div class="line"><span class="number">340</span><code>        list.addLesson(new Lesson(1, 101, &quot;Alpha&quot;, &quot;P&quot;, &quot;S&quot;, &quot;&quot;));</code></div>
+<div class="line"><span class="number">341</span><code>        list.addLesson(new Lesson(2, 101, &quot;Beta&quot;, &quot;P&quot;, &quot;S&quot;, &quot;&quot;));</code></div>
+<div class="line"><span class="number">342</span><code>        LessonList subset = list.searchByKeyword(&quot;alpha&quot;);</code></div>
+<div class="line"><span class="number">343</span><code>        check(&quot;C09-P testListOperations&quot;, list.updateLesson(new Lesson(2, 101, &quot;Edited&quot;, &quot;P&quot;, &quot;S&quot;, &quot;&quot;))</code></div>
+<div class="line"><span class="number">344</span><code>                &amp;&amp; subset.removeLesson(1) &amp;&amp; list.getLesson(1) != null &amp;&amp; list.getLesson(2).getTitle().equals(&quot;Edited&quot;));</code></div>
+<div class="line"><span class="number">345</span><code>    }</code></div>
+<div class="line"><span class="number">346</span><code></code></div>
+<div class="line"><span class="number">347</span><code>    /** C09 negative: duplicate and missing identities cannot corrupt a list.</code></div>
+<div class="line"><span class="number">348</span><code>     * Success means duplicate insertion is ignored and missing removal returns false. */</code></div>
+<div class="line"><span class="number">349</span><code>    public static void testListEdges() {</code></div>
+<div class="line"><span class="number">350</span><code>        LessonList list = new LessonList();</code></div>
+<div class="line"><span class="number">351</span><code>        list.addLesson(new Lesson(1, 101, &quot;Original&quot;, &quot;P&quot;, &quot;S&quot;, &quot;&quot;));</code></div>
+<div class="line"><span class="number">352</span><code>        list.addLesson(new Lesson(1, 101, &quot;Duplicate&quot;, &quot;P&quot;, &quot;S&quot;, &quot;&quot;));</code></div>
+<div class="line"><span class="number">353</span><code>        check(&quot;C09-N testListEdges&quot;, list.getLessons().size() == 1 &amp;&amp; !list.removeLesson(999)</code></div>
+<div class="line"><span class="number">354</span><code>                &amp;&amp; list.getLesson(1).getTitle().equals(&quot;Original&quot;) &amp;&amp; list.searchByKeyword(&quot;absent&quot;).getLessons().isEmpty());</code></div>
+<div class="line"><span class="number">355</span><code>    }</code></div>
+<div class="line"><span class="number">356</span><code></code></div>
+<div class="line"><span class="number">357</span><code>    /** C10 positive: batch-lock and unlock two lessons while retaining individual locks.</code></div>
+<div class="line"><span class="number">358</span><code>     * Success means both whole locks change and the independent title lock survives.</code></div>
+<div class="line"><span class="number">359</span><code>     * @throws Exception if persistence fails */</code></div>
+<div class="line"><span class="number">360</span><code>    public static void testBatchLocks() throws Exception {</code></div></div></html>

@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ContributorStoryTests - lines 361-405</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>ContributorStoryTests.java - source lines 361-405</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: A2CCA1D5C51ACAE6A656F3C86A4CA5C1BED7D04C50F7A9D03FE1BF575BC1E86D</p><div class="source"><div class="line"><span class="number">361</span><code>        Lesson first = fixture(); Lesson second = fixture();</code></div>
+<div class="line"><span class="number">362</span><code>        ModelLessons.toggleLock(first.getId(), ModelLessons.LessonField.TITLE, admin);</code></div>
+<div class="line"><span class="number">363</span><code>        ModelLessons.setLessonsLocked(List.of(first.getId(), second.getId()), true, admin);</code></div>
+<div class="line"><span class="number">364</span><code>        check(&quot;C10-P batch lock&quot;, ModelLessons.readLesson(first.getId(), admin).isLocked() &amp;&amp; ModelLessons.readLesson(second.getId(), admin).isLocked());</code></div>
+<div class="line"><span class="number">365</span><code>        ModelLessons.setLessonsLocked(List.of(first.getId(), second.getId()), false, admin);</code></div>
+<div class="line"><span class="number">366</span><code>        check(&quot;C10-P batch unlock&quot;, !ModelLessons.readLesson(first.getId(), admin).isLocked()</code></div>
+<div class="line"><span class="number">367</span><code>                &amp;&amp; !ModelLessons.readLesson(second.getId(), admin).isLocked() &amp;&amp; ModelLessons.readLesson(first.getId(), admin).isTitleLocked());</code></div>
+<div class="line"><span class="number">368</span><code>    }</code></div>
+<div class="line"><span class="number">369</span><code></code></div>
+<div class="line"><span class="number">370</span><code>    /** C10 negative: a missing ID in a batch must roll back the valid ID&#39;s change.</code></div>
+<div class="line"><span class="number">371</span><code>     * Success means SQL rejection leaves the valid record unlocked and permits later writes.</code></div>
+<div class="line"><span class="number">372</span><code>     * @throws Exception if an unexpected persistence error occurs */</code></div>
+<div class="line"><span class="number">373</span><code>    public static void testBatchRollback() throws Exception {</code></div>
+<div class="line"><span class="number">374</span><code>        Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">375</span><code>        boolean rejected = false;</code></div>
+<div class="line"><span class="number">376</span><code>        try { ModelLessons.setLessonsLocked(List.of(lesson.getId(), Integer.MAX_VALUE), true, admin); }</code></div>
+<div class="line"><span class="number">377</span><code>        catch (java.sql.SQLException expected) { rejected = true; }</code></div>
+<div class="line"><span class="number">378</span><code>        check(&quot;C10-N testBatchRollback&quot;, rejected &amp;&amp; !ModelLessons.readLesson(lesson.getId(), admin).isLocked()</code></div>
+<div class="line"><span class="number">379</span><code>                &amp;&amp; ModelLessons.updateLesson(lesson, owner));</code></div>
+<div class="line"><span class="number">380</span><code>    }</code></div>
+<div class="line"><span class="number">381</span><code></code></div>
+<div class="line"><span class="number">382</span><code>    /** C11 positive: accept exact required-field maxima and optional empty experience.</code></div>
+<div class="line"><span class="number">383</span><code>     * Success means the application&#39;s validator accepts both minimum and maximum input. */</code></div>
+<div class="line"><span class="number">384</span><code>    public static void testBoundaryAccepted() {</code></div>
+<div class="line"><span class="number">385</span><code>        check(&quot;C11-P testBoundaryAccepted&quot;, ModelLessons.validateLesson(new Lesson(0, 101, &quot;T&quot;, &quot;P&quot;, &quot;S&quot;, &quot;&quot;)).isEmpty()</code></div>
+<div class="line"><span class="number">386</span><code>                &amp;&amp; ModelLessons.validateLesson(new Lesson(0, 101, &quot;T&quot;.repeat(100), &quot;P&quot;.repeat(2000), &quot;S&quot;.repeat(2000), &quot;E&quot;.repeat(2000))).isEmpty());</code></div>
+<div class="line"><span class="number">387</span><code>    }</code></div>
+<div class="line"><span class="number">388</span><code></code></div>
+<div class="line"><span class="number">389</span><code>    /** C11 negative: reject blank required content and values above each maximum.</code></div>
+<div class="line"><span class="number">390</span><code>     * Success means all five invalid fixtures produce a validation error. */</code></div>
+<div class="line"><span class="number">391</span><code>    public static void testBoundaryRejected() {</code></div>
+<div class="line"><span class="number">392</span><code>        for (Lesson invalid : new Lesson[] {new Lesson(0,101,&quot; &quot;,&quot;P&quot;,&quot;S&quot;,&quot;&quot;),</code></div>
+<div class="line"><span class="number">393</span><code>                new Lesson(0,101,&quot;T&quot;.repeat(101),&quot;P&quot;,&quot;S&quot;,&quot;&quot;), new Lesson(0,101,&quot;T&quot;,&quot;P&quot;.repeat(2001),&quot;S&quot;,&quot;&quot;),</code></div>
+<div class="line"><span class="number">394</span><code>                new Lesson(0,101,&quot;T&quot;,&quot;P&quot;,&quot;S&quot;.repeat(2001),&quot;&quot;), new Lesson(0,101,&quot;T&quot;,&quot;P&quot;,&quot;S&quot;,&quot;E&quot;.repeat(2001))})</code></div>
+<div class="line"><span class="number">395</span><code>            check(&quot;C11-N testBoundaryRejected&quot;, !ModelLessons.validateLesson(invalid).isEmpty());</code></div>
+<div class="line"><span class="number">396</span><code>    }</code></div>
+<div class="line"><span class="number">397</span><code></code></div>
+<div class="line"><span class="number">398</span><code>    /** Prepares C08/C12&#39;s independent owner-77 record without affecting owner-zero counts.</code></div>
+<div class="line"><span class="number">399</span><code>     * @throws Exception if saving the fixture or marker fails */</code></div>
+<div class="line"><span class="number">400</span><code>    private static void prepareRestart() throws Exception {</code></div>
+<div class="line"><span class="number">401</span><code>        Lesson lesson = new Lesson(0, 77, &quot;Story restart&quot;, &quot;P&quot;, &quot;S&quot;, &quot;&quot;);</code></div>
+<div class="line"><span class="number">402</span><code>        lesson.create(FoundationsMain.database);</code></div>
+<div class="line"><span class="number">403</span><code>        lesson.setLocked(true); lesson.setProblemLocked(true); lesson.setSearchTerms(&quot;PRIVATE RESTART&quot;);</code></div>
+<div class="line"><span class="number">404</span><code>        lesson.setTimeHours(3); lesson.setEffortHours(4); lesson.setStatsVisible(true);</code></div>
+<div class="line"><span class="number">405</span><code>        FoundationsMain.database.updateLessonLocks(lesson);</code></div></div></html>

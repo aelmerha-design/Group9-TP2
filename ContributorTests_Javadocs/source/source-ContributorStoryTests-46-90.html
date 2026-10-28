@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ContributorStoryTests - lines 46-90</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>ContributorStoryTests.java - source lines 46-90</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: A2CCA1D5C51ACAE6A656F3C86A4CA5C1BED7D04C50F7A9D03FE1BF575BC1E86D</p><div class="source"><div class="line"><span class="number">46</span><code>    /** Creates a valid core-content fixture and tracks it for cleanup.</code></div>
+<div class="line"><span class="number">47</span><code>     * @return saved fixture</code></div>
+<div class="line"><span class="number">48</span><code>     * @throws Exception if persistence fails */</code></div>
+<div class="line"><span class="number">49</span><code>    private static Lesson fixture() throws Exception {</code></div>
+<div class="line"><span class="number">50</span><code>        Lesson lesson = new Lesson(0, owner.getUserId(), &quot;Story lesson&quot;, &quot;A repeated attempt failed&quot;,</code></div>
+<div class="line"><span class="number">51</span><code>                &quot;Revise the approach&quot;, &quot;Initial attempt: reviewed design; 1 hour; Alex 1 person-hour&quot;);</code></div>
+<div class="line"><span class="number">52</span><code>        created.add(ModelLessons.createLesson(lesson, owner));</code></div>
+<div class="line"><span class="number">53</span><code>        return lesson;</code></div>
+<div class="line"><span class="number">54</span><code>    }</code></div>
+<div class="line"><span class="number">55</span><code></code></div>
+<div class="line"><span class="number">56</span><code>    /** Prints an independently named assertion and updates the Foundations-style totals.</code></div>
+<div class="line"><span class="number">57</span><code>     * @param name scenario/method name</code></div>
+<div class="line"><span class="number">58</span><code>     * @param passed whether the documented expectation was observed */</code></div>
+<div class="line"><span class="number">59</span><code>    private static void check(String name, boolean passed) {</code></div>
+<div class="line"><span class="number">60</span><code>        System.out.println(&quot;\nStory test &quot; + name + &quot;: &quot; + (passed ? &quot;Success&quot; : &quot;Failure&quot;));</code></div>
+<div class="line"><span class="number">61</span><code>        if (passed) LessonTestingAutomation.numPassed++;</code></div>
+<div class="line"><span class="number">62</span><code>        else LessonTestingAutomation.numFailed++;</code></div>
+<div class="line"><span class="number">63</span><code>    }</code></div>
+<div class="line"><span class="number">64</span><code></code></div>
+<div class="line"><span class="number">65</span><code>    /** Checked action used to distinguish expected permission denial from other failures. */</code></div>
+<div class="line"><span class="number">66</span><code>    @FunctionalInterface</code></div>
+<div class="line"><span class="number">67</span><code>    private interface Action {</code></div>
+<div class="line"><span class="number">68</span><code>        /** Executes the challenged operation.</code></div>
+<div class="line"><span class="number">69</span><code>         * @throws Exception if the operation fails */</code></div>
+<div class="line"><span class="number">70</span><code>        void run() throws Exception;</code></div>
+<div class="line"><span class="number">71</span><code>    }</code></div>
+<div class="line"><span class="number">72</span><code></code></div>
+<div class="line"><span class="number">73</span><code>    /** Accepts only the documented security exception; SQL/programming errors propagate.</code></div>
+<div class="line"><span class="number">74</span><code>     * @param action challenged actor-aware operation</code></div>
+<div class="line"><span class="number">75</span><code>     * @return whether access was denied</code></div>
+<div class="line"><span class="number">76</span><code>     * @throws Exception if a different failure occurs */</code></div>
+<div class="line"><span class="number">77</span><code>    private static boolean denied(Action action) throws Exception {</code></div>
+<div class="line"><span class="number">78</span><code>        try { action.run(); return false; }</code></div>
+<div class="line"><span class="number">79</span><code>        catch (SecurityException expected) { return true; }</code></div>
+<div class="line"><span class="number">80</span><code>    }</code></div>
+<div class="line"><span class="number">81</span><code></code></div>
+<div class="line"><span class="number">82</span><code>    /** Runs every first-process story scenario and restores the previous view identity.</code></div>
+<div class="line"><span class="number">83</span><code>     * @throws Exception if setup, cleanup, or an unexpected operation fails */</code></div>
+<div class="line"><span class="number">84</span><code>    public static void run() throws Exception {</code></div>
+<div class="line"><span class="number">85</span><code>        User previous = ViewLessons.currentUser;</code></div>
+<div class="line"><span class="number">86</span><code>        try {</code></div>
+<div class="line"><span class="number">87</span><code>            testCreateValid(); testCreateInvalid();</code></div>
+<div class="line"><span class="number">88</span><code>            testOwnListAndRead(); testForeignAccessDenied();</code></div>
+<div class="line"><span class="number">89</span><code>            testOtherRoleEditVisible(); testOtherRoleDeletionVisible();</code></div>
+<div class="line"><span class="number">90</span><code>            testUnlockedEdit(); testLockedEditsAndIndicators();</code></div></div></html>

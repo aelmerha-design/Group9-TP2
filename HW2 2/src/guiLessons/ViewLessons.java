@@ -68,6 +68,15 @@ public class ViewLessons {
 	private static Alert alertError = new Alert(AlertType.ERROR);
 	/** The current user accessing the scene. */
 	protected static User currentUser;
+	/** Visible lock indicators explain why a contributor cannot edit each field. */
+	protected static Label[] fieldLabels = {new Label("Title"), new Label("Problem"),
+			new Label("Solution"), new Label("Experience: what, how, time, team effort (optional)")};
+	/** Privileged per-field controls, hidden from contributors. */
+	protected static Button[] lockButtons = {new Button("Lock"), new Button("Lock"), new Button("Lock"), new Button("Lock")};
+	/** Privileged whole-lesson controls, hidden from contributors. */
+	protected static Button button_LockSelected = new Button("Lock selected");
+	/** Unlocking the whole lesson leaves individual field locks unchanged. */
+	protected static Button button_UnlockSelected = new Button("Unlock selected");
 
 	/**
 	 * Opens the lesson page, creating its widgets on the first call. Saves the
@@ -86,6 +95,9 @@ public class ViewLessons {
 
 		label_UserDetails.setText("User: " + user.getUserName());
 		currentUser = user;
+		for (Button button : lockButtons) { button.setVisible(user.getAdminRole()); button.setManaged(user.getAdminRole()); }
+		button_LockSelected.setVisible(user.getAdminRole());
+		button_UnlockSelected.setVisible(user.getAdminRole());
 		refreshList();
 
 		theStage.setTitle("CSE 360: Lessons Learned");
@@ -114,22 +126,42 @@ public class ViewLessons {
 					if (newLesson != null) ControllerLessons.readLesson();
 				});
 
-		Label label_Title = new Label("Title");
+		Label label_Title = fieldLabels[0];
 		setupLabelUI(label_Title, 16, 420, 350, 105);
 		text_Title.setLayoutX(350);
 		text_Title.setLayoutY(130);
 		text_Title.setPrefWidth(430);
-		Label label_Problem = new Label("Problem");
+		Label label_Problem = fieldLabels[1];
 		setupLabelUI(label_Problem, 16, 420, 350, 170);
 		setupTextAreaUI(text_Problem, 350, 195);
-		Label label_Solution = new Label("Solution");
+		Label label_Solution = fieldLabels[2];
 		setupLabelUI(label_Solution, 16, 420, 350, 280);
 		setupTextAreaUI(text_Solution, 350, 305);
-		Label label_Experience = new Label("Experience: what, how, time, team effort (optional)");
+		Label label_Experience = fieldLabels[3];
 		setupLabelUI(label_Experience, 14, 430, 350, 390);
 		setupTextAreaUI(text_Experience, 350, 415);
 		Button button_Create = new Button("Create");
 		setupButtonUI(button_Create, 95, 350, 520);
+		for (int index = 0; index < lockButtons.length; index++) {
+			Button button = lockButtons[index];
+			button.setLayoutX(680);
+			button.setLayoutY(new double[] {102, 167, 277, 387}[index]);
+			button.setPrefWidth(100);
+			ModelLessons.LessonField field = ModelLessons.LessonField.values()[index];
+			button.setOnAction(event -> ControllerLessons.toggleLock(field));
+			theRootPane.getChildren().add(button);
+		}
+		setupButtonUI(button_LockSelected, 145, 20, 560);
+		setupButtonUI(button_UnlockSelected, 145, 175, 560);
+		button_LockSelected.setOnAction(event -> ControllerLessons.setSelectedLessonsLocked(true));
+		button_UnlockSelected.setOnAction(event -> ControllerLessons.setSelectedLessonsLocked(false));
+		Button button_AddExperience = new Button("Add experience");
+		setupButtonUI(button_AddExperience, 205, 350, 560);
+		button_AddExperience.setOnAction(event -> ControllerLessons.addExperience());
+		Button button_History = new Button("Experience history");
+		setupButtonUI(button_History, 205, 570, 560);
+		button_History.setOnAction(event -> ControllerLessons.showExperiences());
+		theRootPane.getChildren().addAll(button_LockSelected, button_UnlockSelected, button_AddExperience, button_History);
 		button_Create.setOnAction((event) -> { ControllerLessons.createLesson(); });
 		Button button_Read = new Button("Read");
 		setupButtonUI(button_Read, 95, 460, 520);
@@ -165,10 +197,12 @@ public class ViewLessons {
 	 */
 	protected static void refreshList() {
 		try {
-			displayedLessons = ModelLessons.readLessons(currentUser.getUserId());
+			displayedLessons = ModelLessons.readLessons(currentUser);
 			list_Lessons.getSelectionModel().clearSelection();
 			list_Lessons.getItems().setAll(displayedLessons.getLessons());
 			showLesson(null);
+		} catch (SecurityException e) {
+			showError(e.getMessage());
 		} catch (SQLException e) {
 			showError("Could not load lessons. Please try again.");
 		}
@@ -194,6 +228,19 @@ public class ViewLessons {
 		text_Problem.setText(lesson == null ? "" : lesson.getProblem());
 		text_Solution.setText(lesson == null ? "" : lesson.getSolution());
 		text_Experience.setText(lesson == null ? "" : lesson.getExperience());
+		boolean[] locks = {lesson != null && lesson.isTitleEffectivelyLocked(), lesson != null && lesson.isProblemEffectivelyLocked(),
+				lesson != null && lesson.isSolutionEffectivelyLocked(), lesson != null && lesson.isExperienceEffectivelyLocked()};
+		String[] captions = {"Title", "Problem", "Solution", "Experience: what, how, time, team effort (optional)"};
+		for (int index = 0; index < locks.length; index++) {
+			fieldLabels[index].setText(captions[index] + (locks[index] ? " [locked]" : ""));
+			lockButtons[index].setText(locks[index] ? "Unlock" : "Lock");
+			lockButtons[index].setDisable(lesson == null);
+		}
+		boolean admin = currentUser != null && currentUser.getAdminRole();
+		text_Title.setEditable(admin || !locks[0]);
+		text_Problem.setEditable(admin || !locks[1]);
+		text_Solution.setEditable(admin || !locks[2]);
+		text_Experience.setEditable(admin || !locks[3]);
 	}
 	/**
 	 * Sets a label's Arial font, minimum width, and position within the pane.
@@ -237,5 +284,15 @@ public class ViewLessons {
 		text.setLayoutY(y);
 		text.setPrefSize(430, 75);
 		text.setWrapText(true);
+	}
+
+	/** Displays contributor-authored attempts in order.
+	 * @param history authorized history entries */
+	protected static void showExperienceHistory(java.util.List<String> history) {
+		Alert dialog = new Alert(AlertType.INFORMATION);
+		dialog.setTitle("Experience history");
+		dialog.setHeaderText(null);
+		dialog.setContentText(history.isEmpty() ? "No experiences" : String.join("\n\n", history));
+		dialog.showAndWait();
 	}
 }

@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ContributorStoryTests - lines 136-180</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>ContributorStoryTests.java - source lines 136-180</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: A2CCA1D5C51ACAE6A656F3C86A4CA5C1BED7D04C50F7A9D03FE1BF575BC1E86D</p><div class="source"><div class="line"><span class="number">136</span><code>                &amp;&amp; ModelLessons.readLessons(other).getLesson(lesson.getId()) == null);</code></div>
+<div class="line"><span class="number">137</span><code>    }</code></div>
+<div class="line"><span class="number">138</span><code></code></div>
+<div class="line"><span class="number">139</span><code>    /** C02 negative: challenge ID-based read/update/delete with a different contributor.</code></div>
+<div class="line"><span class="number">140</span><code>     * Success means all three operations are denied and saved core content remains intact.</code></div>
+<div class="line"><span class="number">141</span><code>     * @throws Exception if an unexpected failure occurs */</code></div>
+<div class="line"><span class="number">142</span><code>    public static void testForeignAccessDenied() throws Exception {</code></div>
+<div class="line"><span class="number">143</span><code>        Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">144</span><code>        check(&quot;C02-N testForeignAccessDenied&quot;, denied(() -&gt; ModelLessons.readLesson(lesson.getId(), other))</code></div>
+<div class="line"><span class="number">145</span><code>                &amp;&amp; denied(() -&gt; ModelLessons.updateLesson(lesson, other))</code></div>
+<div class="line"><span class="number">146</span><code>                &amp;&amp; denied(() -&gt; ModelLessons.deleteLesson(lesson.getId(), other))</code></div>
+<div class="line"><span class="number">147</span><code>                &amp;&amp; ModelLessons.readLesson(lesson.getId(), owner).getTitle().equals(&quot;Story lesson&quot;));</code></div>
+<div class="line"><span class="number">148</span><code>        check(&quot;C02-N unsigned actor&quot;, denied(() -&gt; ModelLessons.readLessons((User) null))</code></div>
+<div class="line"><span class="number">149</span><code>                &amp;&amp; denied(() -&gt; ModelLessons.readLesson(lesson.getId(), null)));</code></div>
+<div class="line"><span class="number">150</span><code>    }</code></div>
+<div class="line"><span class="number">151</span><code></code></div>
+<div class="line"><span class="number">152</span><code>    /** C03 positive: another privileged role edits contributor-authored core information.</code></div>
+<div class="line"><span class="number">153</span><code>     * Success means the contributor rereads the edited content under the same identity.</code></div>
+<div class="line"><span class="number">154</span><code>     * @throws Exception if persistence fails */</code></div>
+<div class="line"><span class="number">155</span><code>    public static void testOtherRoleEditVisible() throws Exception {</code></div>
+<div class="line"><span class="number">156</span><code>        Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">157</span><code>        lesson.setSolution(&quot;Admin corrected contributor solution&quot;);</code></div>
+<div class="line"><span class="number">158</span><code>        check(&quot;C03-P testOtherRoleEditVisible&quot;, ModelLessons.updateLesson(lesson, admin)</code></div>
+<div class="line"><span class="number">159</span><code>                &amp;&amp; ModelLessons.readLesson(lesson.getId(), owner).getSolution().equals(lesson.getSolution()));</code></div>
+<div class="line"><span class="number">160</span><code>    }</code></div>
+<div class="line"><span class="number">161</span><code></code></div>
+<div class="line"><span class="number">162</span><code>    /** C03 second scenario: privileged deletion is reflected in the contributor&#39;s list and read.</code></div>
+<div class="line"><span class="number">163</span><code>     * Success means the deleted record is absent through both paths.</code></div>
+<div class="line"><span class="number">164</span><code>     * @throws Exception if persistence fails */</code></div>
+<div class="line"><span class="number">165</span><code>    public static void testOtherRoleDeletionVisible() throws Exception {</code></div>
+<div class="line"><span class="number">166</span><code>        Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">167</span><code>        check(&quot;C03-D testOtherRoleDeletionVisible&quot;, ModelLessons.deleteLesson(lesson.getId(), admin)</code></div>
+<div class="line"><span class="number">168</span><code>                &amp;&amp; ModelLessons.readLesson(lesson.getId(), owner) == null</code></div>
+<div class="line"><span class="number">169</span><code>                &amp;&amp; ModelLessons.readLessons(owner).getLesson(lesson.getId()) == null);</code></div>
+<div class="line"><span class="number">170</span><code>    }</code></div>
+<div class="line"><span class="number">171</span><code></code></div>
+<div class="line"><span class="number">172</span><code>    /** C04 positive: a contributor can change unlocked content despite another field&#39;s lock.</code></div>
+<div class="line"><span class="number">173</span><code>     * Success means the unlocked solution changes and the title&#39;s saved lock survives.</code></div>
+<div class="line"><span class="number">174</span><code>     * @throws Exception if persistence fails */</code></div>
+<div class="line"><span class="number">175</span><code>    public static void testUnlockedEdit() throws Exception {</code></div>
+<div class="line"><span class="number">176</span><code>        Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">177</span><code>        ModelLessons.toggleLock(lesson.getId(), ModelLessons.LessonField.TITLE, admin);</code></div>
+<div class="line"><span class="number">178</span><code>        lesson.setSolution(&quot;Unlocked solution changed&quot;);</code></div>
+<div class="line"><span class="number">179</span><code>        check(&quot;C04-P testUnlockedEdit&quot;, ModelLessons.updateLesson(lesson, owner)</code></div>
+<div class="line"><span class="number">180</span><code>                &amp;&amp; ModelLessons.readLesson(lesson.getId(), owner).isTitleLocked());</code></div></div></html>

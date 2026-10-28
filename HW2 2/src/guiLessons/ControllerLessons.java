@@ -44,8 +44,10 @@ public class ControllerLessons {
 			return;
 		}
 		try {
-			ModelLessons.createLesson(lesson);
+			ModelLessons.createLesson(lesson, ViewLessons.currentUser);
 			ViewLessons.refreshList();
+		} catch (SecurityException e) {
+			ViewLessons.showError(e.getMessage());
 		} catch (SQLException e) {
 			ViewLessons.showError("Could not save the lesson. Please try again.");
 		}
@@ -62,10 +64,12 @@ public class ControllerLessons {
 			return;
 		}
 		try {
-			Lesson lesson = ModelLessons.readLesson(selected.getId());
+			Lesson lesson = ModelLessons.readLesson(selected.getId(), ViewLessons.currentUser);
 
 			if (lesson == null) ViewLessons.showError("Select a lesson that exists");
 			else ViewLessons.showLesson(lesson);
+		} catch (SecurityException e) {
+			ViewLessons.showError(e.getMessage());
 		} catch (SQLException e) {
 			ViewLessons.showError("Could not read the lesson. Please try again.");
 		}
@@ -84,7 +88,7 @@ public class ControllerLessons {
 		}
 
 		try {
-			if (ModelLessons.readLesson(selected.getId()) == null) {
+			if (ModelLessons.readLesson(selected.getId(), ViewLessons.currentUser) == null) {
 				ViewLessons.showError("Select a lesson that exists");
 				return;
 			}
@@ -97,8 +101,10 @@ public class ControllerLessons {
 				return;
 			}
 
-			if (ModelLessons.updateLesson(lesson)) ViewLessons.refreshList();
+			if (ModelLessons.updateLesson(lesson, ViewLessons.currentUser)) ViewLessons.refreshList();
 			else ViewLessons.showError("Select a lesson that exists");
+		} catch (SecurityException e) {
+			ViewLessons.showError(e.getMessage());
 		} catch (SQLException e) {
 			ViewLessons.showError("Could not update the lesson. Please try again.");
 		}
@@ -116,8 +122,10 @@ public class ControllerLessons {
 			return;
 		}
 		try {
-			if (ModelLessons.deleteLesson(selected.getId())) ViewLessons.refreshList();
+			if (ModelLessons.deleteLesson(selected.getId(), ViewLessons.currentUser)) ViewLessons.refreshList();
 			else ViewLessons.showError("Select a lesson that exists");
+		} catch (SecurityException e) {
+			ViewLessons.showError(e.getMessage());
 		} catch (SQLException e) {
 			ViewLessons.showError("Could not delete the lesson. Please try again.");
 		}
@@ -161,4 +169,48 @@ public class ControllerLessons {
 		ViewLessons.theStage.setTitle(ViewLessons.theHomeTitle);
 	}
 	
+
+	/** Toggles a selected field lock and reloads persisted content.
+	 * @param field requested individual lock */
+	protected static void toggleLock(ModelLessons.LessonField field) {
+		Lesson selected = ViewLessons.list_Lessons.getSelectionModel().getSelectedItem();
+		if (selected == null) { ViewLessons.showError("Select a lesson first."); return; }
+		try {
+			ViewLessons.showLesson(ModelLessons.toggleLock(selected.getId(), field, ViewLessons.currentUser));
+		} catch (SecurityException | IllegalStateException failure) {
+			ViewLessons.showError(failure.getMessage());
+		} catch (SQLException failure) { ViewLessons.showError("Could not save the lock change."); }
+	}
+	/** Sets whole-lesson locks through the privileged model operation.
+	 * @param locked desired whole lock */
+	protected static void setSelectedLessonsLocked(boolean locked) {
+		java.util.List<Integer> ids = new java.util.ArrayList<>();
+		for (Lesson lesson : ViewLessons.list_Lessons.getSelectionModel().getSelectedItems()) ids.add(lesson.getId());
+		if (ids.isEmpty()) { ViewLessons.showError("Select one or more lessons first."); return; }
+		try {
+			ModelLessons.setLessonsLocked(ids, locked, ViewLessons.currentUser);
+			ViewLessons.refreshList();
+		} catch (SecurityException failure) { ViewLessons.showError(failure.getMessage()); }
+		catch (SQLException failure) { ViewLessons.showError("Could not change the lesson locks. Please try again."); }
+	}
+	/** Appends the experience input as a new attempt without replacing history. */
+	protected static void addExperience() {
+		Lesson selected = ViewLessons.list_Lessons.getSelectionModel().getSelectedItem();
+		if (selected == null) { ViewLessons.showError("Select a lesson that exists"); return; }
+		try {
+			if (!ModelLessons.addExperience(selected.getId(), ViewLessons.text_Experience.getText(), ViewLessons.currentUser))
+				ViewLessons.showError("Enter experience between 1-2000 characters for an existing lesson.");
+		} catch (SecurityException failure) { ViewLessons.showError(failure.getMessage()); }
+		catch (SQLException failure) { ViewLessons.showError("Could not save the experience. Please try again."); }
+	}
+	/** Displays only authorized contributor-authored attempt history. */
+	protected static void showExperiences() {
+		Lesson selected = ViewLessons.list_Lessons.getSelectionModel().getSelectedItem();
+		if (selected == null) { ViewLessons.showError("Select a lesson that exists"); return; }
+		try {
+			java.util.List<String> history = ModelLessons.readExperiences(selected.getId(), ViewLessons.currentUser);
+			ViewLessons.showExperienceHistory(history);
+		} catch (SecurityException failure) { ViewLessons.showError(failure.getMessage()); }
+		catch (SQLException failure) { ViewLessons.showError("Could not read experience history. Please try again."); }
+	}
 }

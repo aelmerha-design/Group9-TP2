@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>LessonManualTesting - lines 46-81</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>LessonManualTesting.java - source lines 46-81</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: 6E35EA7D766B970857B6130F394A855F8750C1447A745929B9779EFE3A0FEE2E</p><div class="source"><div class="line"><span class="number">46</span><code>        System.setProperty(&quot;user.home&quot;, testHome.toAbsolutePath().toString());</code></div>
+<div class="line"><span class="number">47</span><code>        Platform.startup(() -&gt; {</code></div>
+<div class="line"><span class="number">48</span><code>            try {</code></div>
+<div class="line"><span class="number">49</span><code>                FoundationsMain.database.connectToDatabase();</code></div>
+<div class="line"><span class="number">50</span><code>                Stage stage = new Stage();</code></div>
+<div class="line"><span class="number">51</span><code>                stage.setScene(new Scene(new StackPane(new Label(&quot;Manual test return page&quot;)), 800, 600));</code></div>
+<div class="line"><span class="number">52</span><code>                stage.setTitle(&quot;Manual test home&quot;);</code></div>
+<div class="line"><span class="number">53</span><code>                // MT-01 through MT-07 use the same real contributor controls as the application.</code></div>
+<div class="line"><span class="number">54</span><code>                String role = System.getProperty(&quot;contributor.test.actor&quot;, &quot;owner&quot;);</code></div>
+<div class="line"><span class="number">55</span><code>                boolean privileged = role.equals(&quot;admin&quot;);</code></div>
+<div class="line"><span class="number">56</span><code>                int ownerId = privileged ? 999 : role.equals(&quot;other&quot;) ? 102 : role.equals(&quot;regression&quot;) ? 0 : 101;</code></div>
+<div class="line"><span class="number">57</span><code>                ViewLessons.displayLessons(stage, new User(&quot;Manual &quot; + role, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;,</code></div>
+<div class="line"><span class="number">58</span><code>                        privileged, !privileged, false, ownerId));</code></div>
+<div class="line"><span class="number">59</span><code>                stage.getScene().setOnKeyPressed(event -&gt; {</code></div>
+<div class="line"><span class="number">60</span><code>                    // F12 records actual visible state; it does not infer a pass or fail.</code></div>
+<div class="line"><span class="number">61</span><code>                    if (event.getCode() == KeyCode.F12) {</code></div>
+<div class="line"><span class="number">62</span><code>                        try {</code></div>
+<div class="line"><span class="number">63</span><code>                            Path evidence = Path.of(System.getProperty(&quot;contributor.test.evidence&quot;, &quot;ContributorTests_Javadocs/screenshots&quot;));</code></div>
+<div class="line"><span class="number">64</span><code>                            LessonTestEvidence.capture(stage.getScene().getRoot(), evidence.resolve(&quot;manual-&quot; + System.currentTimeMillis() + &quot;.png&quot;));</code></div>
+<div class="line"><span class="number">65</span><code>                        } catch (Exception failure) {</code></div>
+<div class="line"><span class="number">66</span><code>                            failure.printStackTrace();</code></div>
+<div class="line"><span class="number">67</span><code>                        }</code></div>
+<div class="line"><span class="number">68</span><code>                    }</code></div>
+<div class="line"><span class="number">69</span><code>                });</code></div>
+<div class="line"><span class="number">70</span><code>                stage.setOnHidden(event -&gt; {</code></div>
+<div class="line"><span class="number">71</span><code>                    // MT-06 needs an orderly database close before the next launch reads the file.</code></div>
+<div class="line"><span class="number">72</span><code>                    FoundationsMain.database.closeConnection();</code></div>
+<div class="line"><span class="number">73</span><code>                });</code></div>
+<div class="line"><span class="number">74</span><code>            } catch (Exception failure) {</code></div>
+<div class="line"><span class="number">75</span><code>                failure.printStackTrace();</code></div>
+<div class="line"><span class="number">76</span><code>                Platform.exit();</code></div>
+<div class="line"><span class="number">77</span><code>                System.exit(1);</code></div>
+<div class="line"><span class="number">78</span><code>            }</code></div>
+<div class="line"><span class="number">79</span><code>        });</code></div>
+<div class="line"><span class="number">80</span><code>    }</code></div>
+<div class="line"><span class="number">81</span><code>}</code></div></div></html>

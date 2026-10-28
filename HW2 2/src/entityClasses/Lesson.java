@@ -1,5 +1,6 @@
 package entityClasses;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import database.Database;
 
 
@@ -34,6 +35,25 @@ public class Lesson {
 	private String problem;
 	private String solution;
 	private String experience;
+	/** Persistent locked state used by contributor lock restrictions. */
+	private boolean locked;
+	/** Persistent titleLocked state used by contributor lock restrictions. */
+	private boolean titleLocked;
+	/** Persistent problemLocked state used by contributor lock restrictions. */
+	private boolean problemLocked;
+	/** Persistent solutionLocked state used by contributor lock restrictions. */
+	private boolean solutionLocked;
+	/** Persistent experienceLocked state used by contributor lock restrictions. */
+	private boolean experienceLocked;
+	/** Curator-approved search terms reserved for Phase Three search coaching. */
+	private String searchTerms = "";
+	/** Recorded duration in hours for future effort aggregation. */
+	private double timeHours;
+	/** Recorded effort in person-hours for future effort aggregation. */
+	private double effortHours;
+	/** Visibility policy for future statistics, separate from contributor core content. */
+	private boolean statsVisible;
+
 	
 	
     /**
@@ -220,4 +240,73 @@ public class Lesson {
 		return id + ": " + title;
 	}
 
+	/** @return the stored locked state */
+	public boolean isLocked() { return locked; }
+	/** @param value the locked state to persist */
+	public void setLocked(boolean value) { locked = value; }
+
+	/** @return the stored titleLocked state */
+	public boolean isTitleLocked() { return titleLocked; }
+	/** @param value the titleLocked state to persist */
+	public void setTitleLocked(boolean value) { titleLocked = value; }
+
+	/** @return the stored problemLocked state */
+	public boolean isProblemLocked() { return problemLocked; }
+	/** @param value the problemLocked state to persist */
+	public void setProblemLocked(boolean value) { problemLocked = value; }
+
+	/** @return the stored solutionLocked state */
+	public boolean isSolutionLocked() { return solutionLocked; }
+	/** @param value the solutionLocked state to persist */
+	public void setSolutionLocked(boolean value) { solutionLocked = value; }
+
+	/** @return the stored experienceLocked state */
+	public boolean isExperienceLocked() { return experienceLocked; }
+	/** @param value the experienceLocked state to persist */
+	public void setExperienceLocked(boolean value) { experienceLocked = value; }
+	/** @return whether the whole lesson or this field is locked */
+	public boolean isTitleEffectivelyLocked() { return locked || titleLocked; }
+	/** @return whether the whole lesson or this field is locked */
+	public boolean isProblemEffectivelyLocked() { return locked || problemLocked; }
+	/** @return whether the whole lesson or this field is locked */
+	public boolean isSolutionEffectivelyLocked() { return locked || solutionLocked; }
+	/** @return whether the whole lesson or this field is locked */
+	public boolean isExperienceEffectivelyLocked() { return locked || experienceLocked; }
+	/** @return whether any lesson or field lock is active */
+	public boolean hasAnyLock() { return locked || titleLocked || problemLocked || solutionLocked || experienceLocked; }
+	/** @return curator-managed search terms */
+	public String getSearchTerms() { return searchTerms; }
+	/** @param value curator-managed search terms */
+	public void setSearchTerms(String value) { searchTerms = value == null ? "" : value.trim(); }
+	/** @return recorded duration in hours */
+	public double getTimeHours() { return timeHours; }
+	/** @param value recorded duration in hours */
+	public void setTimeHours(double value) { timeHours = value; }
+	/** @return recorded effort in person-hours */
+	public double getEffortHours() { return effortHours; }
+	/** @param value recorded effort in person-hours */
+	public void setEffortHours(double value) { effortHours = value; }
+	/** @return whether the statistics visibility policy is enabled */
+	public boolean isStatsVisible() { return statsVisible; }
+	/** @param value whether statistics may be displayed by a future authorized view */
+	public void setStatsVisible(boolean value) { statsVisible = value; }
+	/**
+	 * Appends one validated attempt without replacing earlier experiences.
+	 * Authorization belongs to the actor-aware model, as with other entity operations.
+	 * @param db trusted persistence connection
+	 * @param text what was done, how, time, and individual team effort
+	 * @return whether an existing lesson received a valid experience
+	 * @throws SQLException if persistence fails
+	 */
+	public boolean addExperience(Database db, String text) throws SQLException {
+		if (text == null || text.trim().isEmpty() || !isValidExperience(text)) return false;
+		return db.addExperience(id, text.trim());
+	}
+	/**
+	 * Reads attempts in insertion order through the trusted entity API.
+	 * @param db trusted persistence connection
+	 * @return saved attempts, possibly empty
+	 * @throws SQLException if persistence fails
+	 */
+	public ArrayList<String> getExperiences(Database db) throws SQLException { return db.readExperiences(id); }
 }

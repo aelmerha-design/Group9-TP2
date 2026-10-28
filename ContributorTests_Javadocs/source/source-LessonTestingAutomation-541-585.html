@@ -1,48 +1,48 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 541-585</title>
 <style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
 <h1>LessonTestingAutomation.java - source lines 541-585</h1><p>Contributor test implementation / original Java source and internal documentation</p>
-<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">541</span><code>                new Lesson(0, testOwnerId, title, null, solution, &quot;&quot;),</code></div>
-<div class="line"><span class="number">542</span><code>                new Lesson(0, testOwnerId, title, problem, null, &quot;&quot;),</code></div>
-<div class="line"><span class="number">543</span><code>                new Lesson(0, testOwnerId, &quot;T&quot;.repeat(101), problem, solution, &quot;&quot;),</code></div>
-<div class="line"><span class="number">544</span><code>                new Lesson(0, testOwnerId, title, &quot;P&quot;.repeat(2001), solution, &quot;&quot;),</code></div>
-<div class="line"><span class="number">545</span><code>                new Lesson(0, testOwnerId, title, problem, &quot;S&quot;.repeat(2001), &quot;&quot;),</code></div>
-<div class="line"><span class="number">546</span><code>                new Lesson(0, testOwnerId, title, problem, solution, &quot;E&quot;.repeat(2001))}) {</code></div>
-<div class="line"><span class="number">547</span><code>            performTestCase(19, &quot;Entity rejects invalid create without inserting&quot;,</code></div>
-<div class="line"><span class="number">548</span><code>                    !invalid.isValid() &amp;&amp; invalid.create(FoundationsMain.database) == -1</code></div>
-<div class="line"><span class="number">549</span><code>                    &amp;&amp; ModelLessons.readLessons(testOwnerId).getLessons().size() == originalCount);</code></div>
-<div class="line"><span class="number">550</span><code>        }</code></div>
-<div class="line"><span class="number">551</span><code>        Lesson entity = new Lesson(0, testOwnerId, &quot;  Entity title  &quot;, &quot; Problem &quot;, &quot; Solution &quot;, null);</code></div>
-<div class="line"><span class="number">552</span><code>        int entityId = entity.create(FoundationsMain.database);</code></div>
-<div class="line"><span class="number">553</span><code>        Lesson stored = Lesson.read(FoundationsMain.database, entityId);</code></div>
-<div class="line"><span class="number">554</span><code>        performTestCase(19, &quot;Entity create trims text, normalizes null experience, assigns ID&quot;,</code></div>
-<div class="line"><span class="number">555</span><code>                entityId &gt; 0 &amp;&amp; entity.getId() == entityId &amp;&amp; stored != null</code></div>
-<div class="line"><span class="number">556</span><code>                &amp;&amp; stored.getTitle().equals(&quot;Entity title&quot;) &amp;&amp; stored.getProblem().equals(&quot;Problem&quot;)</code></div>
-<div class="line"><span class="number">557</span><code>                &amp;&amp; stored.getSolution().equals(&quot;Solution&quot;) &amp;&amp; stored.getExperience().isEmpty());</code></div>
-<div class="line"><span class="number">558</span><code>        entity.setTitle(&quot;   &quot;);</code></div>
-<div class="line"><span class="number">559</span><code>        performTestCase(19, &quot;Entity rejects invalid update and preserves stored snapshot&quot;,</code></div>
-<div class="line"><span class="number">560</span><code>                !entity.update(FoundationsMain.database) &amp;&amp; sameLesson(stored, Lesson.read(FoundationsMain.database, entityId)));</code></div>
-<div class="line"><span class="number">561</span><code>        entity.setTitle(&quot; Updated entity &quot;);</code></div>
-<div class="line"><span class="number">562</span><code>        entity.setProblem(&quot; Updated problem &quot;);</code></div>
-<div class="line"><span class="number">563</span><code>        entity.setSolution(&quot; Updated solution &quot;);</code></div>
-<div class="line"><span class="number">564</span><code>        entity.setExperience(&quot; Updated experience &quot;);</code></div>
-<div class="line"><span class="number">565</span><code>        performTestCase(19, &quot;Entity update persists normalized fields and unchanged identity&quot;,</code></div>
-<div class="line"><span class="number">566</span><code>                entity.update(FoundationsMain.database) &amp;&amp; sameLesson(entity, Lesson.read(FoundationsMain.database, entityId)));</code></div>
-<div class="line"><span class="number">567</span><code>        LessonList ownLessons = LessonList.readLessons(FoundationsMain.database, testOwnerId);</code></div>
-<div class="line"><span class="number">568</span><code>        LessonList allLessons = LessonList.readAllLessons(FoundationsMain.database);</code></div>
-<div class="line"><span class="number">569</span><code>        performTestCase(19, &quot;Persistent list APIs include the newly created entity&quot;,</code></div>
-<div class="line"><span class="number">570</span><code>                ownLessons.getLesson(entityId) != null &amp;&amp; allLessons.getLesson(entityId) != null</code></div>
-<div class="line"><span class="number">571</span><code>                &amp;&amp; ownLessons.getLessons().size() == originalCount + 1);</code></div>
-<div class="line"><span class="number">572</span><code>        performTestCase(19, &quot;Entity delete removes stored row and repeated delete returns false&quot;,</code></div>
-<div class="line"><span class="number">573</span><code>                entity.delete(FoundationsMain.database) &amp;&amp; Lesson.read(FoundationsMain.database, entityId) == null</code></div>
-<div class="line"><span class="number">574</span><code>                &amp;&amp; !entity.delete(FoundationsMain.database));</code></div>
-<div class="line"><span class="number">575</span><code>        ViewLessons.refreshList();</code></div>
-<div class="line"><span class="number">576</span><code>    }</code></div>
-<div class="line"><span class="number">577</span><code></code></div>
-<div class="line"><span class="number">578</span><code>    /**</code></div>
-<div class="line"><span class="number">579</span><code>     * Checks Task 4&#39;s helpful database error dialogs and recovery after reconnection.</code></div>
-<div class="line"><span class="number">580</span><code>     * @throws Exception if preparing or restoring the database connection fails</code></div>
-<div class="line"><span class="number">581</span><code>     */</code></div>
-<div class="line"><span class="number">582</span><code>    private static void testDatabaseErrors() throws Exception {</code></div>
-<div class="line"><span class="number">583</span><code>        // CASE 20: Close only the isolated connection to force genuine SQL failures.</code></div>
-<div class="line"><span class="number">584</span><code>        Lesson selected = ViewLessons.list_Lessons.getItems().get(0);</code></div>
-<div class="line"><span class="number">585</span><code>        select(selected.getId());</code></div></div></html>
+<p class="hash">SHA-256: 8A0C70980AD78A9E46E20EB4E53FCE0EFF9639F006F25F9EA7583C02312D4BBD</p><div class="source"><div class="line"><span class="number">541</span><code>        int originalCount = ModelLessons.readLessons(testOwnerId).getLessons().size();</code></div>
+<div class="line"><span class="number">542</span><code>        for (Lesson invalid : new Lesson[] {</code></div>
+<div class="line"><span class="number">543</span><code>                new Lesson(0, testOwnerId, null, problem, solution, null),</code></div>
+<div class="line"><span class="number">544</span><code>                new Lesson(0, testOwnerId, title, null, solution, &quot;&quot;),</code></div>
+<div class="line"><span class="number">545</span><code>                new Lesson(0, testOwnerId, title, problem, null, &quot;&quot;),</code></div>
+<div class="line"><span class="number">546</span><code>                new Lesson(0, testOwnerId, &quot;T&quot;.repeat(101), problem, solution, &quot;&quot;),</code></div>
+<div class="line"><span class="number">547</span><code>                new Lesson(0, testOwnerId, title, &quot;P&quot;.repeat(2001), solution, &quot;&quot;),</code></div>
+<div class="line"><span class="number">548</span><code>                new Lesson(0, testOwnerId, title, problem, &quot;S&quot;.repeat(2001), &quot;&quot;),</code></div>
+<div class="line"><span class="number">549</span><code>                new Lesson(0, testOwnerId, title, problem, solution, &quot;E&quot;.repeat(2001))}) {</code></div>
+<div class="line"><span class="number">550</span><code>            performTestCase(19, &quot;Entity rejects invalid create without inserting&quot;,</code></div>
+<div class="line"><span class="number">551</span><code>                    !invalid.isValid() &amp;&amp; invalid.create(FoundationsMain.database) == -1</code></div>
+<div class="line"><span class="number">552</span><code>                    &amp;&amp; ModelLessons.readLessons(testOwnerId).getLessons().size() == originalCount);</code></div>
+<div class="line"><span class="number">553</span><code>        }</code></div>
+<div class="line"><span class="number">554</span><code>        Lesson entity = new Lesson(0, testOwnerId, &quot;  Entity title  &quot;, &quot; Problem &quot;, &quot; Solution &quot;, null);</code></div>
+<div class="line"><span class="number">555</span><code>        int entityId = entity.create(FoundationsMain.database);</code></div>
+<div class="line"><span class="number">556</span><code>        Lesson stored = Lesson.read(FoundationsMain.database, entityId);</code></div>
+<div class="line"><span class="number">557</span><code>        performTestCase(19, &quot;Entity create trims text, normalizes null experience, assigns ID&quot;,</code></div>
+<div class="line"><span class="number">558</span><code>                entityId &gt; 0 &amp;&amp; entity.getId() == entityId &amp;&amp; stored != null</code></div>
+<div class="line"><span class="number">559</span><code>                &amp;&amp; stored.getTitle().equals(&quot;Entity title&quot;) &amp;&amp; stored.getProblem().equals(&quot;Problem&quot;)</code></div>
+<div class="line"><span class="number">560</span><code>                &amp;&amp; stored.getSolution().equals(&quot;Solution&quot;) &amp;&amp; stored.getExperience().isEmpty());</code></div>
+<div class="line"><span class="number">561</span><code>        entity.setTitle(&quot;   &quot;);</code></div>
+<div class="line"><span class="number">562</span><code>        performTestCase(19, &quot;Entity rejects invalid update and preserves stored snapshot&quot;,</code></div>
+<div class="line"><span class="number">563</span><code>                !entity.update(FoundationsMain.database) &amp;&amp; sameLesson(stored, Lesson.read(FoundationsMain.database, entityId)));</code></div>
+<div class="line"><span class="number">564</span><code>        entity.setTitle(&quot; Updated entity &quot;);</code></div>
+<div class="line"><span class="number">565</span><code>        entity.setProblem(&quot; Updated problem &quot;);</code></div>
+<div class="line"><span class="number">566</span><code>        entity.setSolution(&quot; Updated solution &quot;);</code></div>
+<div class="line"><span class="number">567</span><code>        entity.setExperience(&quot; Updated experience &quot;);</code></div>
+<div class="line"><span class="number">568</span><code>        performTestCase(19, &quot;Entity update persists normalized fields and unchanged identity&quot;,</code></div>
+<div class="line"><span class="number">569</span><code>                entity.update(FoundationsMain.database) &amp;&amp; sameLesson(entity, Lesson.read(FoundationsMain.database, entityId)));</code></div>
+<div class="line"><span class="number">570</span><code>        LessonList ownLessons = LessonList.readLessons(FoundationsMain.database, testOwnerId);</code></div>
+<div class="line"><span class="number">571</span><code>        LessonList allLessons = LessonList.readAllLessons(FoundationsMain.database);</code></div>
+<div class="line"><span class="number">572</span><code>        performTestCase(19, &quot;Persistent list APIs include the newly created entity&quot;,</code></div>
+<div class="line"><span class="number">573</span><code>                ownLessons.getLesson(entityId) != null &amp;&amp; allLessons.getLesson(entityId) != null</code></div>
+<div class="line"><span class="number">574</span><code>                &amp;&amp; ownLessons.getLessons().size() == originalCount + 1);</code></div>
+<div class="line"><span class="number">575</span><code>        performTestCase(19, &quot;Entity delete removes stored row and repeated delete returns false&quot;,</code></div>
+<div class="line"><span class="number">576</span><code>                entity.delete(FoundationsMain.database) &amp;&amp; Lesson.read(FoundationsMain.database, entityId) == null</code></div>
+<div class="line"><span class="number">577</span><code>                &amp;&amp; !entity.delete(FoundationsMain.database));</code></div>
+<div class="line"><span class="number">578</span><code>        ViewLessons.refreshList();</code></div>
+<div class="line"><span class="number">579</span><code>    }</code></div>
+<div class="line"><span class="number">580</span><code></code></div>
+<div class="line"><span class="number">581</span><code>    /**</code></div>
+<div class="line"><span class="number">582</span><code>     * Checks Task 4&#39;s helpful database error dialogs and recovery after reconnection.</code></div>
+<div class="line"><span class="number">583</span><code>     * @throws Exception if preparing or restoring the database connection fails</code></div>
+<div class="line"><span class="number">584</span><code>     */</code></div>
+<div class="line"><span class="number">585</span><code>    private static void testDatabaseErrors() throws Exception {</code></div></div></html>

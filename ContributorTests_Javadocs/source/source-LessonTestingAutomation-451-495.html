@@ -1,48 +1,48 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 451-495</title>
 <style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
 <h1>LessonTestingAutomation.java - source lines 451-495</h1><p>Contributor test implementation / original Java source and internal documentation</p>
-<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">451</span><code>        ModelLessons.deleteLesson(otherId);</code></div>
-<div class="line"><span class="number">452</span><code>        ViewLessons.refreshList();</code></div>
-<div class="line"><span class="number">453</span><code>    }</code></div>
-<div class="line"><span class="number">454</span><code></code></div>
-<div class="line"><span class="number">455</span><code>    /** Checks duplicate IDs, missing IDs, defensive list copies, and keyword subsets (case 17). */</code></div>
-<div class="line"><span class="number">456</span><code>    private static void testListSearch() {</code></div>
-<div class="line"><span class="number">457</span><code>        // CASE 17: Exercise missing IDs, duplicate IDs, copy isolation, and all search fields.</code></div>
-<div class="line"><span class="number">458</span><code>        LessonList list = new LessonList();</code></div>
-<div class="line"><span class="number">459</span><code>        list.addLesson(new Lesson(1, testOwnerId, &quot;Alpha&quot;, &quot;ProblemToken&quot;, &quot;SolutionToken&quot;, &quot;ExperienceToken&quot;));</code></div>
-<div class="line"><span class="number">460</span><code>        list.addLesson(new Lesson(1, testOwnerId, &quot;Duplicate&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;));</code></div>
-<div class="line"><span class="number">461</span><code>        list.addLesson(new Lesson(2, testOwnerId, &quot;Beta&quot;, &quot;Other&quot;, &quot;Other&quot;, &quot;&quot;));</code></div>
-<div class="line"><span class="number">462</span><code>        performTestCase(17, &quot;Duplicate ID is ignored&quot;, list.getLessons().size() == 2 &amp;&amp; list.getLesson(1).getTitle().equals(&quot;Alpha&quot;));</code></div>
-<div class="line"><span class="number">463</span><code>        performTestCase(17, &quot;Missing IDs return null or false&quot;, list.getLesson(99) == null</code></div>
-<div class="line"><span class="number">464</span><code>                &amp;&amp; !list.updateLesson(new Lesson(99, testOwnerId, &quot;Absent&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;)) &amp;&amp; !list.removeLesson(99));</code></div>
-<div class="line"><span class="number">465</span><code>        list.getLessons().clear();</code></div>
-<div class="line"><span class="number">466</span><code>        performTestCase(17, &quot;Changing returned list preserves original&quot;, list.getLessons().size() == 2);</code></div>
-<div class="line"><span class="number">467</span><code>        for (String keyword : new String[] {&quot; ALPHA &quot;, &quot;problemtoken&quot;, &quot;solutiontoken&quot;, &quot;experiencetoken&quot;}) {</code></div>
-<div class="line"><span class="number">468</span><code>            LessonList subset = list.searchByKeyword(keyword);</code></div>
-<div class="line"><span class="number">469</span><code>            performTestCase(17, &quot;Keyword matches field: &quot; + keyword,</code></div>
-<div class="line"><span class="number">470</span><code>                    subset.getLessons().size() == 1 &amp;&amp; subset.getLesson(1) != null &amp;&amp; list.getLessons().size() == 2);</code></div>
-<div class="line"><span class="number">471</span><code>        }</code></div>
-<div class="line"><span class="number">472</span><code>        performTestCase(17, &quot;Absent keyword yields empty subset&quot;, list.searchByKeyword(&quot;missing&quot;).getLessons().isEmpty());</code></div>
-<div class="line"><span class="number">473</span><code>        performTestCase(17, &quot;Blank and null keywords match all&quot;, list.searchByKeyword(&quot;&quot;).getLessons().size() == 2</code></div>
-<div class="line"><span class="number">474</span><code>                &amp;&amp; list.searchByKeyword(null).getLessons().size() == 2);</code></div>
-<div class="line"><span class="number">475</span><code>    }</code></div>
-<div class="line"><span class="number">476</span><code></code></div>
-<div class="line"><span class="number">477</span><code>    /**</code></div>
-<div class="line"><span class="number">478</span><code>     * Exercises actual button handlers, including subset restoration and Back (case 18).</code></div>
-<div class="line"><span class="number">479</span><code>     * @throws Exception if database access fails</code></div>
-<div class="line"><span class="number">480</span><code>     */</code></div>
-<div class="line"><span class="number">481</span><code>    private static void testButtons() throws Exception {</code></div>
-<div class="line"><span class="number">482</span><code>        // CASE 18: Fire installed button handlers so broken MVC bindings cannot pass silently.</code></div>
-<div class="line"><span class="number">483</span><code>        fields(title, problem, solution, experience);</code></div>
-<div class="line"><span class="number">484</span><code>        fireButton(&quot;Create&quot;);</code></div>
-<div class="line"><span class="number">485</span><code>        performTestCase(18, &quot;Create button saves a lesson&quot;, ViewLessons.list_Lessons.getItems().size() == 1);</code></div>
-<div class="line"><span class="number">486</span><code>        int lessonId = ViewLessons.list_Lessons.getItems().get(0).getId();</code></div>
-<div class="line"><span class="number">487</span><code>        select(lessonId);</code></div>
-<div class="line"><span class="number">488</span><code>        fields(&quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;);</code></div>
-<div class="line"><span class="number">489</span><code>        fireButton(&quot;Read&quot;);</code></div>
-<div class="line"><span class="number">490</span><code>        performTestCase(18, &quot;Read button restores every field&quot;, formMatches(title, problem, solution, experience));</code></div>
-<div class="line"><span class="number">491</span><code>        ViewLessons.text_Title.setText(&quot;Button update&quot;);</code></div>
-<div class="line"><span class="number">492</span><code>        fireButton(&quot;Update&quot;);</code></div>
-<div class="line"><span class="number">493</span><code>        performTestCase(18, &quot;Update button saves the edited title&quot;, ModelLessons.readLesson(lessonId).getTitle().equals(&quot;Button update&quot;));</code></div>
-<div class="line"><span class="number">494</span><code>        select(lessonId);</code></div>
-<div class="line"><span class="number">495</span><code>        fireButton(&quot;Show selected&quot;);</code></div></div></html>
+<p class="hash">SHA-256: 8A0C70980AD78A9E46E20EB4E53FCE0EFF9639F006F25F9EA7583C02312D4BBD</p><div class="source"><div class="line"><span class="number">451</span><code>                ViewLessons.list_Lessons.getItems().size() == 1000</code></div>
+<div class="line"><span class="number">452</span><code>                &amp;&amp; ViewLessons.list_Lessons.getItems().stream().noneMatch(lesson -&gt; lesson.getId() == otherId)</code></div>
+<div class="line"><span class="number">453</span><code>                &amp;&amp; ModelLessons.readLessons(otherOwnerId).getLessons().size() == 1);</code></div>
+<div class="line"><span class="number">454</span><code>        ModelLessons.deleteLesson(otherId);</code></div>
+<div class="line"><span class="number">455</span><code>        ViewLessons.refreshList();</code></div>
+<div class="line"><span class="number">456</span><code>    }</code></div>
+<div class="line"><span class="number">457</span><code></code></div>
+<div class="line"><span class="number">458</span><code>    /** Checks duplicate IDs, missing IDs, defensive list copies, and keyword subsets (case 17). */</code></div>
+<div class="line"><span class="number">459</span><code>    private static void testListSearch() {</code></div>
+<div class="line"><span class="number">460</span><code>        // CASE 17: Exercise missing IDs, duplicate IDs, copy isolation, and all search fields.</code></div>
+<div class="line"><span class="number">461</span><code>        LessonList list = new LessonList();</code></div>
+<div class="line"><span class="number">462</span><code>        list.addLesson(new Lesson(1, testOwnerId, &quot;Alpha&quot;, &quot;ProblemToken&quot;, &quot;SolutionToken&quot;, &quot;ExperienceToken&quot;));</code></div>
+<div class="line"><span class="number">463</span><code>        list.addLesson(new Lesson(1, testOwnerId, &quot;Duplicate&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;));</code></div>
+<div class="line"><span class="number">464</span><code>        list.addLesson(new Lesson(2, testOwnerId, &quot;Beta&quot;, &quot;Other&quot;, &quot;Other&quot;, &quot;&quot;));</code></div>
+<div class="line"><span class="number">465</span><code>        performTestCase(17, &quot;Duplicate ID is ignored&quot;, list.getLessons().size() == 2 &amp;&amp; list.getLesson(1).getTitle().equals(&quot;Alpha&quot;));</code></div>
+<div class="line"><span class="number">466</span><code>        performTestCase(17, &quot;Missing IDs return null or false&quot;, list.getLesson(99) == null</code></div>
+<div class="line"><span class="number">467</span><code>                &amp;&amp; !list.updateLesson(new Lesson(99, testOwnerId, &quot;Absent&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;)) &amp;&amp; !list.removeLesson(99));</code></div>
+<div class="line"><span class="number">468</span><code>        list.getLessons().clear();</code></div>
+<div class="line"><span class="number">469</span><code>        performTestCase(17, &quot;Changing returned list preserves original&quot;, list.getLessons().size() == 2);</code></div>
+<div class="line"><span class="number">470</span><code>        for (String keyword : new String[] {&quot; ALPHA &quot;, &quot;problemtoken&quot;, &quot;solutiontoken&quot;, &quot;experiencetoken&quot;}) {</code></div>
+<div class="line"><span class="number">471</span><code>            LessonList subset = list.searchByKeyword(keyword);</code></div>
+<div class="line"><span class="number">472</span><code>            performTestCase(17, &quot;Keyword matches field: &quot; + keyword.trim(),</code></div>
+<div class="line"><span class="number">473</span><code>                    subset.getLessons().size() == 1 &amp;&amp; subset.getLesson(1) != null &amp;&amp; list.getLessons().size() == 2);</code></div>
+<div class="line"><span class="number">474</span><code>        }</code></div>
+<div class="line"><span class="number">475</span><code>        performTestCase(17, &quot;Absent keyword yields empty subset&quot;, list.searchByKeyword(&quot;missing&quot;).getLessons().isEmpty());</code></div>
+<div class="line"><span class="number">476</span><code>        performTestCase(17, &quot;Blank and null keywords match all&quot;, list.searchByKeyword(&quot;&quot;).getLessons().size() == 2</code></div>
+<div class="line"><span class="number">477</span><code>                &amp;&amp; list.searchByKeyword(null).getLessons().size() == 2);</code></div>
+<div class="line"><span class="number">478</span><code>    }</code></div>
+<div class="line"><span class="number">479</span><code></code></div>
+<div class="line"><span class="number">480</span><code>    /**</code></div>
+<div class="line"><span class="number">481</span><code>     * Exercises actual button handlers, including subset restoration and Back (case 18).</code></div>
+<div class="line"><span class="number">482</span><code>     * @throws Exception if database access fails</code></div>
+<div class="line"><span class="number">483</span><code>     */</code></div>
+<div class="line"><span class="number">484</span><code>    private static void testButtons() throws Exception {</code></div>
+<div class="line"><span class="number">485</span><code>        // CASE 18: Fire installed button handlers so broken MVC bindings cannot pass silently.</code></div>
+<div class="line"><span class="number">486</span><code>        fields(title, problem, solution, experience);</code></div>
+<div class="line"><span class="number">487</span><code>        fireButton(&quot;Create&quot;);</code></div>
+<div class="line"><span class="number">488</span><code>        performTestCase(18, &quot;Create button saves a lesson&quot;, ViewLessons.list_Lessons.getItems().size() == 1);</code></div>
+<div class="line"><span class="number">489</span><code>        int lessonId = ViewLessons.list_Lessons.getItems().get(0).getId();</code></div>
+<div class="line"><span class="number">490</span><code>        select(lessonId);</code></div>
+<div class="line"><span class="number">491</span><code>        fields(&quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;);</code></div>
+<div class="line"><span class="number">492</span><code>        fireButton(&quot;Read&quot;);</code></div>
+<div class="line"><span class="number">493</span><code>        performTestCase(18, &quot;Read button restores every field&quot;, formMatches(title, problem, solution, experience));</code></div>
+<div class="line"><span class="number">494</span><code>        ViewLessons.text_Title.setText(&quot;Button update&quot;);</code></div>
+<div class="line"><span class="number">495</span><code>        fireButton(&quot;Update&quot;);</code></div></div></html>

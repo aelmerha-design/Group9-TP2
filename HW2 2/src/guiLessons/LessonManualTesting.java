@@ -23,6 +23,11 @@ import javafx.stage.Stage;
  * These procedures exercise Task 3's entities through Task 4's real MVC page.
  * The tester records observed results in ManualTests.md; opening the launcher
  * alone is not a completed manual test.</p>
+ * <p>MT-09 through MT-13 check ownership, field and whole locks, restricted
+ * additions, repeated experience history, and other-role edits/deletions.
+ * Set contributor.test.actor to owner (101), other (102), admin (999), or
+ * regression (0). Switching actors requires closing and relaunching the fixture;
+ * this is a test identity selection, not application authentication.</p>
  */
 public final class LessonManualTesting {
 
@@ -46,7 +51,11 @@ public final class LessonManualTesting {
 				stage.setScene(new Scene(new StackPane(new Label("Manual test return page")), 800, 600));
 				stage.setTitle("Manual test home");
 				// MT-01 through MT-07 use the same real contributor controls as the application.
-				ViewLessons.displayLessons(stage, new User("Manual contributor", "", "", "", "", "", "", false, true, false, 0));
+				String role = System.getProperty("contributor.test.actor", "owner");
+				boolean privileged = role.equals("admin");
+				int ownerId = privileged ? 999 : role.equals("other") ? 102 : role.equals("regression") ? 0 : 101;
+				ViewLessons.displayLessons(stage, new User("Manual " + role, "", "", "", "", "", "",
+						privileged, !privileged, false, ownerId));
 				stage.getScene().setOnKeyPressed(event -> {
 					// F12 records actual visible state; it does not infer a pass or fail.
 					if (event.getCode() == KeyCode.F12) {
@@ -61,7 +70,6 @@ public final class LessonManualTesting {
 				stage.setOnHidden(event -> {
 					// MT-06 needs an orderly database close before the next launch reads the file.
 					FoundationsMain.database.closeConnection();
-					Platform.exit();
 				});
 			} catch (Exception failure) {
 				failure.printStackTrace();

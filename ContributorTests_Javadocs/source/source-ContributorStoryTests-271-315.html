@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ContributorStoryTests - lines 271-315</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>ContributorStoryTests.java - source lines 271-315</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: A2CCA1D5C51ACAE6A656F3C86A4CA5C1BED7D04C50F7A9D03FE1BF575BC1E86D</p><div class="source"><div class="line"><span class="number">271</span><code>    }</code></div>
+<div class="line"><span class="number">272</span><code></code></div>
+<div class="line"><span class="number">273</span><code>    /** C07 positive: append two attempts describing what/how/time/individual team effort.</code></div>
+<div class="line"><span class="number">274</span><code>     * Success means both entries remain in exact insertion order.</code></div>
+<div class="line"><span class="number">275</span><code>     * @throws Exception if persistence fails */</code></div>
+<div class="line"><span class="number">276</span><code>    public static void testExperienceAppend() throws Exception {</code></div>
+<div class="line"><span class="number">277</span><code>        Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">278</span><code>        String first = &quot;What: retry diagrams; how: pair review; time: 2 hours; Alex: 1, Sam: 2 person-hours&quot;;</code></div>
+<div class="line"><span class="number">279</span><code>        String second = &quot;What: refine diagrams; how: prototype; time: 1 hour; Alex: 1 person-hour&quot;;</code></div>
+<div class="line"><span class="number">280</span><code>        check(&quot;C07-P testExperienceAppend&quot;, ModelLessons.addExperience(lesson.getId(), first, owner)</code></div>
+<div class="line"><span class="number">281</span><code>                &amp;&amp; ModelLessons.addExperience(lesson.getId(), second, owner)</code></div>
+<div class="line"><span class="number">282</span><code>                &amp;&amp; ModelLessons.readExperiences(lesson.getId(), owner).equals(List.of(first, second)));</code></div>
+<div class="line"><span class="number">283</span><code>    }</code></div>
+<div class="line"><span class="number">284</span><code></code></div>
+<div class="line"><span class="number">285</span><code>    /** C07 negative: blank/overlong/null attempts are rejected without modifying history.</code></div>
+<div class="line"><span class="number">286</span><code>     * Success means every invalid append returns false and history is unchanged.</code></div>
+<div class="line"><span class="number">287</span><code>     * @throws Exception if persistence fails */</code></div>
+<div class="line"><span class="number">288</span><code>    public static void testExperienceRejected() throws Exception {</code></div>
+<div class="line"><span class="number">289</span><code>        Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">290</span><code>        ModelLessons.addExperience(lesson.getId(), &quot;Existing attempt&quot;, owner);</code></div>
+<div class="line"><span class="number">291</span><code>        check(&quot;C07-N testExperienceRejected&quot;, !ModelLessons.addExperience(lesson.getId(), &quot; &quot;, owner)</code></div>
+<div class="line"><span class="number">292</span><code>                &amp;&amp; !ModelLessons.addExperience(lesson.getId(), null, owner)</code></div>
+<div class="line"><span class="number">293</span><code>                &amp;&amp; !ModelLessons.addExperience(lesson.getId(), &quot;E&quot;.repeat(2001), owner)</code></div>
+<div class="line"><span class="number">294</span><code>                &amp;&amp; ModelLessons.readExperiences(lesson.getId(), owner).equals(List.of(&quot;Existing attempt&quot;)));</code></div>
+<div class="line"><span class="number">295</span><code>    }</code></div>
+<div class="line"><span class="number">296</span><code></code></div>
+<div class="line"><span class="number">297</span><code>    /** C07 GUI positive: invoke the actual Add experience and Experience history buttons.</code></div>
+<div class="line"><span class="number">298</span><code>     * Success means the button appends stored text and the actual dialog displays it.</code></div>
+<div class="line"><span class="number">299</span><code>     * @throws Exception if persistence or evidence fails */</code></div>
+<div class="line"><span class="number">300</span><code>    public static void testExperienceHistoryButton() throws Exception {</code></div>
+<div class="line"><span class="number">301</span><code>        Lesson lesson = fixture();</code></div>
+<div class="line"><span class="number">302</span><code>        ViewLessons.currentUser = owner;</code></div>
+<div class="line"><span class="number">303</span><code>        ViewLessons.refreshList();</code></div>
+<div class="line"><span class="number">304</span><code>        ViewLessons.list_Lessons.getSelectionModel().select(ViewLessons.displayedLessons.getLesson(lesson.getId()));</code></div>
+<div class="line"><span class="number">305</span><code>        ViewLessons.text_Experience.setText(&quot;What: retest; how: review; time: 1 hour; Sam: 1 person-hour&quot;);</code></div>
+<div class="line"><span class="number">306</span><code>        for (javafx.scene.Node node : ViewLessons.theStage.getScene().getRoot().lookupAll(&quot;.button&quot;)) {</code></div>
+<div class="line"><span class="number">307</span><code>            if (node instanceof javafx.scene.control.Button button &amp;&amp; button.getText().equals(&quot;Add experience&quot;)) button.fire();</code></div>
+<div class="line"><span class="number">308</span><code>        }</code></div>
+<div class="line"><span class="number">309</span><code>        check(&quot;C07-P append button&quot;, ModelLessons.readExperiences(lesson.getId(), owner).size() == 1);</code></div>
+<div class="line"><span class="number">310</span><code>        javafx.application.Platform.runLater(() -&gt; {</code></div>
+<div class="line"><span class="number">311</span><code>            for (javafx.stage.Window window : javafx.stage.Window.getWindows().toArray(new javafx.stage.Window[0])) {</code></div>
+<div class="line"><span class="number">312</span><code>                if (window.getScene() != null &amp;&amp; window.getScene().getRoot() instanceof javafx.scene.control.DialogPane pane) {</code></div>
+<div class="line"><span class="number">313</span><code>                    check(&quot;C07-P history dialog&quot;, pane.getContentText().contains(&quot;Sam: 1 person-hour&quot;));</code></div>
+<div class="line"><span class="number">314</span><code>                    try { captureNode(pane, &quot;10-experience-history&quot;); } catch (Exception failure) { throw new RuntimeException(failure); }</code></div>
+<div class="line"><span class="number">315</span><code>                    ((javafx.scene.control.Button) pane.lookupButton(javafx.scene.control.ButtonType.OK)).fire();</code></div></div></html>

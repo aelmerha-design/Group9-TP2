@@ -1,5 +1,7 @@
 param(
     [switch]$Manual,
+    [ValidateSet('owner', 'other', 'admin', 'regression')][string]$Actor = 'owner',
+    [string]$ManualHome,
     [string]$JdkHome = $env:JAVA_HOME,
     [string]$LibraryPath = "$PSScriptRoot/.work/lib"
 )
@@ -33,11 +35,12 @@ $ErrorActionPreference = 'Continue'
 $ErrorActionPreference = 'Stop'
 if ($LASTEXITCODE -ne 0) { throw 'Compilation failed.' }
 if ($Manual) {
-    $manualHome = Join-Path $PSScriptRoot '.work/manual-database'
+    $manualDatabaseHome = Join-Path $PSScriptRoot '.work/manual-database'
+    if ($ManualHome) { $manualDatabaseHome = $ManualHome }
     $ErrorActionPreference = 'Continue'
     & $java --enable-native-access=javafx.graphics --module-path "$LibraryPath;$classes" `
         --add-modules FoundationsF26 -cp (Join-Path $LibraryPath 'h2.jar') `
-        "-Dcontributor.test.home=$manualHome" "-Dcontributor.test.evidence=$evidence" `
+        "-Dcontributor.test.home=$manualDatabaseHome" "-Dcontributor.test.evidence=$evidence" "-Dcontributor.test.actor=$Actor" `
         -m FoundationsF26/guiLessons.LessonManualTesting
     $ErrorActionPreference = 'Stop'
     if ($LASTEXITCODE -ne 0) { throw 'Manual launcher failed.' }
@@ -54,7 +57,7 @@ foreach ($phase in @('first-run', 'restart-run')) {
     if ($LASTEXITCODE -ne 0) { throw "$phase failed. See results/$phase.txt." }
 }
 if (Test-Path -LiteralPath (Join-Path $testHome 'restart-test.txt')) { throw 'Restart marker was not consumed.' }
-$documented = @('LessonTestingAutomation.java', 'LessonTestEvidence.java', 'LessonManualTesting.java') | ForEach-Object {
+$documented = @('LessonTestingAutomation.java', 'LessonTestEvidence.java', 'LessonManualTesting.java', 'ContributorStoryTests.java') | ForEach-Object {
     Join-Path $source "guiLessons/$_"
 }
 $ErrorActionPreference = 'Continue'
@@ -69,3 +72,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Javadoc generation failed.' }
     'First JVM: PASS', 'Restart JVM: PASS', 'Javadoc: PASS') |
     Set-Content -Encoding UTF8 (Join-Path $results 'environment.txt')
 Write-Host 'Both test processes and Javadoc generation passed.'
+foreach ($log in Get-ChildItem -LiteralPath $results -Filter '*.txt') {
+    $logText = [System.IO.File]::ReadAllText($log.FullName)
+    [System.IO.File]::WriteAllText($log.FullName, $logText)
+}

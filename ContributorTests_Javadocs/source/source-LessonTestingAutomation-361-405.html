@@ -1,48 +1,48 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><title>LessonTestingAutomation - lines 361-405</title>
 <style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
 <h1>LessonTestingAutomation.java - source lines 361-405</h1><p>Contributor test implementation / original Java source and internal documentation</p>
-<p class="hash">SHA-256: BCE60A6B1518B26AEADD0E3224C23D15A4D56F84445BC590ECC17467A266EAEA</p><div class="source"><div class="line"><span class="number">361</span><code>        action.run();</code></div>
-<div class="line"><span class="number">362</span><code>        performTestCase(number, &quot;Helpful error: &quot; + expected, actualError.equals(expected));</code></div>
-<div class="line"><span class="number">363</span><code>        System.out.println(&quot;Actual error: &quot; + actualError);</code></div>
-<div class="line"><span class="number">364</span><code>    }</code></div>
-<div class="line"><span class="number">365</span><code>    /** @param id ID to select in the currently displayed list */</code></div>
-<div class="line"><span class="number">366</span><code>    private static void select(int id) {</code></div>
-<div class="line"><span class="number">367</span><code>        ViewLessons.list_Lessons.getSelectionModel().clearSelection();</code></div>
-<div class="line"><span class="number">368</span><code>        for (Lesson lesson : ViewLessons.list_Lessons.getItems()) {</code></div>
-<div class="line"><span class="number">369</span><code>            if (lesson.getId() == id) {</code></div>
-<div class="line"><span class="number">370</span><code>                ViewLessons.list_Lessons.getSelectionModel().select(lesson);</code></div>
-<div class="line"><span class="number">371</span><code>                return;</code></div>
-<div class="line"><span class="number">372</span><code>            }</code></div>
-<div class="line"><span class="number">373</span><code>        }</code></div>
-<div class="line"><span class="number">374</span><code>    }</code></div>
-<div class="line"><span class="number">375</span><code>    /**</code></div>
-<div class="line"><span class="number">376</span><code>     * Populates the form without saving it.</code></div>
-<div class="line"><span class="number">377</span><code>     * @param t title input</code></div>
-<div class="line"><span class="number">378</span><code>     * @param p problem input</code></div>
-<div class="line"><span class="number">379</span><code>     * @param s solution input</code></div>
-<div class="line"><span class="number">380</span><code>     * @param e experience input</code></div>
-<div class="line"><span class="number">381</span><code>     */</code></div>
-<div class="line"><span class="number">382</span><code>    private static void fields(String t, String p, String s, String e) {</code></div>
-<div class="line"><span class="number">383</span><code>        ViewLessons.text_Title.setText(t);</code></div>
-<div class="line"><span class="number">384</span><code>        ViewLessons.text_Problem.setText(p);</code></div>
-<div class="line"><span class="number">385</span><code>        ViewLessons.text_Solution.setText(s);</code></div>
-<div class="line"><span class="number">386</span><code>        ViewLessons.text_Experience.setText(e);</code></div>
-<div class="line"><span class="number">387</span><code>    }</code></div>
-<div class="line"><span class="number">388</span><code>    /**</code></div>
-<div class="line"><span class="number">389</span><code>     * Compares every visible field with expected stored text.</code></div>
-<div class="line"><span class="number">390</span><code>     * @param t expected title</code></div>
-<div class="line"><span class="number">391</span><code>     * @param p expected problem</code></div>
-<div class="line"><span class="number">392</span><code>     * @param s expected solution</code></div>
-<div class="line"><span class="number">393</span><code>     * @param e expected experience</code></div>
-<div class="line"><span class="number">394</span><code>     * @return whether all four fields match</code></div>
-<div class="line"><span class="number">395</span><code>     */</code></div>
-<div class="line"><span class="number">396</span><code>    private static boolean formMatches(String t, String p, String s, String e) {</code></div>
-<div class="line"><span class="number">397</span><code>        return ViewLessons.text_Title.getText().equals(t) &amp;&amp; ViewLessons.text_Problem.getText().equals(p)</code></div>
-<div class="line"><span class="number">398</span><code>                &amp;&amp; ViewLessons.text_Solution.getText().equals(s) &amp;&amp; ViewLessons.text_Experience.getText().equals(e);</code></div>
-<div class="line"><span class="number">399</span><code>    }</code></div>
-<div class="line"><span class="number">400</span><code>    /**</code></div>
-<div class="line"><span class="number">401</span><code>     * Compares persisted identity, ownership, and text after a rejected edit.</code></div>
-<div class="line"><span class="number">402</span><code>     * @param a snapshot before the attempted edit</code></div>
-<div class="line"><span class="number">403</span><code>     * @param b snapshot after the attempted edit</code></div>
-<div class="line"><span class="number">404</span><code>     * @return whether the complete stored record is unchanged</code></div>
-<div class="line"><span class="number">405</span><code>     */</code></div></div></html>
+<p class="hash">SHA-256: 8A0C70980AD78A9E46E20EB4E53FCE0EFF9639F006F25F9EA7583C02312D4BBD</p><div class="source"><div class="line"><span class="number">361</span><code>                }</code></div>
+<div class="line"><span class="number">362</span><code>            }</code></div>
+<div class="line"><span class="number">363</span><code>        });</code></div>
+<div class="line"><span class="number">364</span><code>        action.run();</code></div>
+<div class="line"><span class="number">365</span><code>        performTestCase(number, &quot;Helpful error: &quot; + expected, actualError.equals(expected));</code></div>
+<div class="line"><span class="number">366</span><code>        System.out.println(&quot;Actual error: &quot; + actualError);</code></div>
+<div class="line"><span class="number">367</span><code>    }</code></div>
+<div class="line"><span class="number">368</span><code>    /** @param id ID to select in the currently displayed list */</code></div>
+<div class="line"><span class="number">369</span><code>    private static void select(int id) {</code></div>
+<div class="line"><span class="number">370</span><code>        ViewLessons.list_Lessons.getSelectionModel().clearSelection();</code></div>
+<div class="line"><span class="number">371</span><code>        for (Lesson lesson : ViewLessons.list_Lessons.getItems()) {</code></div>
+<div class="line"><span class="number">372</span><code>            if (lesson.getId() == id) {</code></div>
+<div class="line"><span class="number">373</span><code>                ViewLessons.list_Lessons.getSelectionModel().select(lesson);</code></div>
+<div class="line"><span class="number">374</span><code>                return;</code></div>
+<div class="line"><span class="number">375</span><code>            }</code></div>
+<div class="line"><span class="number">376</span><code>        }</code></div>
+<div class="line"><span class="number">377</span><code>    }</code></div>
+<div class="line"><span class="number">378</span><code>    /**</code></div>
+<div class="line"><span class="number">379</span><code>     * Populates the form without saving it.</code></div>
+<div class="line"><span class="number">380</span><code>     * @param t title input</code></div>
+<div class="line"><span class="number">381</span><code>     * @param p problem input</code></div>
+<div class="line"><span class="number">382</span><code>     * @param s solution input</code></div>
+<div class="line"><span class="number">383</span><code>     * @param e experience input</code></div>
+<div class="line"><span class="number">384</span><code>     */</code></div>
+<div class="line"><span class="number">385</span><code>    private static void fields(String t, String p, String s, String e) {</code></div>
+<div class="line"><span class="number">386</span><code>        ViewLessons.text_Title.setText(t);</code></div>
+<div class="line"><span class="number">387</span><code>        ViewLessons.text_Problem.setText(p);</code></div>
+<div class="line"><span class="number">388</span><code>        ViewLessons.text_Solution.setText(s);</code></div>
+<div class="line"><span class="number">389</span><code>        ViewLessons.text_Experience.setText(e);</code></div>
+<div class="line"><span class="number">390</span><code>    }</code></div>
+<div class="line"><span class="number">391</span><code>    /**</code></div>
+<div class="line"><span class="number">392</span><code>     * Compares every visible field with expected stored text.</code></div>
+<div class="line"><span class="number">393</span><code>     * @param t expected title</code></div>
+<div class="line"><span class="number">394</span><code>     * @param p expected problem</code></div>
+<div class="line"><span class="number">395</span><code>     * @param s expected solution</code></div>
+<div class="line"><span class="number">396</span><code>     * @param e expected experience</code></div>
+<div class="line"><span class="number">397</span><code>     * @return whether all four fields match</code></div>
+<div class="line"><span class="number">398</span><code>     */</code></div>
+<div class="line"><span class="number">399</span><code>    private static boolean formMatches(String t, String p, String s, String e) {</code></div>
+<div class="line"><span class="number">400</span><code>        return ViewLessons.text_Title.getText().equals(t) &amp;&amp; ViewLessons.text_Problem.getText().equals(p)</code></div>
+<div class="line"><span class="number">401</span><code>                &amp;&amp; ViewLessons.text_Solution.getText().equals(s) &amp;&amp; ViewLessons.text_Experience.getText().equals(e);</code></div>
+<div class="line"><span class="number">402</span><code>    }</code></div>
+<div class="line"><span class="number">403</span><code>    /**</code></div>
+<div class="line"><span class="number">404</span><code>     * Compares persisted identity, ownership, and text after a rejected edit.</code></div>
+<div class="line"><span class="number">405</span><code>     * @param a snapshot before the attempted edit</code></div></div></html>

@@ -262,6 +262,7 @@ public class LessonTestingAutomation {
 		testListSearch();
 		testEntityPersistence();
 		testDatabaseErrors();
+		ContributorStoryTests.run();
 		ViewLessons.refreshList();
 		select(savedId);
 		ViewLessons.text_Title.setText("Saved after restart");
@@ -295,6 +296,8 @@ public class LessonTestingAutomation {
 			capture("05-after-restart");
 		}
 		if (!restartFile.delete()) System.out.println("Could not remove the restart test marker.");
+		ContributorStoryTests.testRestartRestoresState();
+		ContributorStoryTests.testRestartKeepsRestrictions();
 	}
 	/**
 	 * Checks that a valid create stores every supplied field and adds one record.
@@ -466,7 +469,7 @@ public class LessonTestingAutomation {
 		performTestCase(17, "Changing returned list preserves original", list.getLessons().size() == 2);
 		for (String keyword : new String[] {" ALPHA ", "problemtoken", "solutiontoken", "experiencetoken"}) {
 			LessonList subset = list.searchByKeyword(keyword);
-			performTestCase(17, "Keyword matches field: " + keyword,
+			performTestCase(17, "Keyword matches field: " + keyword.trim(),
 					subset.getLessons().size() == 1 && subset.getLesson(1) != null && list.getLessons().size() == 2);
 		}
 		performTestCase(17, "Absent keyword yields empty subset", list.searchByKeyword("missing").getLessons().isEmpty());

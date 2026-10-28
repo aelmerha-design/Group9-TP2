@@ -141,6 +141,18 @@ public class Database {
 				+ "experience VARCHAR(2000))";
 	    
 	    statement.execute(lessonTable);
+		// Existing HW2 files need the same columns as fresh TP2 databases.
+		statement.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS locked BOOLEAN DEFAULT FALSE NOT NULL");
+		statement.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS titleLocked BOOLEAN DEFAULT FALSE NOT NULL");
+		statement.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS problemLocked BOOLEAN DEFAULT FALSE NOT NULL");
+		statement.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS solutionLocked BOOLEAN DEFAULT FALSE NOT NULL");
+		statement.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS experienceLocked BOOLEAN DEFAULT FALSE NOT NULL");
+		statement.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS statsVisible BOOLEAN DEFAULT FALSE NOT NULL");
+		statement.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS searchTerms VARCHAR(2000) DEFAULT '' NOT NULL");
+		statement.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS timeHours DOUBLE DEFAULT 0 NOT NULL");
+		statement.execute("ALTER TABLE lessons ADD COLUMN IF NOT EXISTS effortHours DOUBLE DEFAULT 0 NOT NULL");
+		statement.execute("CREATE TABLE IF NOT EXISTS experiences (id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "lessonId INT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE, text VARCHAR(2000) NOT NULL)");
 	}
 
 
@@ -1273,9 +1285,7 @@ public class Database {
 			query.setInt(1, id);
 			try (ResultSet result = query.executeQuery()) {
 				if (result.next()) {
-					return new Lesson(result.getInt("id"), result.getInt("ownerId"), result.getString("title"),
-							result.getString("problem"), result.getString("solution"),
-							result.getString("experience"));
+					return lessonFromRow(result);
 				}
 			}
 		}
@@ -1290,9 +1300,7 @@ public class Database {
 		try (PreparedStatement query = connection.prepareStatement(sql)) {
 			try (ResultSet result = query.executeQuery()) {
 				while (result.next()) {
-				lessons.addLesson(new Lesson(result.getInt("id"), result.getInt("ownerId"), result.getString("title"),
-						result.getString("problem"), result.getString("solution"),
-						result.getString("experience")));
+				lessons.addLesson(lessonFromRow(result));
 				}
 			}
 		}
@@ -1309,9 +1317,7 @@ public class Database {
 
 			try (ResultSet result = query.executeQuery()) {
 				while (result.next()) {
-				lessons.addLesson(new Lesson(result.getInt("id"), result.getInt("ownerId"), result.getString("title"),
-						result.getString("problem"), result.getString("solution"),
-						result.getString("experience")));
+				lessons.addLesson(lessonFromRow(result));
 				}
 			}
 		}
@@ -1339,5 +1345,104 @@ public class Database {
 			query.setInt(1, id);
 			return query.executeUpdate() == 1;
 		}
+	}
+
+	/** Maps a complete persisted lesson, including locks and future attributes.
+	 * @param result current row
+	 * @return complete lesson
+	 * @throws SQLException if reading fails */
+	private Lesson lessonFromRow(ResultSet result) throws SQLException {
+		Lesson lesson = new Lesson(result.getInt("id"), result.getInt("ownerId"), result.getString("title"),
+				result.getString("problem"), result.getString("solution"), result.getString("experience"));
+		lesson.setLocked(result.getBoolean("locked"));
+		lesson.setTitleLocked(result.getBoolean("titleLocked"));
+		lesson.setProblemLocked(result.getBoolean("problemLocked"));
+		lesson.setSolutionLocked(result.getBoolean("solutionLocked"));
+		lesson.setExperienceLocked(result.getBoolean("experienceLocked"));
+		lesson.setStatsVisible(result.getBoolean("statsVisible"));
+		lesson.setSearchTerms(result.getString("searchTerms"));
+		lesson.setTimeHours(result.getDouble("timeHours"));
+		lesson.setEffortHours(result.getDouble("effortHours"));
+		return lesson;
+	}
+	/** Stores lock state through the trusted storage API; authorization belongs to the model.
+	 * @param lesson saved identity and lock state
+	 * @return whether a row existed
+	 * @throws SQLException if saving fails */
+	public boolean updateLessonLocks(Lesson lesson) throws SQLException {
+		try (PreparedStatement query = connection.prepareStatement(
+				"UPDATE lessons SET locked=?,titleLocked=?,problemLocked=?,solutionLocked=?,experienceLocked=? WHERE id=?")) {
+			query.setBoolean(1, lesson.isLocked());
+			query.setBoolean(2, lesson.isTitleLocked());
+			query.setBoolean(3, lesson.isProblemLocked());
+			query.setBoolean(4, lesson.isSolutionLocked());
+			query.setBoolean(5, lesson.isExperienceLocked());
+			query.setInt(6, lesson.getId());
+			return query.executeUpdate() == 1;
+		}
+	}
+	/** Atomically locks selected lessons, preserving individual field locks.
+	 * @param ids selected identities
+	 * @param locked desired whole lock
+	 * @throws SQLException if an ID is absent or the transaction fails */
+	public void setLessonsLocked(List<Integer> ids, boolean locked) throws SQLException {
+		if (ids.isEmpty()) return;
+		if (!connection.getAutoCommit()) throw new SQLException("Another transaction is already active.");
+		connection.setAutoCommit(false);
+		try {
+			try (PreparedStatement query = connection.prepareStatement("UPDATE lessons SET locked=? WHERE id=?")) {
+				for (int lessonId : ids) {
+					query.setBoolean(1, locked);
+					query.setInt(2, lessonId);
+					if (query.executeUpdate() != 1) throw new SQLException("A selected lesson no longer exists.");
+				}
+			}
+			connection.commit();
+		} catch (SQLException failure) {
+			try { connection.rollback(); } catch (SQLException rollback) { failure.addSuppressed(rollback); }
+			throw failure;
+		} finally { connection.setAutoCommit(true); }
+	}
+	/** Stores curator metadata independently of contributor core edits. Trusted storage API.
+	 * @param lesson saved identity and metadata
+	 * @return whether a row existed
+	 * @throws SQLException if saving fails */
+	public boolean updateLessonMetadata(Lesson lesson) throws SQLException {
+		try (PreparedStatement query = connection.prepareStatement(
+				"UPDATE lessons SET searchTerms=?,timeHours=?,effortHours=?,statsVisible=? WHERE id=?")) {
+			query.setString(1, lesson.getSearchTerms());
+			query.setDouble(2, lesson.getTimeHours());
+			query.setDouble(3, lesson.getEffortHours());
+			query.setBoolean(4, lesson.isStatsVisible());
+			query.setInt(5, lesson.getId());
+			return query.executeUpdate() == 1;
+		}
+	}
+	/** Appends to an existing lesson; deletion cascades to its history.
+	 * @param lessonId existing lesson
+	 * @param text validated attempt
+	 * @return whether a row was added
+	 * @throws SQLException if saving fails */
+	public boolean addExperience(int lessonId, String text) throws SQLException {
+		if (readLesson(lessonId) == null) return false;
+		try (PreparedStatement query = connection.prepareStatement("INSERT INTO experiences (lessonId,text) VALUES (?,?)")) {
+			query.setInt(1, lessonId);
+			query.setString(2, text);
+			return query.executeUpdate() == 1;
+		}
+	}
+	/** Reads experiences through the trusted storage API.
+	 * @param lessonId lesson identity
+	 * @return attempts in insertion order
+	 * @throws SQLException if reading fails */
+	public ArrayList<String> readExperiences(int lessonId) throws SQLException {
+		ArrayList<String> history = new ArrayList<>();
+		try (PreparedStatement query = connection.prepareStatement("SELECT text FROM experiences WHERE lessonId=? ORDER BY id")) {
+			query.setInt(1, lessonId);
+			try (ResultSet result = query.executeQuery()) {
+				while (result.next()) history.add(result.getString("text"));
+			}
+		}
+		return history;
 	}
 }

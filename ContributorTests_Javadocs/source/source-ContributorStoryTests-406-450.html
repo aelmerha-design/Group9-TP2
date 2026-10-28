@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ContributorStoryTests - lines 406-450</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>ContributorStoryTests.java - source lines 406-450</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: A2CCA1D5C51ACAE6A656F3C86A4CA5C1BED7D04C50F7A9D03FE1BF575BC1E86D</p><div class="source"><div class="line"><span class="number">406</span><code>        FoundationsMain.database.updateLessonMetadata(lesson);</code></div>
+<div class="line"><span class="number">407</span><code>        lesson.addExperience(FoundationsMain.database, &quot;Attempt one; time 1h; Alex 1 person-hour&quot;);</code></div>
+<div class="line"><span class="number">408</span><code>        lesson.addExperience(FoundationsMain.database, &quot;Attempt two; time 2h; Sam 2 person-hours&quot;);</code></div>
+<div class="line"><span class="number">409</span><code>        Files.writeString(restart, Integer.toString(lesson.getId()));</code></div>
+<div class="line"><span class="number">410</span><code>    }</code></div>
+<div class="line"><span class="number">411</span><code></code></div>
+<div class="line"><span class="number">412</span><code>    /** C08/C12 positive: a new JVM must restore lock state, metadata, and attempt order.</code></div>
+<div class="line"><span class="number">413</span><code>     * Success means these persisted values survive closing the original connection.</code></div>
+<div class="line"><span class="number">414</span><code>     * @throws Exception if reading the fixture fails */</code></div>
+<div class="line"><span class="number">415</span><code>    public static void testRestartRestoresState() throws Exception {</code></div>
+<div class="line"><span class="number">416</span><code>        int lessonId = Integer.parseInt(Files.readString(restart));</code></div>
+<div class="line"><span class="number">417</span><code>        Lesson lesson = ModelLessons.readLesson(lessonId, admin);</code></div>
+<div class="line"><span class="number">418</span><code>        check(&quot;C08-P testRestartRestoresState&quot;, lesson != null &amp;&amp; lesson.isLocked() &amp;&amp; lesson.isProblemLocked()</code></div>
+<div class="line"><span class="number">419</span><code>                &amp;&amp; lesson.getSearchTerms().equals(&quot;PRIVATE RESTART&quot;) &amp;&amp; lesson.getTimeHours() == 3</code></div>
+<div class="line"><span class="number">420</span><code>                &amp;&amp; ModelLessons.readExperiences(lessonId, admin).equals(List.of(</code></div>
+<div class="line"><span class="number">421</span><code>                        &quot;Attempt one; time 1h; Alex 1 person-hour&quot;, &quot;Attempt two; time 2h; Sam 2 person-hours&quot;)));</code></div>
+<div class="line"><span class="number">422</span><code>        check(&quot;C12-P future attributes persisted&quot;, lesson.getSearchTerms().equals(&quot;PRIVATE RESTART&quot;)</code></div>
+<div class="line"><span class="number">423</span><code>                &amp;&amp; lesson.getTimeHours() == 3 &amp;&amp; lesson.getEffortHours() == 4 &amp;&amp; lesson.isStatsVisible());</code></div>
+<div class="line"><span class="number">424</span><code>    }</code></div>
+<div class="line"><span class="number">425</span><code></code></div>
+<div class="line"><span class="number">426</span><code>    /** C08/C12 negative: restart must not bypass locks or reveal restricted attributes.</code></div>
+<div class="line"><span class="number">427</span><code>     * Success means edit/delete are denied and the contributor projection hides metadata.</code></div>
+<div class="line"><span class="number">428</span><code>     * @throws Exception if fixture access or cleanup fails */</code></div>
+<div class="line"><span class="number">429</span><code>    public static void testRestartKeepsRestrictions() throws Exception {</code></div>
+<div class="line"><span class="number">430</span><code>        int lessonId = Integer.parseInt(Files.readString(restart));</code></div>
+<div class="line"><span class="number">431</span><code>        User contributor = actor(77, false);</code></div>
+<div class="line"><span class="number">432</span><code>        Lesson visible = ModelLessons.readLesson(lessonId, contributor);</code></div>
+<div class="line"><span class="number">433</span><code>        visible.setTitle(&quot;Forbidden after restart&quot;);</code></div>
+<div class="line"><span class="number">434</span><code>        check(&quot;C08-N testRestartKeepsRestrictions&quot;, denied(() -&gt; ModelLessons.updateLesson(visible, contributor))</code></div>
+<div class="line"><span class="number">435</span><code>                &amp;&amp; denied(() -&gt; ModelLessons.deleteLesson(lessonId, contributor)));</code></div>
+<div class="line"><span class="number">436</span><code>        check(&quot;C12-N future attributes restricted&quot;, visible.getSearchTerms().isEmpty()</code></div>
+<div class="line"><span class="number">437</span><code>                &amp;&amp; visible.getTimeHours() == 0 &amp;&amp; visible.getEffortHours() == 0 &amp;&amp; !visible.isStatsVisible());</code></div>
+<div class="line"><span class="number">438</span><code>        FoundationsMain.database.deleteLesson(lessonId);</code></div>
+<div class="line"><span class="number">439</span><code>        Files.delete(restart);</code></div>
+<div class="line"><span class="number">440</span><code>    }</code></div>
+<div class="line"><span class="number">441</span><code></code></div>
+<div class="line"><span class="number">442</span><code>    /** Saves optional evidence of the actual scene.</code></div>
+<div class="line"><span class="number">443</span><code>     * @param name descriptive filename stem</code></div>
+<div class="line"><span class="number">444</span><code>     * @throws Exception if evidence writing fails */</code></div>
+<div class="line"><span class="number">445</span><code>    private static void capture(String name) throws Exception { captureNode(ViewLessons.theStage.getScene().getRoot(), name); }</code></div>
+<div class="line"><span class="number">446</span><code></code></div>
+<div class="line"><span class="number">447</span><code>    /** Saves optional evidence of a real rendered node.</code></div>
+<div class="line"><span class="number">448</span><code>     * @param node scene or dialog</code></div>
+<div class="line"><span class="number">449</span><code>     * @param name descriptive filename stem</code></div>
+<div class="line"><span class="number">450</span><code>     * @throws Exception if writing fails */</code></div></div></html>

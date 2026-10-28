@@ -275,344 +275,347 @@
 <span class="source-line-no">262</span><span id="line-262">                testListSearch();</span>
 <span class="source-line-no">263</span><span id="line-263">                testEntityPersistence();</span>
 <span class="source-line-no">264</span><span id="line-264">                testDatabaseErrors();</span>
-<span class="source-line-no">265</span><span id="line-265">                ViewLessons.refreshList();</span>
-<span class="source-line-no">266</span><span id="line-266">                select(savedId);</span>
-<span class="source-line-no">267</span><span id="line-267">                ViewLessons.text_Title.setText("Saved after restart");</span>
-<span class="source-line-no">268</span><span id="line-268">                ControllerLessons.updateLesson();</span>
-<span class="source-line-no">269</span><span id="line-269">                int deletedId = ViewLessons.list_Lessons.getItems().get(999).getId();</span>
-<span class="source-line-no">270</span><span id="line-270">                select(deletedId);</span>
-<span class="source-line-no">271</span><span id="line-271">                ControllerLessons.deleteLesson();</span>
-<span class="source-line-no">272</span><span id="line-272">                try (PrintWriter output = new PrintWriter(restartFile)) {</span>
-<span class="source-line-no">273</span><span id="line-273">                        output.println(savedId);</span>
-<span class="source-line-no">274</span><span id="line-274">                        output.println(deletedId);</span>
-<span class="source-line-no">275</span><span id="line-275">                }</span>
-<span class="source-line-no">276</span><span id="line-276">                System.out.println("\nTest 6: Run this class again to check a separate execution.");</span>
-<span class="source-line-no">277</span><span id="line-277">        }</span>
-<span class="source-line-no">278</span><span id="line-278">        /**</span>
-<span class="source-line-no">279</span><span id="line-279">         * Verifies case 6 in a fresh process using IDs recorded by the first execution.</span>
-<span class="source-line-no">280</span><span id="line-280">         * @throws Exception if database access or reading the marker fails</span>
-<span class="source-line-no">281</span><span id="line-281">         */</span>
-<span class="source-line-no">282</span><span id="line-282">        private static void testRestart() throws Exception {</span>
-<span class="source-line-no">283</span><span id="line-283">                // CASE 06: A new JVM must read saved data, not a previous process's cached list.</span>
-<span class="source-line-no">284</span><span id="line-284">                try (Scanner input = new Scanner(restartFile)) {</span>
-<span class="source-line-no">285</span><span id="line-285">                        int savedId = input.nextInt();</span>
-<span class="source-line-no">286</span><span id="line-286">                        int deletedId = input.nextInt();</span>
-<span class="source-line-no">287</span><span id="line-287">                        Lesson saved = ModelLessons.readLesson(savedId);</span>
-<span class="source-line-no">288</span><span id="line-288">                        performTestCase(6, "Created and edited lesson survives a separate execution", saved != null</span>
-<span class="source-line-no">289</span><span id="line-289">                                        &amp;&amp; saved.getId() == savedId &amp;&amp; saved.getTitle().equals("Saved after restart")</span>
-<span class="source-line-no">290</span><span id="line-290">                                        &amp;&amp; saved.getProblem().equals(problem) &amp;&amp; saved.getSolution().equals(solution)</span>
-<span class="source-line-no">291</span><span id="line-291">                                        &amp;&amp; saved.getExperience().isEmpty());</span>
-<span class="source-line-no">292</span><span id="line-292">                        performTestCase(6, "Deleted lesson stays deleted", ModelLessons.readLesson(deletedId) == null);</span>
-<span class="source-line-no">293</span><span id="line-293">                        performTestCase(6, "All remaining lessons survive", ModelLessons.readLessons(testOwnerId).getLessons().size() == 999);</span>
-<span class="source-line-no">294</span><span id="line-294">                        select(savedId);</span>
-<span class="source-line-no">295</span><span id="line-295">                        capture("05-after-restart");</span>
-<span class="source-line-no">296</span><span id="line-296">                }</span>
-<span class="source-line-no">297</span><span id="line-297">                if (!restartFile.delete()) System.out.println("Could not remove the restart test marker.");</span>
-<span class="source-line-no">298</span><span id="line-298">        }</span>
-<span class="source-line-no">299</span><span id="line-299">        /**</span>
-<span class="source-line-no">300</span><span id="line-300">         * Checks that a valid create stores every supplied field and adds one record.</span>
-<span class="source-line-no">301</span><span id="line-301">         * @param number requirement case number</span>
-<span class="source-line-no">302</span><span id="line-302">         * @param t title input</span>
-<span class="source-line-no">303</span><span id="line-303">         * @param p problem input</span>
-<span class="source-line-no">304</span><span id="line-304">         * @param s solution input</span>
-<span class="source-line-no">305</span><span id="line-305">         * @param e experience input</span>
-<span class="source-line-no">306</span><span id="line-306">         * @throws Exception if database access fails</span>
-<span class="source-line-no">307</span><span id="line-307">         */</span>
-<span class="source-line-no">308</span><span id="line-308">        private static void testValid(int number, String t, String p, String s, String e) throws Exception {</span>
-<span class="source-line-no">309</span><span id="line-309">                int count = ModelLessons.readLessons(testOwnerId).getLessons().size();</span>
-<span class="source-line-no">310</span><span id="line-310">                fields(t, p, s, e);</span>
-<span class="source-line-no">311</span><span id="line-311">                ControllerLessons.createLesson();</span>
-<span class="source-line-no">312</span><span id="line-312">                Lesson saved = ViewLessons.list_Lessons.getItems().get(ViewLessons.list_Lessons.getItems().size() - 1);</span>
-<span class="source-line-no">313</span><span id="line-313">                performTestCase(number, "Accept lengths " + t.length() + ", " + p.length() + ", " + s.length() + ", " + e.length(),</span>
-<span class="source-line-no">314</span><span id="line-314">                                ModelLessons.readLessons(testOwnerId).getLessons().size() == count + 1</span>
-<span class="source-line-no">315</span><span id="line-315">                                &amp;&amp; saved.getTitle().equals(t) &amp;&amp; saved.getProblem().equals(p)</span>
-<span class="source-line-no">316</span><span id="line-316">                                &amp;&amp; saved.getSolution().equals(s) &amp;&amp; saved.getExperience().equals(e));</span>
-<span class="source-line-no">317</span><span id="line-317">        }</span>
-<span class="source-line-no">318</span><span id="line-318">        /**</span>
-<span class="source-line-no">319</span><span id="line-319">         * Checks the actual validation dialog and verifies no record was added.</span>
-<span class="source-line-no">320</span><span id="line-320">         * @param number requirement case number</span>
-<span class="source-line-no">321</span><span id="line-321">         * @param t title input</span>
-<span class="source-line-no">322</span><span id="line-322">         * @param p problem input</span>
-<span class="source-line-no">323</span><span id="line-323">         * @param s solution input</span>
-<span class="source-line-no">324</span><span id="line-324">         * @param e experience input</span>
-<span class="source-line-no">325</span><span id="line-325">         * @param message expected dialog text</span>
-<span class="source-line-no">326</span><span id="line-326">         * @throws Exception if database access fails</span>
-<span class="source-line-no">327</span><span id="line-327">         */</span>
-<span class="source-line-no">328</span><span id="line-328">        private static void testCreateError(int number, String t, String p, String s, String e, String message) throws Exception {</span>
-<span class="source-line-no">329</span><span id="line-329">                int count = ModelLessons.readLessons(testOwnerId).getLessons().size();</span>
-<span class="source-line-no">330</span><span id="line-330">                fields(t, p, s, e);</span>
-<span class="source-line-no">331</span><span id="line-331">                testError(number, ControllerLessons::createLesson, message);</span>
-<span class="source-line-no">332</span><span id="line-332">                performTestCase(number, "Invalid create adds no record", ModelLessons.readLessons(testOwnerId).getLessons().size() == count);</span>
-<span class="source-line-no">333</span><span id="line-333">        }</span>
-<span class="source-line-no">334</span><span id="line-334">        /**</span>
-<span class="source-line-no">335</span><span id="line-335">         * Reads and dismisses a real modal error dialog in its nested JavaFX event loop.</span>
-<span class="source-line-no">336</span><span id="line-336">         * @param number requirement case number</span>
-<span class="source-line-no">337</span><span id="line-337">         * @param action controller action expected to show an error</span>
-<span class="source-line-no">338</span><span id="line-338">         * @param expected exact expected error content</span>
-<span class="source-line-no">339</span><span id="line-339">         */</span>
-<span class="source-line-no">340</span><span id="line-340">        private static void testError(int number, Runnable action, String expected) {</span>
-<span class="source-line-no">341</span><span id="line-341">                actualError = "";</span>
-<span class="source-line-no">342</span><span id="line-342">                // showAndWait processes this queued action and it reads the real dialog before it dismisses it</span>
-<span class="source-line-no">343</span><span id="line-343">                Platform.runLater(() -&gt; {</span>
-<span class="source-line-no">344</span><span id="line-344">                        for (Window window : Window.getWindows().toArray(new Window[0])) {</span>
-<span class="source-line-no">345</span><span id="line-345">                                if (window.getScene() != null &amp;&amp; window.getScene().getRoot() instanceof DialogPane) {</span>
-<span class="source-line-no">346</span><span id="line-346">                                        DialogPane pane = (DialogPane) window.getScene().getRoot();</span>
-<span class="source-line-no">347</span><span id="line-347">                                        actualError = pane.getContentText();</span>
-<span class="source-line-no">348</span><span id="line-348">                                        if (evidenceDirectory != null &amp;&amp; !errorCaptured) {</span>
-<span class="source-line-no">349</span><span id="line-349">                                                try {</span>
-<span class="source-line-no">350</span><span id="line-350">                                                        LessonTestEvidence.capture(pane, evidenceDirectory.resolve("02-validation-error.png"));</span>
-<span class="source-line-no">351</span><span id="line-351">                                                        errorCaptured = true;</span>
-<span class="source-line-no">352</span><span id="line-352">                                                } catch (Exception failure) {</span>
-<span class="source-line-no">353</span><span id="line-353">                                                        numFailed++;</span>
-<span class="source-line-no">354</span><span id="line-354">                                                        failure.printStackTrace();</span>
-<span class="source-line-no">355</span><span id="line-355">                                                }</span>
-<span class="source-line-no">356</span><span id="line-356">                                        }</span>
-<span class="source-line-no">357</span><span id="line-357">                                        pane.lookupButton(ButtonType.OK).fireEvent(new javafx.event.ActionEvent());</span>
-<span class="source-line-no">358</span><span id="line-358">                                }</span>
-<span class="source-line-no">359</span><span id="line-359">                        }</span>
-<span class="source-line-no">360</span><span id="line-360">                });</span>
-<span class="source-line-no">361</span><span id="line-361">                action.run();</span>
-<span class="source-line-no">362</span><span id="line-362">                performTestCase(number, "Helpful error: " + expected, actualError.equals(expected));</span>
-<span class="source-line-no">363</span><span id="line-363">                System.out.println("Actual error: " + actualError);</span>
-<span class="source-line-no">364</span><span id="line-364">        }</span>
-<span class="source-line-no">365</span><span id="line-365">        /** @param id ID to select in the currently displayed list */</span>
-<span class="source-line-no">366</span><span id="line-366">        private static void select(int id) {</span>
-<span class="source-line-no">367</span><span id="line-367">                ViewLessons.list_Lessons.getSelectionModel().clearSelection();</span>
-<span class="source-line-no">368</span><span id="line-368">                for (Lesson lesson : ViewLessons.list_Lessons.getItems()) {</span>
-<span class="source-line-no">369</span><span id="line-369">                        if (lesson.getId() == id) {</span>
-<span class="source-line-no">370</span><span id="line-370">                                ViewLessons.list_Lessons.getSelectionModel().select(lesson);</span>
-<span class="source-line-no">371</span><span id="line-371">                                return;</span>
-<span class="source-line-no">372</span><span id="line-372">                        }</span>
-<span class="source-line-no">373</span><span id="line-373">                }</span>
-<span class="source-line-no">374</span><span id="line-374">        }</span>
-<span class="source-line-no">375</span><span id="line-375">        /**</span>
-<span class="source-line-no">376</span><span id="line-376">         * Populates the form without saving it.</span>
-<span class="source-line-no">377</span><span id="line-377">         * @param t title input</span>
-<span class="source-line-no">378</span><span id="line-378">         * @param p problem input</span>
-<span class="source-line-no">379</span><span id="line-379">         * @param s solution input</span>
-<span class="source-line-no">380</span><span id="line-380">         * @param e experience input</span>
-<span class="source-line-no">381</span><span id="line-381">         */</span>
-<span class="source-line-no">382</span><span id="line-382">        private static void fields(String t, String p, String s, String e) {</span>
-<span class="source-line-no">383</span><span id="line-383">                ViewLessons.text_Title.setText(t);</span>
-<span class="source-line-no">384</span><span id="line-384">                ViewLessons.text_Problem.setText(p);</span>
-<span class="source-line-no">385</span><span id="line-385">                ViewLessons.text_Solution.setText(s);</span>
-<span class="source-line-no">386</span><span id="line-386">                ViewLessons.text_Experience.setText(e);</span>
-<span class="source-line-no">387</span><span id="line-387">        }</span>
-<span class="source-line-no">388</span><span id="line-388">        /**</span>
-<span class="source-line-no">389</span><span id="line-389">         * Compares every visible field with expected stored text.</span>
-<span class="source-line-no">390</span><span id="line-390">         * @param t expected title</span>
-<span class="source-line-no">391</span><span id="line-391">         * @param p expected problem</span>
-<span class="source-line-no">392</span><span id="line-392">         * @param s expected solution</span>
-<span class="source-line-no">393</span><span id="line-393">         * @param e expected experience</span>
-<span class="source-line-no">394</span><span id="line-394">         * @return whether all four fields match</span>
-<span class="source-line-no">395</span><span id="line-395">         */</span>
-<span class="source-line-no">396</span><span id="line-396">        private static boolean formMatches(String t, String p, String s, String e) {</span>
-<span class="source-line-no">397</span><span id="line-397">                return ViewLessons.text_Title.getText().equals(t) &amp;&amp; ViewLessons.text_Problem.getText().equals(p)</span>
-<span class="source-line-no">398</span><span id="line-398">                                &amp;&amp; ViewLessons.text_Solution.getText().equals(s) &amp;&amp; ViewLessons.text_Experience.getText().equals(e);</span>
-<span class="source-line-no">399</span><span id="line-399">        }</span>
-<span class="source-line-no">400</span><span id="line-400">        /**</span>
-<span class="source-line-no">401</span><span id="line-401">         * Compares persisted identity, ownership, and text after a rejected edit.</span>
-<span class="source-line-no">402</span><span id="line-402">         * @param a snapshot before the attempted edit</span>
-<span class="source-line-no">403</span><span id="line-403">         * @param b snapshot after the attempted edit</span>
-<span class="source-line-no">404</span><span id="line-404">         * @return whether the complete stored record is unchanged</span>
-<span class="source-line-no">405</span><span id="line-405">         */</span>
-<span class="source-line-no">406</span><span id="line-406">        private static boolean sameLesson(Lesson a, Lesson b) {</span>
-<span class="source-line-no">407</span><span id="line-407">                return a != null &amp;&amp; b != null &amp;&amp; a.getOwnerId() == b.getOwnerId()</span>
-<span class="source-line-no">408</span><span id="line-408">                                &amp;&amp; a.getId() == b.getId() &amp;&amp; a.getTitle().equals(b.getTitle()) &amp;&amp; a.getProblem().equals(b.getProblem())</span>
-<span class="source-line-no">409</span><span id="line-409">                                &amp;&amp; a.getSolution().equals(b.getSolution()) &amp;&amp; a.getExperience().equals(b.getExperience());</span>
-<span class="source-line-no">410</span><span id="line-410">        }</span>
-<span class="source-line-no">411</span><span id="line-411">        /**</span>
-<span class="source-line-no">412</span><span id="line-412">         * Reports one assertion; multiple assertions may belong to the same case.</span>
-<span class="source-line-no">413</span><span id="line-413">         * @param number requirement case number</span>
-<span class="source-line-no">414</span><span id="line-414">         * @param description assertion description</span>
-<span class="source-line-no">415</span><span id="line-415">         * @param passed whether the observed result met the expectation</span>
-<span class="source-line-no">416</span><span id="line-416">         */</span>
-<span class="source-line-no">417</span><span id="line-417">        private static void performTestCase(int number, String description, boolean passed) {</span>
-<span class="source-line-no">418</span><span id="line-418">                System.out.println("\nTest case " + number + ": " + description);</span>
-<span class="source-line-no">419</span><span id="line-419">                if (passed) {</span>
-<span class="source-line-no">420</span><span id="line-420">                        System.out.println("Success");</span>
-<span class="source-line-no">421</span><span id="line-421">                        numPassed++;</span>
-<span class="source-line-no">422</span><span id="line-422">                } else {</span>
-<span class="source-line-no">423</span><span id="line-423">                        System.out.println("Failure");</span>
-<span class="source-line-no">424</span><span id="line-424">                        numFailed++;</span>
-<span class="source-line-no">425</span><span id="line-425">                }</span>
-<span class="source-line-no">426</span><span id="line-426">        }</span>
-<span class="source-line-no">427</span><span id="line-427"></span>
-<span class="source-line-no">428</span><span id="line-428">        /**</span>
-<span class="source-line-no">429</span><span id="line-429">         * Saves a rendered lesson scene when evidence output is enabled.</span>
-<span class="source-line-no">430</span><span id="line-430">         * @param name screenshot filename without its PNG extension</span>
-<span class="source-line-no">431</span><span id="line-431">         * @throws Exception if the screenshot cannot be written</span>
-<span class="source-line-no">432</span><span id="line-432">         */</span>
-<span class="source-line-no">433</span><span id="line-433">        private static void capture(String name) throws Exception {</span>
-<span class="source-line-no">434</span><span id="line-434">                if (evidenceDirectory != null)</span>
-<span class="source-line-no">435</span><span id="line-435">                        LessonTestEvidence.capture(ViewLessons.theStage.getScene().getRoot(), evidenceDirectory.resolve(name + ".png"));</span>
-<span class="source-line-no">436</span><span id="line-436">        }</span>
-<span class="source-line-no">437</span><span id="line-437"></span>
-<span class="source-line-no">438</span><span id="line-438">        /**</span>
-<span class="source-line-no">439</span><span id="line-439">         * Checks owner-filtered lists with an independently owned fixture (case 16).</span>
-<span class="source-line-no">440</span><span id="line-440">         * @throws Exception if database access fails</span>
-<span class="source-line-no">441</span><span id="line-441">         */</span>
-<span class="source-line-no">442</span><span id="line-442">        private static void testContributorLists() throws Exception {</span>
-<span class="source-line-no">443</span><span id="line-443">                // CASE 16: An independent owner fixture detects accidental unfiltered list reads.</span>
-<span class="source-line-no">444</span><span id="line-444">                int otherOwnerId = 42;</span>
-<span class="source-line-no">445</span><span id="line-445">                int otherId = ModelLessons.createLesson(new Lesson(0, otherOwnerId, "Other contributor", problem, solution, ""));</span>
-<span class="source-line-no">446</span><span id="line-446">                ViewLessons.refreshList();</span>
-<span class="source-line-no">447</span><span id="line-447">                performTestCase(16, "Contributor list excludes another owner's lesson",</span>
-<span class="source-line-no">448</span><span id="line-448">                                ViewLessons.list_Lessons.getItems().size() == 1000</span>
-<span class="source-line-no">449</span><span id="line-449">                                &amp;&amp; ViewLessons.list_Lessons.getItems().stream().noneMatch(lesson -&gt; lesson.getId() == otherId)</span>
-<span class="source-line-no">450</span><span id="line-450">                                &amp;&amp; ModelLessons.readLessons(otherOwnerId).getLessons().size() == 1);</span>
-<span class="source-line-no">451</span><span id="line-451">                ModelLessons.deleteLesson(otherId);</span>
-<span class="source-line-no">452</span><span id="line-452">                ViewLessons.refreshList();</span>
-<span class="source-line-no">453</span><span id="line-453">        }</span>
-<span class="source-line-no">454</span><span id="line-454"></span>
-<span class="source-line-no">455</span><span id="line-455">        /** Checks duplicate IDs, missing IDs, defensive list copies, and keyword subsets (case 17). */</span>
-<span class="source-line-no">456</span><span id="line-456">        private static void testListSearch() {</span>
-<span class="source-line-no">457</span><span id="line-457">                // CASE 17: Exercise missing IDs, duplicate IDs, copy isolation, and all search fields.</span>
-<span class="source-line-no">458</span><span id="line-458">                LessonList list = new LessonList();</span>
-<span class="source-line-no">459</span><span id="line-459">                list.addLesson(new Lesson(1, testOwnerId, "Alpha", "ProblemToken", "SolutionToken", "ExperienceToken"));</span>
-<span class="source-line-no">460</span><span id="line-460">                list.addLesson(new Lesson(1, testOwnerId, "Duplicate", "", "", ""));</span>
-<span class="source-line-no">461</span><span id="line-461">                list.addLesson(new Lesson(2, testOwnerId, "Beta", "Other", "Other", ""));</span>
-<span class="source-line-no">462</span><span id="line-462">                performTestCase(17, "Duplicate ID is ignored", list.getLessons().size() == 2 &amp;&amp; list.getLesson(1).getTitle().equals("Alpha"));</span>
-<span class="source-line-no">463</span><span id="line-463">                performTestCase(17, "Missing IDs return null or false", list.getLesson(99) == null</span>
-<span class="source-line-no">464</span><span id="line-464">                                &amp;&amp; !list.updateLesson(new Lesson(99, testOwnerId, "Absent", "", "", "")) &amp;&amp; !list.removeLesson(99));</span>
-<span class="source-line-no">465</span><span id="line-465">                list.getLessons().clear();</span>
-<span class="source-line-no">466</span><span id="line-466">                performTestCase(17, "Changing returned list preserves original", list.getLessons().size() == 2);</span>
-<span class="source-line-no">467</span><span id="line-467">                for (String keyword : new String[] {" ALPHA ", "problemtoken", "solutiontoken", "experiencetoken"}) {</span>
-<span class="source-line-no">468</span><span id="line-468">                        LessonList subset = list.searchByKeyword(keyword);</span>
-<span class="source-line-no">469</span><span id="line-469">                        performTestCase(17, "Keyword matches field: " + keyword,</span>
-<span class="source-line-no">470</span><span id="line-470">                                        subset.getLessons().size() == 1 &amp;&amp; subset.getLesson(1) != null &amp;&amp; list.getLessons().size() == 2);</span>
-<span class="source-line-no">471</span><span id="line-471">                }</span>
-<span class="source-line-no">472</span><span id="line-472">                performTestCase(17, "Absent keyword yields empty subset", list.searchByKeyword("missing").getLessons().isEmpty());</span>
-<span class="source-line-no">473</span><span id="line-473">                performTestCase(17, "Blank and null keywords match all", list.searchByKeyword("").getLessons().size() == 2</span>
-<span class="source-line-no">474</span><span id="line-474">                                &amp;&amp; list.searchByKeyword(null).getLessons().size() == 2);</span>
-<span class="source-line-no">475</span><span id="line-475">        }</span>
-<span class="source-line-no">476</span><span id="line-476"></span>
-<span class="source-line-no">477</span><span id="line-477">        /**</span>
-<span class="source-line-no">478</span><span id="line-478">         * Exercises actual button handlers, including subset restoration and Back (case 18).</span>
-<span class="source-line-no">479</span><span id="line-479">         * @throws Exception if database access fails</span>
-<span class="source-line-no">480</span><span id="line-480">         */</span>
-<span class="source-line-no">481</span><span id="line-481">        private static void testButtons() throws Exception {</span>
-<span class="source-line-no">482</span><span id="line-482">                // CASE 18: Fire installed button handlers so broken MVC bindings cannot pass silently.</span>
-<span class="source-line-no">483</span><span id="line-483">                fields(title, problem, solution, experience);</span>
-<span class="source-line-no">484</span><span id="line-484">                fireButton("Create");</span>
-<span class="source-line-no">485</span><span id="line-485">                performTestCase(18, "Create button saves a lesson", ViewLessons.list_Lessons.getItems().size() == 1);</span>
-<span class="source-line-no">486</span><span id="line-486">                int lessonId = ViewLessons.list_Lessons.getItems().get(0).getId();</span>
-<span class="source-line-no">487</span><span id="line-487">                select(lessonId);</span>
-<span class="source-line-no">488</span><span id="line-488">                fields("", "", "", "");</span>
-<span class="source-line-no">489</span><span id="line-489">                fireButton("Read");</span>
-<span class="source-line-no">490</span><span id="line-490">                performTestCase(18, "Read button restores every field", formMatches(title, problem, solution, experience));</span>
-<span class="source-line-no">491</span><span id="line-491">                ViewLessons.text_Title.setText("Button update");</span>
-<span class="source-line-no">492</span><span id="line-492">                fireButton("Update");</span>
-<span class="source-line-no">493</span><span id="line-493">                performTestCase(18, "Update button saves the edited title", ModelLessons.readLesson(lessonId).getTitle().equals("Button update"));</span>
-<span class="source-line-no">494</span><span id="line-494">                select(lessonId);</span>
-<span class="source-line-no">495</span><span id="line-495">                fireButton("Show selected");</span>
-<span class="source-line-no">496</span><span id="line-496">                performTestCase(18, "Show selected button clears the form", ViewLessons.list_Lessons.getItems().size() == 1</span>
-<span class="source-line-no">497</span><span id="line-497">                                &amp;&amp; formMatches("", "", "", ""));</span>
-<span class="source-line-no">498</span><span id="line-498">                select(lessonId);</span>
-<span class="source-line-no">499</span><span id="line-499">                fireButton("Remove from subset");</span>
-<span class="source-line-no">500</span><span id="line-500">                performTestCase(18, "Remove button hides without deleting", ViewLessons.list_Lessons.getItems().isEmpty()</span>
-<span class="source-line-no">501</span><span id="line-501">                                &amp;&amp; ModelLessons.readLesson(lessonId) != null);</span>
-<span class="source-line-no">502</span><span id="line-502">                fireButton("Show all");</span>
-<span class="source-line-no">503</span><span id="line-503">                performTestCase(18, "Show all button restores the lesson", ViewLessons.list_Lessons.getItems().size() == 1);</span>
-<span class="source-line-no">504</span><span id="line-504">                select(lessonId);</span>
-<span class="source-line-no">505</span><span id="line-505">                fireButton("Delete");</span>
-<span class="source-line-no">506</span><span id="line-506">                performTestCase(18, "Delete button removes the saved record", ModelLessons.readLesson(lessonId) == null</span>
-<span class="source-line-no">507</span><span id="line-507">                                &amp;&amp; ViewLessons.list_Lessons.getItems().isEmpty());</span>
-<span class="source-line-no">508</span><span id="line-508">                javafx.scene.Scene lessonScene = ViewLessons.theStage.getScene();</span>
-<span class="source-line-no">509</span><span id="line-509">                fireButton("Back");</span>
-<span class="source-line-no">510</span><span id="line-510">                performTestCase(18, "Back button restores scene and title", ViewLessons.theStage.getScene() == ViewLessons.theHomeScene</span>
-<span class="source-line-no">511</span><span id="line-511">                                &amp;&amp; ViewLessons.theStage.getTitle().equals("Contributor test home"));</span>
-<span class="source-line-no">512</span><span id="line-512">                ViewLessons.theStage.setScene(lessonScene);</span>
-<span class="source-line-no">513</span><span id="line-513">                ViewLessons.theStage.setTitle("CSE 360: Lessons Learned");</span>
-<span class="source-line-no">514</span><span id="line-514">        }</span>
-<span class="source-line-no">515</span><span id="line-515"></span>
-<span class="source-line-no">516</span><span id="line-516">        /**</span>
-<span class="source-line-no">517</span><span id="line-517">         * Fires a visible button through its installed action handler.</span>
-<span class="source-line-no">518</span><span id="line-518">         * @param caption exact button text to find</span>
-<span class="source-line-no">519</span><span id="line-519">         * @throws IllegalStateException if the expected control is absent</span>
-<span class="source-line-no">520</span><span id="line-520">         */</span>
-<span class="source-line-no">521</span><span id="line-521">        private static void fireButton(String caption) {</span>
-<span class="source-line-no">522</span><span id="line-522">                ViewLessons.theStage.getScene().getRoot().applyCss();</span>
-<span class="source-line-no">523</span><span id="line-523">                for (javafx.scene.Node node : ViewLessons.theStage.getScene().getRoot().lookupAll(".button")) {</span>
-<span class="source-line-no">524</span><span id="line-524">                        if (node instanceof javafx.scene.control.Button button &amp;&amp; button.getText().equals(caption)) {</span>
-<span class="source-line-no">525</span><span id="line-525">                                button.fire();</span>
-<span class="source-line-no">526</span><span id="line-526">                                return;</span>
-<span class="source-line-no">527</span><span id="line-527">                        }</span>
-<span class="source-line-no">528</span><span id="line-528">                }</span>
-<span class="source-line-no">529</span><span id="line-529">                throw new IllegalStateException("Missing button: " + caption);</span>
-<span class="source-line-no">530</span><span id="line-530">        }</span>
-<span class="source-line-no">531</span><span id="line-531"></span>
-<span class="source-line-no">532</span><span id="line-532">        /**</span>
-<span class="source-line-no">533</span><span id="line-533">         * Checks Task 3's entity validation and persistence without going through the MVC controller.</span>
-<span class="source-line-no">534</span><span id="line-534">         * @throws Exception if the entity/database fixture fails</span>
-<span class="source-line-no">535</span><span id="line-535">         */</span>
-<span class="source-line-no">536</span><span id="line-536">        private static void testEntityPersistence() throws Exception {</span>
-<span class="source-line-no">537</span><span id="line-537">                // CASE 19: The entity itself must guard invalid writes, even without GUI validation.</span>
-<span class="source-line-no">538</span><span id="line-538">                int originalCount = ModelLessons.readLessons(testOwnerId).getLessons().size();</span>
-<span class="source-line-no">539</span><span id="line-539">                for (Lesson invalid : new Lesson[] {</span>
-<span class="source-line-no">540</span><span id="line-540">                                new Lesson(0, testOwnerId, null, problem, solution, null),</span>
-<span class="source-line-no">541</span><span id="line-541">                                new Lesson(0, testOwnerId, title, null, solution, ""),</span>
-<span class="source-line-no">542</span><span id="line-542">                                new Lesson(0, testOwnerId, title, problem, null, ""),</span>
-<span class="source-line-no">543</span><span id="line-543">                                new Lesson(0, testOwnerId, "T".repeat(101), problem, solution, ""),</span>
-<span class="source-line-no">544</span><span id="line-544">                                new Lesson(0, testOwnerId, title, "P".repeat(2001), solution, ""),</span>
-<span class="source-line-no">545</span><span id="line-545">                                new Lesson(0, testOwnerId, title, problem, "S".repeat(2001), ""),</span>
-<span class="source-line-no">546</span><span id="line-546">                                new Lesson(0, testOwnerId, title, problem, solution, "E".repeat(2001))}) {</span>
-<span class="source-line-no">547</span><span id="line-547">                        performTestCase(19, "Entity rejects invalid create without inserting",</span>
-<span class="source-line-no">548</span><span id="line-548">                                        !invalid.isValid() &amp;&amp; invalid.create(FoundationsMain.database) == -1</span>
-<span class="source-line-no">549</span><span id="line-549">                                        &amp;&amp; ModelLessons.readLessons(testOwnerId).getLessons().size() == originalCount);</span>
-<span class="source-line-no">550</span><span id="line-550">                }</span>
-<span class="source-line-no">551</span><span id="line-551">                Lesson entity = new Lesson(0, testOwnerId, "  Entity title  ", " Problem ", " Solution ", null);</span>
-<span class="source-line-no">552</span><span id="line-552">                int entityId = entity.create(FoundationsMain.database);</span>
-<span class="source-line-no">553</span><span id="line-553">                Lesson stored = Lesson.read(FoundationsMain.database, entityId);</span>
-<span class="source-line-no">554</span><span id="line-554">                performTestCase(19, "Entity create trims text, normalizes null experience, assigns ID",</span>
-<span class="source-line-no">555</span><span id="line-555">                                entityId &gt; 0 &amp;&amp; entity.getId() == entityId &amp;&amp; stored != null</span>
-<span class="source-line-no">556</span><span id="line-556">                                &amp;&amp; stored.getTitle().equals("Entity title") &amp;&amp; stored.getProblem().equals("Problem")</span>
-<span class="source-line-no">557</span><span id="line-557">                                &amp;&amp; stored.getSolution().equals("Solution") &amp;&amp; stored.getExperience().isEmpty());</span>
-<span class="source-line-no">558</span><span id="line-558">                entity.setTitle("   ");</span>
-<span class="source-line-no">559</span><span id="line-559">                performTestCase(19, "Entity rejects invalid update and preserves stored snapshot",</span>
-<span class="source-line-no">560</span><span id="line-560">                                !entity.update(FoundationsMain.database) &amp;&amp; sameLesson(stored, Lesson.read(FoundationsMain.database, entityId)));</span>
-<span class="source-line-no">561</span><span id="line-561">                entity.setTitle(" Updated entity ");</span>
-<span class="source-line-no">562</span><span id="line-562">                entity.setProblem(" Updated problem ");</span>
-<span class="source-line-no">563</span><span id="line-563">                entity.setSolution(" Updated solution ");</span>
-<span class="source-line-no">564</span><span id="line-564">                entity.setExperience(" Updated experience ");</span>
-<span class="source-line-no">565</span><span id="line-565">                performTestCase(19, "Entity update persists normalized fields and unchanged identity",</span>
-<span class="source-line-no">566</span><span id="line-566">                                entity.update(FoundationsMain.database) &amp;&amp; sameLesson(entity, Lesson.read(FoundationsMain.database, entityId)));</span>
-<span class="source-line-no">567</span><span id="line-567">                LessonList ownLessons = LessonList.readLessons(FoundationsMain.database, testOwnerId);</span>
-<span class="source-line-no">568</span><span id="line-568">                LessonList allLessons = LessonList.readAllLessons(FoundationsMain.database);</span>
-<span class="source-line-no">569</span><span id="line-569">                performTestCase(19, "Persistent list APIs include the newly created entity",</span>
-<span class="source-line-no">570</span><span id="line-570">                                ownLessons.getLesson(entityId) != null &amp;&amp; allLessons.getLesson(entityId) != null</span>
-<span class="source-line-no">571</span><span id="line-571">                                &amp;&amp; ownLessons.getLessons().size() == originalCount + 1);</span>
-<span class="source-line-no">572</span><span id="line-572">                performTestCase(19, "Entity delete removes stored row and repeated delete returns false",</span>
-<span class="source-line-no">573</span><span id="line-573">                                entity.delete(FoundationsMain.database) &amp;&amp; Lesson.read(FoundationsMain.database, entityId) == null</span>
-<span class="source-line-no">574</span><span id="line-574">                                &amp;&amp; !entity.delete(FoundationsMain.database));</span>
-<span class="source-line-no">575</span><span id="line-575">                ViewLessons.refreshList();</span>
-<span class="source-line-no">576</span><span id="line-576">        }</span>
-<span class="source-line-no">577</span><span id="line-577"></span>
-<span class="source-line-no">578</span><span id="line-578">        /**</span>
-<span class="source-line-no">579</span><span id="line-579">         * Checks Task 4's helpful database error dialogs and recovery after reconnection.</span>
-<span class="source-line-no">580</span><span id="line-580">         * @throws Exception if preparing or restoring the database connection fails</span>
-<span class="source-line-no">581</span><span id="line-581">         */</span>
-<span class="source-line-no">582</span><span id="line-582">        private static void testDatabaseErrors() throws Exception {</span>
-<span class="source-line-no">583</span><span id="line-583">                // CASE 20: Close only the isolated connection to force genuine SQL failures.</span>
-<span class="source-line-no">584</span><span id="line-584">                Lesson selected = ViewLessons.list_Lessons.getItems().get(0);</span>
-<span class="source-line-no">585</span><span id="line-585">                select(selected.getId());</span>
-<span class="source-line-no">586</span><span id="line-586">                int displayedCount = ViewLessons.list_Lessons.getItems().size();</span>
-<span class="source-line-no">587</span><span id="line-587">                FoundationsMain.database.closeConnection();</span>
-<span class="source-line-no">588</span><span id="line-588">                try {</span>
-<span class="source-line-no">589</span><span id="line-589">                        testError(20, ControllerLessons::createLesson, "Could not save the lesson. Please try again.");</span>
-<span class="source-line-no">590</span><span id="line-590">                        testError(20, ControllerLessons::readLesson, "Could not read the lesson. Please try again.");</span>
-<span class="source-line-no">591</span><span id="line-591">                        testError(20, ControllerLessons::updateLesson, "Could not update the lesson. Please try again.");</span>
-<span class="source-line-no">592</span><span id="line-592">                        testError(20, ControllerLessons::deleteLesson, "Could not delete the lesson. Please try again.");</span>
-<span class="source-line-no">593</span><span id="line-593">                        testError(20, ViewLessons::refreshList, "Could not load lessons. Please try again.");</span>
-<span class="source-line-no">594</span><span id="line-594">                        performTestCase(20, "Failed list read preserves visible rows", ViewLessons.list_Lessons.getItems().size() == displayedCount);</span>
-<span class="source-line-no">595</span><span id="line-595">                } finally {</span>
-<span class="source-line-no">596</span><span id="line-596">                        FoundationsMain.database.connectToDatabase();</span>
-<span class="source-line-no">597</span><span id="line-597">                        ViewLessons.refreshList();</span>
-<span class="source-line-no">598</span><span id="line-598">                }</span>
-<span class="source-line-no">599</span><span id="line-599">                performTestCase(20, "Reconnection restores unchanged stored fields", sameLesson(selected, ModelLessons.readLesson(selected.getId()))</span>
-<span class="source-line-no">600</span><span id="line-600">                                &amp;&amp; ViewLessons.list_Lessons.getItems().size() == displayedCount);</span>
-<span class="source-line-no">601</span><span id="line-601">        }</span>
-<span class="source-line-no">602</span><span id="line-602">}</span>
+<span class="source-line-no">265</span><span id="line-265">                ContributorStoryTests.run();</span>
+<span class="source-line-no">266</span><span id="line-266">                ViewLessons.refreshList();</span>
+<span class="source-line-no">267</span><span id="line-267">                select(savedId);</span>
+<span class="source-line-no">268</span><span id="line-268">                ViewLessons.text_Title.setText("Saved after restart");</span>
+<span class="source-line-no">269</span><span id="line-269">                ControllerLessons.updateLesson();</span>
+<span class="source-line-no">270</span><span id="line-270">                int deletedId = ViewLessons.list_Lessons.getItems().get(999).getId();</span>
+<span class="source-line-no">271</span><span id="line-271">                select(deletedId);</span>
+<span class="source-line-no">272</span><span id="line-272">                ControllerLessons.deleteLesson();</span>
+<span class="source-line-no">273</span><span id="line-273">                try (PrintWriter output = new PrintWriter(restartFile)) {</span>
+<span class="source-line-no">274</span><span id="line-274">                        output.println(savedId);</span>
+<span class="source-line-no">275</span><span id="line-275">                        output.println(deletedId);</span>
+<span class="source-line-no">276</span><span id="line-276">                }</span>
+<span class="source-line-no">277</span><span id="line-277">                System.out.println("\nTest 6: Run this class again to check a separate execution.");</span>
+<span class="source-line-no">278</span><span id="line-278">        }</span>
+<span class="source-line-no">279</span><span id="line-279">        /**</span>
+<span class="source-line-no">280</span><span id="line-280">         * Verifies case 6 in a fresh process using IDs recorded by the first execution.</span>
+<span class="source-line-no">281</span><span id="line-281">         * @throws Exception if database access or reading the marker fails</span>
+<span class="source-line-no">282</span><span id="line-282">         */</span>
+<span class="source-line-no">283</span><span id="line-283">        private static void testRestart() throws Exception {</span>
+<span class="source-line-no">284</span><span id="line-284">                // CASE 06: A new JVM must read saved data, not a previous process's cached list.</span>
+<span class="source-line-no">285</span><span id="line-285">                try (Scanner input = new Scanner(restartFile)) {</span>
+<span class="source-line-no">286</span><span id="line-286">                        int savedId = input.nextInt();</span>
+<span class="source-line-no">287</span><span id="line-287">                        int deletedId = input.nextInt();</span>
+<span class="source-line-no">288</span><span id="line-288">                        Lesson saved = ModelLessons.readLesson(savedId);</span>
+<span class="source-line-no">289</span><span id="line-289">                        performTestCase(6, "Created and edited lesson survives a separate execution", saved != null</span>
+<span class="source-line-no">290</span><span id="line-290">                                        &amp;&amp; saved.getId() == savedId &amp;&amp; saved.getTitle().equals("Saved after restart")</span>
+<span class="source-line-no">291</span><span id="line-291">                                        &amp;&amp; saved.getProblem().equals(problem) &amp;&amp; saved.getSolution().equals(solution)</span>
+<span class="source-line-no">292</span><span id="line-292">                                        &amp;&amp; saved.getExperience().isEmpty());</span>
+<span class="source-line-no">293</span><span id="line-293">                        performTestCase(6, "Deleted lesson stays deleted", ModelLessons.readLesson(deletedId) == null);</span>
+<span class="source-line-no">294</span><span id="line-294">                        performTestCase(6, "All remaining lessons survive", ModelLessons.readLessons(testOwnerId).getLessons().size() == 999);</span>
+<span class="source-line-no">295</span><span id="line-295">                        select(savedId);</span>
+<span class="source-line-no">296</span><span id="line-296">                        capture("05-after-restart");</span>
+<span class="source-line-no">297</span><span id="line-297">                }</span>
+<span class="source-line-no">298</span><span id="line-298">                if (!restartFile.delete()) System.out.println("Could not remove the restart test marker.");</span>
+<span class="source-line-no">299</span><span id="line-299">                ContributorStoryTests.testRestartRestoresState();</span>
+<span class="source-line-no">300</span><span id="line-300">                ContributorStoryTests.testRestartKeepsRestrictions();</span>
+<span class="source-line-no">301</span><span id="line-301">        }</span>
+<span class="source-line-no">302</span><span id="line-302">        /**</span>
+<span class="source-line-no">303</span><span id="line-303">         * Checks that a valid create stores every supplied field and adds one record.</span>
+<span class="source-line-no">304</span><span id="line-304">         * @param number requirement case number</span>
+<span class="source-line-no">305</span><span id="line-305">         * @param t title input</span>
+<span class="source-line-no">306</span><span id="line-306">         * @param p problem input</span>
+<span class="source-line-no">307</span><span id="line-307">         * @param s solution input</span>
+<span class="source-line-no">308</span><span id="line-308">         * @param e experience input</span>
+<span class="source-line-no">309</span><span id="line-309">         * @throws Exception if database access fails</span>
+<span class="source-line-no">310</span><span id="line-310">         */</span>
+<span class="source-line-no">311</span><span id="line-311">        private static void testValid(int number, String t, String p, String s, String e) throws Exception {</span>
+<span class="source-line-no">312</span><span id="line-312">                int count = ModelLessons.readLessons(testOwnerId).getLessons().size();</span>
+<span class="source-line-no">313</span><span id="line-313">                fields(t, p, s, e);</span>
+<span class="source-line-no">314</span><span id="line-314">                ControllerLessons.createLesson();</span>
+<span class="source-line-no">315</span><span id="line-315">                Lesson saved = ViewLessons.list_Lessons.getItems().get(ViewLessons.list_Lessons.getItems().size() - 1);</span>
+<span class="source-line-no">316</span><span id="line-316">                performTestCase(number, "Accept lengths " + t.length() + ", " + p.length() + ", " + s.length() + ", " + e.length(),</span>
+<span class="source-line-no">317</span><span id="line-317">                                ModelLessons.readLessons(testOwnerId).getLessons().size() == count + 1</span>
+<span class="source-line-no">318</span><span id="line-318">                                &amp;&amp; saved.getTitle().equals(t) &amp;&amp; saved.getProblem().equals(p)</span>
+<span class="source-line-no">319</span><span id="line-319">                                &amp;&amp; saved.getSolution().equals(s) &amp;&amp; saved.getExperience().equals(e));</span>
+<span class="source-line-no">320</span><span id="line-320">        }</span>
+<span class="source-line-no">321</span><span id="line-321">        /**</span>
+<span class="source-line-no">322</span><span id="line-322">         * Checks the actual validation dialog and verifies no record was added.</span>
+<span class="source-line-no">323</span><span id="line-323">         * @param number requirement case number</span>
+<span class="source-line-no">324</span><span id="line-324">         * @param t title input</span>
+<span class="source-line-no">325</span><span id="line-325">         * @param p problem input</span>
+<span class="source-line-no">326</span><span id="line-326">         * @param s solution input</span>
+<span class="source-line-no">327</span><span id="line-327">         * @param e experience input</span>
+<span class="source-line-no">328</span><span id="line-328">         * @param message expected dialog text</span>
+<span class="source-line-no">329</span><span id="line-329">         * @throws Exception if database access fails</span>
+<span class="source-line-no">330</span><span id="line-330">         */</span>
+<span class="source-line-no">331</span><span id="line-331">        private static void testCreateError(int number, String t, String p, String s, String e, String message) throws Exception {</span>
+<span class="source-line-no">332</span><span id="line-332">                int count = ModelLessons.readLessons(testOwnerId).getLessons().size();</span>
+<span class="source-line-no">333</span><span id="line-333">                fields(t, p, s, e);</span>
+<span class="source-line-no">334</span><span id="line-334">                testError(number, ControllerLessons::createLesson, message);</span>
+<span class="source-line-no">335</span><span id="line-335">                performTestCase(number, "Invalid create adds no record", ModelLessons.readLessons(testOwnerId).getLessons().size() == count);</span>
+<span class="source-line-no">336</span><span id="line-336">        }</span>
+<span class="source-line-no">337</span><span id="line-337">        /**</span>
+<span class="source-line-no">338</span><span id="line-338">         * Reads and dismisses a real modal error dialog in its nested JavaFX event loop.</span>
+<span class="source-line-no">339</span><span id="line-339">         * @param number requirement case number</span>
+<span class="source-line-no">340</span><span id="line-340">         * @param action controller action expected to show an error</span>
+<span class="source-line-no">341</span><span id="line-341">         * @param expected exact expected error content</span>
+<span class="source-line-no">342</span><span id="line-342">         */</span>
+<span class="source-line-no">343</span><span id="line-343">        private static void testError(int number, Runnable action, String expected) {</span>
+<span class="source-line-no">344</span><span id="line-344">                actualError = "";</span>
+<span class="source-line-no">345</span><span id="line-345">                // showAndWait processes this queued action and it reads the real dialog before it dismisses it</span>
+<span class="source-line-no">346</span><span id="line-346">                Platform.runLater(() -&gt; {</span>
+<span class="source-line-no">347</span><span id="line-347">                        for (Window window : Window.getWindows().toArray(new Window[0])) {</span>
+<span class="source-line-no">348</span><span id="line-348">                                if (window.getScene() != null &amp;&amp; window.getScene().getRoot() instanceof DialogPane) {</span>
+<span class="source-line-no">349</span><span id="line-349">                                        DialogPane pane = (DialogPane) window.getScene().getRoot();</span>
+<span class="source-line-no">350</span><span id="line-350">                                        actualError = pane.getContentText();</span>
+<span class="source-line-no">351</span><span id="line-351">                                        if (evidenceDirectory != null &amp;&amp; !errorCaptured) {</span>
+<span class="source-line-no">352</span><span id="line-352">                                                try {</span>
+<span class="source-line-no">353</span><span id="line-353">                                                        LessonTestEvidence.capture(pane, evidenceDirectory.resolve("02-validation-error.png"));</span>
+<span class="source-line-no">354</span><span id="line-354">                                                        errorCaptured = true;</span>
+<span class="source-line-no">355</span><span id="line-355">                                                } catch (Exception failure) {</span>
+<span class="source-line-no">356</span><span id="line-356">                                                        numFailed++;</span>
+<span class="source-line-no">357</span><span id="line-357">                                                        failure.printStackTrace();</span>
+<span class="source-line-no">358</span><span id="line-358">                                                }</span>
+<span class="source-line-no">359</span><span id="line-359">                                        }</span>
+<span class="source-line-no">360</span><span id="line-360">                                        pane.lookupButton(ButtonType.OK).fireEvent(new javafx.event.ActionEvent());</span>
+<span class="source-line-no">361</span><span id="line-361">                                }</span>
+<span class="source-line-no">362</span><span id="line-362">                        }</span>
+<span class="source-line-no">363</span><span id="line-363">                });</span>
+<span class="source-line-no">364</span><span id="line-364">                action.run();</span>
+<span class="source-line-no">365</span><span id="line-365">                performTestCase(number, "Helpful error: " + expected, actualError.equals(expected));</span>
+<span class="source-line-no">366</span><span id="line-366">                System.out.println("Actual error: " + actualError);</span>
+<span class="source-line-no">367</span><span id="line-367">        }</span>
+<span class="source-line-no">368</span><span id="line-368">        /** @param id ID to select in the currently displayed list */</span>
+<span class="source-line-no">369</span><span id="line-369">        private static void select(int id) {</span>
+<span class="source-line-no">370</span><span id="line-370">                ViewLessons.list_Lessons.getSelectionModel().clearSelection();</span>
+<span class="source-line-no">371</span><span id="line-371">                for (Lesson lesson : ViewLessons.list_Lessons.getItems()) {</span>
+<span class="source-line-no">372</span><span id="line-372">                        if (lesson.getId() == id) {</span>
+<span class="source-line-no">373</span><span id="line-373">                                ViewLessons.list_Lessons.getSelectionModel().select(lesson);</span>
+<span class="source-line-no">374</span><span id="line-374">                                return;</span>
+<span class="source-line-no">375</span><span id="line-375">                        }</span>
+<span class="source-line-no">376</span><span id="line-376">                }</span>
+<span class="source-line-no">377</span><span id="line-377">        }</span>
+<span class="source-line-no">378</span><span id="line-378">        /**</span>
+<span class="source-line-no">379</span><span id="line-379">         * Populates the form without saving it.</span>
+<span class="source-line-no">380</span><span id="line-380">         * @param t title input</span>
+<span class="source-line-no">381</span><span id="line-381">         * @param p problem input</span>
+<span class="source-line-no">382</span><span id="line-382">         * @param s solution input</span>
+<span class="source-line-no">383</span><span id="line-383">         * @param e experience input</span>
+<span class="source-line-no">384</span><span id="line-384">         */</span>
+<span class="source-line-no">385</span><span id="line-385">        private static void fields(String t, String p, String s, String e) {</span>
+<span class="source-line-no">386</span><span id="line-386">                ViewLessons.text_Title.setText(t);</span>
+<span class="source-line-no">387</span><span id="line-387">                ViewLessons.text_Problem.setText(p);</span>
+<span class="source-line-no">388</span><span id="line-388">                ViewLessons.text_Solution.setText(s);</span>
+<span class="source-line-no">389</span><span id="line-389">                ViewLessons.text_Experience.setText(e);</span>
+<span class="source-line-no">390</span><span id="line-390">        }</span>
+<span class="source-line-no">391</span><span id="line-391">        /**</span>
+<span class="source-line-no">392</span><span id="line-392">         * Compares every visible field with expected stored text.</span>
+<span class="source-line-no">393</span><span id="line-393">         * @param t expected title</span>
+<span class="source-line-no">394</span><span id="line-394">         * @param p expected problem</span>
+<span class="source-line-no">395</span><span id="line-395">         * @param s expected solution</span>
+<span class="source-line-no">396</span><span id="line-396">         * @param e expected experience</span>
+<span class="source-line-no">397</span><span id="line-397">         * @return whether all four fields match</span>
+<span class="source-line-no">398</span><span id="line-398">         */</span>
+<span class="source-line-no">399</span><span id="line-399">        private static boolean formMatches(String t, String p, String s, String e) {</span>
+<span class="source-line-no">400</span><span id="line-400">                return ViewLessons.text_Title.getText().equals(t) &amp;&amp; ViewLessons.text_Problem.getText().equals(p)</span>
+<span class="source-line-no">401</span><span id="line-401">                                &amp;&amp; ViewLessons.text_Solution.getText().equals(s) &amp;&amp; ViewLessons.text_Experience.getText().equals(e);</span>
+<span class="source-line-no">402</span><span id="line-402">        }</span>
+<span class="source-line-no">403</span><span id="line-403">        /**</span>
+<span class="source-line-no">404</span><span id="line-404">         * Compares persisted identity, ownership, and text after a rejected edit.</span>
+<span class="source-line-no">405</span><span id="line-405">         * @param a snapshot before the attempted edit</span>
+<span class="source-line-no">406</span><span id="line-406">         * @param b snapshot after the attempted edit</span>
+<span class="source-line-no">407</span><span id="line-407">         * @return whether the complete stored record is unchanged</span>
+<span class="source-line-no">408</span><span id="line-408">         */</span>
+<span class="source-line-no">409</span><span id="line-409">        private static boolean sameLesson(Lesson a, Lesson b) {</span>
+<span class="source-line-no">410</span><span id="line-410">                return a != null &amp;&amp; b != null &amp;&amp; a.getOwnerId() == b.getOwnerId()</span>
+<span class="source-line-no">411</span><span id="line-411">                                &amp;&amp; a.getId() == b.getId() &amp;&amp; a.getTitle().equals(b.getTitle()) &amp;&amp; a.getProblem().equals(b.getProblem())</span>
+<span class="source-line-no">412</span><span id="line-412">                                &amp;&amp; a.getSolution().equals(b.getSolution()) &amp;&amp; a.getExperience().equals(b.getExperience());</span>
+<span class="source-line-no">413</span><span id="line-413">        }</span>
+<span class="source-line-no">414</span><span id="line-414">        /**</span>
+<span class="source-line-no">415</span><span id="line-415">         * Reports one assertion; multiple assertions may belong to the same case.</span>
+<span class="source-line-no">416</span><span id="line-416">         * @param number requirement case number</span>
+<span class="source-line-no">417</span><span id="line-417">         * @param description assertion description</span>
+<span class="source-line-no">418</span><span id="line-418">         * @param passed whether the observed result met the expectation</span>
+<span class="source-line-no">419</span><span id="line-419">         */</span>
+<span class="source-line-no">420</span><span id="line-420">        private static void performTestCase(int number, String description, boolean passed) {</span>
+<span class="source-line-no">421</span><span id="line-421">                System.out.println("\nTest case " + number + ": " + description);</span>
+<span class="source-line-no">422</span><span id="line-422">                if (passed) {</span>
+<span class="source-line-no">423</span><span id="line-423">                        System.out.println("Success");</span>
+<span class="source-line-no">424</span><span id="line-424">                        numPassed++;</span>
+<span class="source-line-no">425</span><span id="line-425">                } else {</span>
+<span class="source-line-no">426</span><span id="line-426">                        System.out.println("Failure");</span>
+<span class="source-line-no">427</span><span id="line-427">                        numFailed++;</span>
+<span class="source-line-no">428</span><span id="line-428">                }</span>
+<span class="source-line-no">429</span><span id="line-429">        }</span>
+<span class="source-line-no">430</span><span id="line-430"></span>
+<span class="source-line-no">431</span><span id="line-431">        /**</span>
+<span class="source-line-no">432</span><span id="line-432">         * Saves a rendered lesson scene when evidence output is enabled.</span>
+<span class="source-line-no">433</span><span id="line-433">         * @param name screenshot filename without its PNG extension</span>
+<span class="source-line-no">434</span><span id="line-434">         * @throws Exception if the screenshot cannot be written</span>
+<span class="source-line-no">435</span><span id="line-435">         */</span>
+<span class="source-line-no">436</span><span id="line-436">        private static void capture(String name) throws Exception {</span>
+<span class="source-line-no">437</span><span id="line-437">                if (evidenceDirectory != null)</span>
+<span class="source-line-no">438</span><span id="line-438">                        LessonTestEvidence.capture(ViewLessons.theStage.getScene().getRoot(), evidenceDirectory.resolve(name + ".png"));</span>
+<span class="source-line-no">439</span><span id="line-439">        }</span>
+<span class="source-line-no">440</span><span id="line-440"></span>
+<span class="source-line-no">441</span><span id="line-441">        /**</span>
+<span class="source-line-no">442</span><span id="line-442">         * Checks owner-filtered lists with an independently owned fixture (case 16).</span>
+<span class="source-line-no">443</span><span id="line-443">         * @throws Exception if database access fails</span>
+<span class="source-line-no">444</span><span id="line-444">         */</span>
+<span class="source-line-no">445</span><span id="line-445">        private static void testContributorLists() throws Exception {</span>
+<span class="source-line-no">446</span><span id="line-446">                // CASE 16: An independent owner fixture detects accidental unfiltered list reads.</span>
+<span class="source-line-no">447</span><span id="line-447">                int otherOwnerId = 42;</span>
+<span class="source-line-no">448</span><span id="line-448">                int otherId = ModelLessons.createLesson(new Lesson(0, otherOwnerId, "Other contributor", problem, solution, ""));</span>
+<span class="source-line-no">449</span><span id="line-449">                ViewLessons.refreshList();</span>
+<span class="source-line-no">450</span><span id="line-450">                performTestCase(16, "Contributor list excludes another owner's lesson",</span>
+<span class="source-line-no">451</span><span id="line-451">                                ViewLessons.list_Lessons.getItems().size() == 1000</span>
+<span class="source-line-no">452</span><span id="line-452">                                &amp;&amp; ViewLessons.list_Lessons.getItems().stream().noneMatch(lesson -&gt; lesson.getId() == otherId)</span>
+<span class="source-line-no">453</span><span id="line-453">                                &amp;&amp; ModelLessons.readLessons(otherOwnerId).getLessons().size() == 1);</span>
+<span class="source-line-no">454</span><span id="line-454">                ModelLessons.deleteLesson(otherId);</span>
+<span class="source-line-no">455</span><span id="line-455">                ViewLessons.refreshList();</span>
+<span class="source-line-no">456</span><span id="line-456">        }</span>
+<span class="source-line-no">457</span><span id="line-457"></span>
+<span class="source-line-no">458</span><span id="line-458">        /** Checks duplicate IDs, missing IDs, defensive list copies, and keyword subsets (case 17). */</span>
+<span class="source-line-no">459</span><span id="line-459">        private static void testListSearch() {</span>
+<span class="source-line-no">460</span><span id="line-460">                // CASE 17: Exercise missing IDs, duplicate IDs, copy isolation, and all search fields.</span>
+<span class="source-line-no">461</span><span id="line-461">                LessonList list = new LessonList();</span>
+<span class="source-line-no">462</span><span id="line-462">                list.addLesson(new Lesson(1, testOwnerId, "Alpha", "ProblemToken", "SolutionToken", "ExperienceToken"));</span>
+<span class="source-line-no">463</span><span id="line-463">                list.addLesson(new Lesson(1, testOwnerId, "Duplicate", "", "", ""));</span>
+<span class="source-line-no">464</span><span id="line-464">                list.addLesson(new Lesson(2, testOwnerId, "Beta", "Other", "Other", ""));</span>
+<span class="source-line-no">465</span><span id="line-465">                performTestCase(17, "Duplicate ID is ignored", list.getLessons().size() == 2 &amp;&amp; list.getLesson(1).getTitle().equals("Alpha"));</span>
+<span class="source-line-no">466</span><span id="line-466">                performTestCase(17, "Missing IDs return null or false", list.getLesson(99) == null</span>
+<span class="source-line-no">467</span><span id="line-467">                                &amp;&amp; !list.updateLesson(new Lesson(99, testOwnerId, "Absent", "", "", "")) &amp;&amp; !list.removeLesson(99));</span>
+<span class="source-line-no">468</span><span id="line-468">                list.getLessons().clear();</span>
+<span class="source-line-no">469</span><span id="line-469">                performTestCase(17, "Changing returned list preserves original", list.getLessons().size() == 2);</span>
+<span class="source-line-no">470</span><span id="line-470">                for (String keyword : new String[] {" ALPHA ", "problemtoken", "solutiontoken", "experiencetoken"}) {</span>
+<span class="source-line-no">471</span><span id="line-471">                        LessonList subset = list.searchByKeyword(keyword);</span>
+<span class="source-line-no">472</span><span id="line-472">                        performTestCase(17, "Keyword matches field: " + keyword.trim(),</span>
+<span class="source-line-no">473</span><span id="line-473">                                        subset.getLessons().size() == 1 &amp;&amp; subset.getLesson(1) != null &amp;&amp; list.getLessons().size() == 2);</span>
+<span class="source-line-no">474</span><span id="line-474">                }</span>
+<span class="source-line-no">475</span><span id="line-475">                performTestCase(17, "Absent keyword yields empty subset", list.searchByKeyword("missing").getLessons().isEmpty());</span>
+<span class="source-line-no">476</span><span id="line-476">                performTestCase(17, "Blank and null keywords match all", list.searchByKeyword("").getLessons().size() == 2</span>
+<span class="source-line-no">477</span><span id="line-477">                                &amp;&amp; list.searchByKeyword(null).getLessons().size() == 2);</span>
+<span class="source-line-no">478</span><span id="line-478">        }</span>
+<span class="source-line-no">479</span><span id="line-479"></span>
+<span class="source-line-no">480</span><span id="line-480">        /**</span>
+<span class="source-line-no">481</span><span id="line-481">         * Exercises actual button handlers, including subset restoration and Back (case 18).</span>
+<span class="source-line-no">482</span><span id="line-482">         * @throws Exception if database access fails</span>
+<span class="source-line-no">483</span><span id="line-483">         */</span>
+<span class="source-line-no">484</span><span id="line-484">        private static void testButtons() throws Exception {</span>
+<span class="source-line-no">485</span><span id="line-485">                // CASE 18: Fire installed button handlers so broken MVC bindings cannot pass silently.</span>
+<span class="source-line-no">486</span><span id="line-486">                fields(title, problem, solution, experience);</span>
+<span class="source-line-no">487</span><span id="line-487">                fireButton("Create");</span>
+<span class="source-line-no">488</span><span id="line-488">                performTestCase(18, "Create button saves a lesson", ViewLessons.list_Lessons.getItems().size() == 1);</span>
+<span class="source-line-no">489</span><span id="line-489">                int lessonId = ViewLessons.list_Lessons.getItems().get(0).getId();</span>
+<span class="source-line-no">490</span><span id="line-490">                select(lessonId);</span>
+<span class="source-line-no">491</span><span id="line-491">                fields("", "", "", "");</span>
+<span class="source-line-no">492</span><span id="line-492">                fireButton("Read");</span>
+<span class="source-line-no">493</span><span id="line-493">                performTestCase(18, "Read button restores every field", formMatches(title, problem, solution, experience));</span>
+<span class="source-line-no">494</span><span id="line-494">                ViewLessons.text_Title.setText("Button update");</span>
+<span class="source-line-no">495</span><span id="line-495">                fireButton("Update");</span>
+<span class="source-line-no">496</span><span id="line-496">                performTestCase(18, "Update button saves the edited title", ModelLessons.readLesson(lessonId).getTitle().equals("Button update"));</span>
+<span class="source-line-no">497</span><span id="line-497">                select(lessonId);</span>
+<span class="source-line-no">498</span><span id="line-498">                fireButton("Show selected");</span>
+<span class="source-line-no">499</span><span id="line-499">                performTestCase(18, "Show selected button clears the form", ViewLessons.list_Lessons.getItems().size() == 1</span>
+<span class="source-line-no">500</span><span id="line-500">                                &amp;&amp; formMatches("", "", "", ""));</span>
+<span class="source-line-no">501</span><span id="line-501">                select(lessonId);</span>
+<span class="source-line-no">502</span><span id="line-502">                fireButton("Remove from subset");</span>
+<span class="source-line-no">503</span><span id="line-503">                performTestCase(18, "Remove button hides without deleting", ViewLessons.list_Lessons.getItems().isEmpty()</span>
+<span class="source-line-no">504</span><span id="line-504">                                &amp;&amp; ModelLessons.readLesson(lessonId) != null);</span>
+<span class="source-line-no">505</span><span id="line-505">                fireButton("Show all");</span>
+<span class="source-line-no">506</span><span id="line-506">                performTestCase(18, "Show all button restores the lesson", ViewLessons.list_Lessons.getItems().size() == 1);</span>
+<span class="source-line-no">507</span><span id="line-507">                select(lessonId);</span>
+<span class="source-line-no">508</span><span id="line-508">                fireButton("Delete");</span>
+<span class="source-line-no">509</span><span id="line-509">                performTestCase(18, "Delete button removes the saved record", ModelLessons.readLesson(lessonId) == null</span>
+<span class="source-line-no">510</span><span id="line-510">                                &amp;&amp; ViewLessons.list_Lessons.getItems().isEmpty());</span>
+<span class="source-line-no">511</span><span id="line-511">                javafx.scene.Scene lessonScene = ViewLessons.theStage.getScene();</span>
+<span class="source-line-no">512</span><span id="line-512">                fireButton("Back");</span>
+<span class="source-line-no">513</span><span id="line-513">                performTestCase(18, "Back button restores scene and title", ViewLessons.theStage.getScene() == ViewLessons.theHomeScene</span>
+<span class="source-line-no">514</span><span id="line-514">                                &amp;&amp; ViewLessons.theStage.getTitle().equals("Contributor test home"));</span>
+<span class="source-line-no">515</span><span id="line-515">                ViewLessons.theStage.setScene(lessonScene);</span>
+<span class="source-line-no">516</span><span id="line-516">                ViewLessons.theStage.setTitle("CSE 360: Lessons Learned");</span>
+<span class="source-line-no">517</span><span id="line-517">        }</span>
+<span class="source-line-no">518</span><span id="line-518"></span>
+<span class="source-line-no">519</span><span id="line-519">        /**</span>
+<span class="source-line-no">520</span><span id="line-520">         * Fires a visible button through its installed action handler.</span>
+<span class="source-line-no">521</span><span id="line-521">         * @param caption exact button text to find</span>
+<span class="source-line-no">522</span><span id="line-522">         * @throws IllegalStateException if the expected control is absent</span>
+<span class="source-line-no">523</span><span id="line-523">         */</span>
+<span class="source-line-no">524</span><span id="line-524">        private static void fireButton(String caption) {</span>
+<span class="source-line-no">525</span><span id="line-525">                ViewLessons.theStage.getScene().getRoot().applyCss();</span>
+<span class="source-line-no">526</span><span id="line-526">                for (javafx.scene.Node node : ViewLessons.theStage.getScene().getRoot().lookupAll(".button")) {</span>
+<span class="source-line-no">527</span><span id="line-527">                        if (node instanceof javafx.scene.control.Button button &amp;&amp; button.getText().equals(caption)) {</span>
+<span class="source-line-no">528</span><span id="line-528">                                button.fire();</span>
+<span class="source-line-no">529</span><span id="line-529">                                return;</span>
+<span class="source-line-no">530</span><span id="line-530">                        }</span>
+<span class="source-line-no">531</span><span id="line-531">                }</span>
+<span class="source-line-no">532</span><span id="line-532">                throw new IllegalStateException("Missing button: " + caption);</span>
+<span class="source-line-no">533</span><span id="line-533">        }</span>
+<span class="source-line-no">534</span><span id="line-534"></span>
+<span class="source-line-no">535</span><span id="line-535">        /**</span>
+<span class="source-line-no">536</span><span id="line-536">         * Checks Task 3's entity validation and persistence without going through the MVC controller.</span>
+<span class="source-line-no">537</span><span id="line-537">         * @throws Exception if the entity/database fixture fails</span>
+<span class="source-line-no">538</span><span id="line-538">         */</span>
+<span class="source-line-no">539</span><span id="line-539">        private static void testEntityPersistence() throws Exception {</span>
+<span class="source-line-no">540</span><span id="line-540">                // CASE 19: The entity itself must guard invalid writes, even without GUI validation.</span>
+<span class="source-line-no">541</span><span id="line-541">                int originalCount = ModelLessons.readLessons(testOwnerId).getLessons().size();</span>
+<span class="source-line-no">542</span><span id="line-542">                for (Lesson invalid : new Lesson[] {</span>
+<span class="source-line-no">543</span><span id="line-543">                                new Lesson(0, testOwnerId, null, problem, solution, null),</span>
+<span class="source-line-no">544</span><span id="line-544">                                new Lesson(0, testOwnerId, title, null, solution, ""),</span>
+<span class="source-line-no">545</span><span id="line-545">                                new Lesson(0, testOwnerId, title, problem, null, ""),</span>
+<span class="source-line-no">546</span><span id="line-546">                                new Lesson(0, testOwnerId, "T".repeat(101), problem, solution, ""),</span>
+<span class="source-line-no">547</span><span id="line-547">                                new Lesson(0, testOwnerId, title, "P".repeat(2001), solution, ""),</span>
+<span class="source-line-no">548</span><span id="line-548">                                new Lesson(0, testOwnerId, title, problem, "S".repeat(2001), ""),</span>
+<span class="source-line-no">549</span><span id="line-549">                                new Lesson(0, testOwnerId, title, problem, solution, "E".repeat(2001))}) {</span>
+<span class="source-line-no">550</span><span id="line-550">                        performTestCase(19, "Entity rejects invalid create without inserting",</span>
+<span class="source-line-no">551</span><span id="line-551">                                        !invalid.isValid() &amp;&amp; invalid.create(FoundationsMain.database) == -1</span>
+<span class="source-line-no">552</span><span id="line-552">                                        &amp;&amp; ModelLessons.readLessons(testOwnerId).getLessons().size() == originalCount);</span>
+<span class="source-line-no">553</span><span id="line-553">                }</span>
+<span class="source-line-no">554</span><span id="line-554">                Lesson entity = new Lesson(0, testOwnerId, "  Entity title  ", " Problem ", " Solution ", null);</span>
+<span class="source-line-no">555</span><span id="line-555">                int entityId = entity.create(FoundationsMain.database);</span>
+<span class="source-line-no">556</span><span id="line-556">                Lesson stored = Lesson.read(FoundationsMain.database, entityId);</span>
+<span class="source-line-no">557</span><span id="line-557">                performTestCase(19, "Entity create trims text, normalizes null experience, assigns ID",</span>
+<span class="source-line-no">558</span><span id="line-558">                                entityId &gt; 0 &amp;&amp; entity.getId() == entityId &amp;&amp; stored != null</span>
+<span class="source-line-no">559</span><span id="line-559">                                &amp;&amp; stored.getTitle().equals("Entity title") &amp;&amp; stored.getProblem().equals("Problem")</span>
+<span class="source-line-no">560</span><span id="line-560">                                &amp;&amp; stored.getSolution().equals("Solution") &amp;&amp; stored.getExperience().isEmpty());</span>
+<span class="source-line-no">561</span><span id="line-561">                entity.setTitle("   ");</span>
+<span class="source-line-no">562</span><span id="line-562">                performTestCase(19, "Entity rejects invalid update and preserves stored snapshot",</span>
+<span class="source-line-no">563</span><span id="line-563">                                !entity.update(FoundationsMain.database) &amp;&amp; sameLesson(stored, Lesson.read(FoundationsMain.database, entityId)));</span>
+<span class="source-line-no">564</span><span id="line-564">                entity.setTitle(" Updated entity ");</span>
+<span class="source-line-no">565</span><span id="line-565">                entity.setProblem(" Updated problem ");</span>
+<span class="source-line-no">566</span><span id="line-566">                entity.setSolution(" Updated solution ");</span>
+<span class="source-line-no">567</span><span id="line-567">                entity.setExperience(" Updated experience ");</span>
+<span class="source-line-no">568</span><span id="line-568">                performTestCase(19, "Entity update persists normalized fields and unchanged identity",</span>
+<span class="source-line-no">569</span><span id="line-569">                                entity.update(FoundationsMain.database) &amp;&amp; sameLesson(entity, Lesson.read(FoundationsMain.database, entityId)));</span>
+<span class="source-line-no">570</span><span id="line-570">                LessonList ownLessons = LessonList.readLessons(FoundationsMain.database, testOwnerId);</span>
+<span class="source-line-no">571</span><span id="line-571">                LessonList allLessons = LessonList.readAllLessons(FoundationsMain.database);</span>
+<span class="source-line-no">572</span><span id="line-572">                performTestCase(19, "Persistent list APIs include the newly created entity",</span>
+<span class="source-line-no">573</span><span id="line-573">                                ownLessons.getLesson(entityId) != null &amp;&amp; allLessons.getLesson(entityId) != null</span>
+<span class="source-line-no">574</span><span id="line-574">                                &amp;&amp; ownLessons.getLessons().size() == originalCount + 1);</span>
+<span class="source-line-no">575</span><span id="line-575">                performTestCase(19, "Entity delete removes stored row and repeated delete returns false",</span>
+<span class="source-line-no">576</span><span id="line-576">                                entity.delete(FoundationsMain.database) &amp;&amp; Lesson.read(FoundationsMain.database, entityId) == null</span>
+<span class="source-line-no">577</span><span id="line-577">                                &amp;&amp; !entity.delete(FoundationsMain.database));</span>
+<span class="source-line-no">578</span><span id="line-578">                ViewLessons.refreshList();</span>
+<span class="source-line-no">579</span><span id="line-579">        }</span>
+<span class="source-line-no">580</span><span id="line-580"></span>
+<span class="source-line-no">581</span><span id="line-581">        /**</span>
+<span class="source-line-no">582</span><span id="line-582">         * Checks Task 4's helpful database error dialogs and recovery after reconnection.</span>
+<span class="source-line-no">583</span><span id="line-583">         * @throws Exception if preparing or restoring the database connection fails</span>
+<span class="source-line-no">584</span><span id="line-584">         */</span>
+<span class="source-line-no">585</span><span id="line-585">        private static void testDatabaseErrors() throws Exception {</span>
+<span class="source-line-no">586</span><span id="line-586">                // CASE 20: Close only the isolated connection to force genuine SQL failures.</span>
+<span class="source-line-no">587</span><span id="line-587">                Lesson selected = ViewLessons.list_Lessons.getItems().get(0);</span>
+<span class="source-line-no">588</span><span id="line-588">                select(selected.getId());</span>
+<span class="source-line-no">589</span><span id="line-589">                int displayedCount = ViewLessons.list_Lessons.getItems().size();</span>
+<span class="source-line-no">590</span><span id="line-590">                FoundationsMain.database.closeConnection();</span>
+<span class="source-line-no">591</span><span id="line-591">                try {</span>
+<span class="source-line-no">592</span><span id="line-592">                        testError(20, ControllerLessons::createLesson, "Could not save the lesson. Please try again.");</span>
+<span class="source-line-no">593</span><span id="line-593">                        testError(20, ControllerLessons::readLesson, "Could not read the lesson. Please try again.");</span>
+<span class="source-line-no">594</span><span id="line-594">                        testError(20, ControllerLessons::updateLesson, "Could not update the lesson. Please try again.");</span>
+<span class="source-line-no">595</span><span id="line-595">                        testError(20, ControllerLessons::deleteLesson, "Could not delete the lesson. Please try again.");</span>
+<span class="source-line-no">596</span><span id="line-596">                        testError(20, ViewLessons::refreshList, "Could not load lessons. Please try again.");</span>
+<span class="source-line-no">597</span><span id="line-597">                        performTestCase(20, "Failed list read preserves visible rows", ViewLessons.list_Lessons.getItems().size() == displayedCount);</span>
+<span class="source-line-no">598</span><span id="line-598">                } finally {</span>
+<span class="source-line-no">599</span><span id="line-599">                        FoundationsMain.database.connectToDatabase();</span>
+<span class="source-line-no">600</span><span id="line-600">                        ViewLessons.refreshList();</span>
+<span class="source-line-no">601</span><span id="line-601">                }</span>
+<span class="source-line-no">602</span><span id="line-602">                performTestCase(20, "Reconnection restores unchanged stored fields", sameLesson(selected, ModelLessons.readLesson(selected.getId()))</span>
+<span class="source-line-no">603</span><span id="line-603">                                &amp;&amp; ViewLessons.list_Lessons.getItems().size() == displayedCount);</span>
+<span class="source-line-no">604</span><span id="line-604">        }</span>
+<span class="source-line-no">605</span><span id="line-605">}</span>
 
 
 

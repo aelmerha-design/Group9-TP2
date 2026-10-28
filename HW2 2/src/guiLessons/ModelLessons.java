@@ -1,6 +1,9 @@
 package guiLessons;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
+import entityClasses.User;
 import database.Database;
 import entityClasses.Lesson;
 import entityClasses.LessonList;
@@ -11,6 +14,8 @@ import entityClasses.LessonList;
  * <p> Description: Provides lesson validation and database operations for the lesson page.
  * Maintains an in-memory lesson list that is replaced when all lessons are read.
  *
+ * Actor-aware overloads enforce ownership, locks, and restricted-data projections.
+ * Actorless overloads are trusted fixture/storage helpers, never GUI entry points.
  * The controller validates lessons before calling create or update; those
  * persistence methods do not perform validation themselves. Database operations
  * require the application's database connection to be open and propagate SQL
@@ -112,4 +117,158 @@ public class ModelLessons {
 			return true;
 		}
 	
+
+	/** Core fields that privileged roles may lock independently. */
+	protected enum LessonField { TITLE, PROBLEM, SOLUTION, EXPERIENCE }
+	/** Requires a signed-in actor.
+	 * @param actor requesting user
+	 * @throws SecurityException if absent */
+	private static void signedIn(User actor) {
+		if (actor == null) throw new SecurityException("You must be signed in.");
+	}
+	/** Checks record ownership using saved data, never caller-supplied ownership.
+	 * @param lesson stored lesson, possibly absent
+	 * @param actor requesting user */
+	private static void authorize(Lesson lesson, User actor) {
+		signedIn(actor);
+		if (lesson != null && !actor.getAdminRole() && lesson.getOwnerId() != actor.getUserId())
+			throw new SecurityException("You do not own this lesson.");
+	}
+	/** Builds the contributor projection, excluding curator-only metadata.
+	 * @param saved stored lesson
+	 * @param actor authorized viewer
+	 * @return visible core content and lock states */
+	private static Lesson visible(Lesson saved, User actor) {
+		if (saved == null || actor.getAdminRole()) return saved;
+		Lesson result = new Lesson(saved.getId(), saved.getOwnerId(), saved.getTitle(),
+				saved.getProblem(), saved.getSolution(), saved.getExperience());
+		result.setLocked(saved.isLocked());
+		result.setTitleLocked(saved.isTitleLocked());
+		result.setProblemLocked(saved.isProblemLocked());
+		result.setSolutionLocked(saved.isSolutionLocked());
+		result.setExperienceLocked(saved.isExperienceLocked());
+		return result;
+	}
+	/** Reads authorized contributor content or complete admin content.
+	 * @param id requested identity
+	 * @param actor requesting user
+	 * @return permitted content or null for a missing ID
+	 * @throws SQLException if reading fails
+	 * @throws SecurityException for another contributor's lesson or no actor */
+	protected static Lesson readLesson(int id, User actor) throws SQLException {
+		signedIn(actor);
+		Lesson saved = readLesson(id);
+		authorize(saved, actor);
+		return visible(saved, actor);
+	}
+	/** Loads only the requesting contributor's projected lessons; admins see all.
+	 * @param actor requesting user
+	 * @return permitted list
+	 * @throws SQLException if reading fails
+	 * @throws SecurityException if no actor is supplied */
+	protected static LessonList readLessons(User actor) throws SQLException {
+		signedIn(actor);
+		LessonList stored = actor.getAdminRole() ? LessonList.readAllLessons(theDatabase)
+				: LessonList.readLessons(theDatabase, actor.getUserId());
+		LessonList permitted = new LessonList();
+		for (Lesson lesson : stored.getLessons()) permitted.addLesson(visible(lesson, actor));
+		lessons = permitted;
+		return permitted;
+	}
+	/** Creates content under the signed-in contributor's ownership.
+	 * @param lesson requested core content
+	 * @param actor requesting contributor
+	 * @return generated ID, or -1 for invalid content
+	 * @throws SQLException if saving fails */
+	protected static int createLesson(Lesson lesson, User actor) throws SQLException {
+		signedIn(actor);
+		if (lesson.getOwnerId() != actor.getUserId()) throw new SecurityException("You do not own this lesson.");
+		return createLesson(lesson);
+	}
+	/** Applies saved ownership and effective lock rules before updating core content.
+	 * @param lesson requested content
+	 * @param actor requesting user
+	 * @return whether an existing valid lesson changed
+	 * @throws SQLException if saving fails
+	 * @throws SecurityException for an unauthorized or locked-field edit */
+	protected static boolean updateLesson(Lesson lesson, User actor) throws SQLException {
+		signedIn(actor);
+		Lesson saved = readLesson(lesson.getId());
+		authorize(saved, actor);
+		if (saved == null) return false;
+		if (!actor.getAdminRole() &&
+				(saved.isTitleEffectivelyLocked() && !saved.getTitle().equals(lesson.getTitle())
+				|| saved.isProblemEffectivelyLocked() && !saved.getProblem().equals(lesson.getProblem())
+				|| saved.isSolutionEffectivelyLocked() && !saved.getSolution().equals(lesson.getSolution())
+				|| saved.isExperienceEffectivelyLocked() && !saved.getExperience().equals(lesson.getExperience())))
+			throw new SecurityException("A locked field cannot be changed.");
+		return updateLesson(lesson);
+	}
+	/** Deletes only an owned, entirely unlocked lesson for contributors.
+	 * @param id selected identity
+	 * @param actor requesting user
+	 * @return whether a lesson existed and was deleted
+	 * @throws SQLException if saving fails */
+	protected static boolean deleteLesson(int id, User actor) throws SQLException {
+		signedIn(actor);
+		Lesson saved = readLesson(id);
+		authorize(saved, actor);
+		if (saved == null) return false;
+		if (!actor.getAdminRole() && saved.hasAnyLock())
+			throw new SecurityException("This lesson cannot be deleted while a lock is active.");
+		return deleteLesson(id);
+	}
+	/** Toggles an individual field lock. Admin represents the other role in TP2.
+	 * @param id selected lesson
+	 * @param field individual field
+	 * @param actor privileged actor
+	 * @return saved lesson with new lock state
+	 * @throws SQLException if saving fails */
+	protected static Lesson toggleLock(int id, LessonField field, User actor) throws SQLException {
+		if (actor == null || !actor.getAdminRole())
+			throw new SecurityException("Only admins and curators can change locks.");
+		Lesson saved = readLesson(id);
+		if (saved == null) throw new IllegalStateException("The lesson no longer exists.");
+		switch (field) {
+			case TITLE -> saved.setTitleLocked(!saved.isTitleLocked());
+			case PROBLEM -> saved.setProblemLocked(!saved.isProblemLocked());
+			case SOLUTION -> saved.setSolutionLocked(!saved.isSolutionLocked());
+			case EXPERIENCE -> saved.setExperienceLocked(!saved.isExperienceLocked());
+		}
+		if (!theDatabase.updateLessonLocks(saved)) throw new IllegalStateException("The lesson no longer exists.");
+		return saved;
+	}
+	/** Atomically changes whole-lesson locks without clearing individual locks.
+	 * @param ids selected identities
+	 * @param locked desired state
+	 * @param actor privileged actor
+	 * @throws SQLException if the transaction fails */
+	protected static void setLessonsLocked(List<Integer> ids, boolean locked, User actor) throws SQLException {
+		if (actor == null || !actor.getAdminRole()) throw new SecurityException("Only admins can lock or unlock lessons.");
+		theDatabase.setLessonsLocked(ids, locked);
+	}
+	/** Appends a new contributor-authored attempt while preserving earlier attempts.
+	 * @param id selected lesson
+	 * @param text new attempt with what/how/time/team effort
+	 * @param actor requesting contributor
+	 * @return whether valid content was added to an existing lesson
+	 * @throws SQLException if saving fails */
+	protected static boolean addExperience(int id, String text, User actor) throws SQLException {
+		signedIn(actor);
+		Lesson saved = readLesson(id);
+		authorize(saved, actor);
+		if (saved == null) return false;
+		if (saved.getOwnerId() != actor.getUserId()) throw new SecurityException("You do not own this lesson.");
+		if (saved.isExperienceEffectivelyLocked()) throw new SecurityException("A locked field cannot be changed.");
+		return saved.addExperience(theDatabase, text);
+	}
+	/** Reads experience history only after checking lesson access.
+	 * @param id selected lesson
+	 * @param actor requesting viewer
+	 * @return ordered contributor attempts
+	 * @throws SQLException if reading fails */
+	protected static ArrayList<String> readExperiences(int id, User actor) throws SQLException {
+		Lesson saved = readLesson(id, actor);
+		return saved == null ? new ArrayList<>() : theDatabase.readExperiences(id);
+	}
 }

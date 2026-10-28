@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>ContributorStoryTests - lines 1-45</title>
+<style>body{margin:24px;background:white;color:#17212b;font-family:Arial,sans-serif}h1{font-size:22px;margin:0 0 8px}p{font-size:14px;margin:6px 0}.source{margin-top:16px;border:1px solid #ccd4dc;padding:10px;background:#f8fafc}.line{display:flex;white-space:pre;font:14px/21px Consolas,monospace;min-height:21px}.number{color:#526270;display:inline-block;flex:0 0 48px;text-align:right;margin-right:18px;border-right:1px solid #d6dce1;padding-right:12px}code{font:inherit}.hash{font:12px Consolas,monospace}</style>
+<h1>ContributorStoryTests.java - source lines 1-45</h1><p>Contributor test implementation / original Java source and internal documentation</p>
+<p class="hash">SHA-256: A2CCA1D5C51ACAE6A656F3C86A4CA5C1BED7D04C50F7A9D03FE1BF575BC1E86D</p><div class="source"><div class="line"><span class="number">1</span><code>package guiLessons;</code></div>
+<div class="line"><span class="number">2</span><code></code></div>
+<div class="line"><span class="number">3</span><code>import java.nio.file.Files;</code></div>
+<div class="line"><span class="number">4</span><code>import java.nio.file.Path;</code></div>
+<div class="line"><span class="number">5</span><code>import java.util.ArrayList;</code></div>
+<div class="line"><span class="number">6</span><code>import java.util.List;</code></div>
+<div class="line"><span class="number">7</span><code>import applicationMain.FoundationsMain;</code></div>
+<div class="line"><span class="number">8</span><code>import entityClasses.Lesson;</code></div>
+<div class="line"><span class="number">9</span><code>import entityClasses.LessonList;</code></div>
+<div class="line"><span class="number">10</span><code>import entityClasses.User;</code></div>
+<div class="line"><span class="number">11</span><code></code></div>
+<div class="line"><span class="number">12</span><code>/**</code></div>
+<div class="line"><span class="number">13</span><code> * &lt;p&gt;Title: ContributorStoryTests Class.&lt;/p&gt;</code></div>
+<div class="line"><span class="number">14</span><code> * &lt;p&gt;Description: Named positive and negative scenarios derived from the supplied</code></div>
+<div class="line"><span class="number">15</span><code> * Contributor (Phase Two) stories. C01-C12 refer to RequirementsToTests.md.</code></div>
+<div class="line"><span class="number">16</span><code> * Each method documents its requirement, implementation, and output oracle.</code></div>
+<div class="line"><span class="number">17</span><code> * Runs inside LessonTestingAutomation on the JavaFX thread and its isolated H2</code></div>
+<div class="line"><span class="number">18</span><code> * connection. Admin is the privileged-role fixture; Phase Three AI behavior is</code></div>
+<div class="line"><span class="number">19</span><code> * design scope, not claimed as implemented.&lt;/p&gt;</code></div>
+<div class="line"><span class="number">20</span><code> */</code></div>
+<div class="line"><span class="number">21</span><code>public final class ContributorStoryTests {</code></div>
+<div class="line"><span class="number">22</span><code></code></div>
+<div class="line"><span class="number">23</span><code>    /** Owner fixture; independent of the original regression suite&#39;s owner zero. */</code></div>
+<div class="line"><span class="number">24</span><code>    private static final User owner = actor(101, false);</code></div>
+<div class="line"><span class="number">25</span><code>    /** A different contributor used to challenge privacy enforcement. */</code></div>
+<div class="line"><span class="number">26</span><code>    private static final User other = actor(102, false);</code></div>
+<div class="line"><span class="number">27</span><code>    /** Admin represents the other role permitted to edit, delete, and lock. */</code></div>
+<div class="line"><span class="number">28</span><code>    private static final User admin = actor(999, true);</code></div>
+<div class="line"><span class="number">29</span><code>    /** Fixture identities removed after this suite, including failed scenarios. */</code></div>
+<div class="line"><span class="number">30</span><code>    private static final List&lt;Integer&gt; created = new ArrayList&lt;&gt;();</code></div>
+<div class="line"><span class="number">31</span><code>    /** Marker identifies the independent story fixture between JVMs. */</code></div>
+<div class="line"><span class="number">32</span><code>    private static final Path restart = Path.of(System.getProperty(&quot;user.home&quot;), &quot;story-restart.txt&quot;);</code></div>
+<div class="line"><span class="number">33</span><code></code></div>
+<div class="line"><span class="number">34</span><code>    /** Prevents construction of a static test suite. */</code></div>
+<div class="line"><span class="number">35</span><code>    private ContributorStoryTests() { }</code></div>
+<div class="line"><span class="number">36</span><code></code></div>
+<div class="line"><span class="number">37</span><code>    /** Creates a fixture identity without testing authentication.</code></div>
+<div class="line"><span class="number">38</span><code>     * @param id fixture owner identity</code></div>
+<div class="line"><span class="number">39</span><code>     * @param privileged whether this fixture represents an admin</code></div>
+<div class="line"><span class="number">40</span><code>     * @return requesting user */</code></div>
+<div class="line"><span class="number">41</span><code>    private static User actor(int id, boolean privileged) {</code></div>
+<div class="line"><span class="number">42</span><code>        return new User(privileged ? &quot;Story admin&quot; : &quot;Contributor &quot; + id, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;,</code></div>
+<div class="line"><span class="number">43</span><code>                privileged, !privileged, false, id);</code></div>
+<div class="line"><span class="number">44</span><code>    }</code></div>
+<div class="line"><span class="number">45</span><code></code></div></div></html>
